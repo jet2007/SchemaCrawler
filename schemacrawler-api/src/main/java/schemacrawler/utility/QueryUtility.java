@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -44,19 +44,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.Column;
 import schemacrawler.schema.JavaSqlType.JavaSqlTypeGroup;
 import schemacrawler.schema.Table;
 import schemacrawler.schemacrawler.InclusionRule;
+import schemacrawler.schemacrawler.InclusionRuleWithRegularExpression;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
+import sf.util.UtilityMarker;
 
+@UtilityMarker
 public final class QueryUtility
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(QueryUtility.class.getName());
 
   public static ResultSet executeAgainstSchema(final Query query,
@@ -159,9 +162,12 @@ public final class QueryUtility
                                  final InclusionRule schemaInclusionRule)
   {
     final Map<String, String> properties = new HashMap<>();
-    if (schemaInclusionRule != null)
+
+    properties.put("schemas", ".*");
+    if (schemaInclusionRule != null
+        && schemaInclusionRule instanceof InclusionRuleWithRegularExpression)
     {
-      final String schemaInclusionPattern = schemaInclusionRule
+      final String schemaInclusionPattern = ((InclusionRuleWithRegularExpression) schemaInclusionRule)
         .getInclusionPattern().pattern();
       if (!isBlank(schemaInclusionPattern))
       {

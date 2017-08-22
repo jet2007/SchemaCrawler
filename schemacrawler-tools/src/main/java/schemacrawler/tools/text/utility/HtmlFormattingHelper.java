@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,8 +30,8 @@ package schemacrawler.tools.text.utility;
 
 
 import static schemacrawler.tools.text.utility.html.Entities.escapeForXMLElement;
+import static sf.util.IOUtility.readResourceFully;
 import static sf.util.Utility.isBlank;
-import static sf.util.Utility.readResourceFully;
 
 import java.io.PrintWriter;
 

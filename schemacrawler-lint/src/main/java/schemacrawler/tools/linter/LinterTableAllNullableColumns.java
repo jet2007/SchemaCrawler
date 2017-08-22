@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ public class LinterTableAllNullableColumns
   @Override
   public String getSummary()
   {
-    return "all data columns are nullable";
+    return "no non-nullable data columns";
   }
 
   @Override

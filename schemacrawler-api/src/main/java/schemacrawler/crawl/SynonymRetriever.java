@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,10 +34,8 @@ import static sf.util.Utility.isBlank;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.filter.InclusionRuleFilter;
 import schemacrawler.schema.DatabaseObject;
@@ -48,6 +46,7 @@ import schemacrawler.schemacrawler.InclusionRule;
 import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -60,7 +59,7 @@ final class SynonymRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SynonymRetriever.class.getName());
 
   SynonymRetriever(final RetrieverConnection retrieverConnection,
@@ -102,7 +101,7 @@ final class SynonymRetriever
       return;
     }
 
-    final Collection<Schema> schemas = catalog.getSchemaNames();
+    final NamedObjectList<SchemaReference> schemas = getAllSchemas();
 
     final Query synonymsDefinitionSql = informationSchemaViews.getSynonymsSql();
     final Connection connection = getDatabaseConnection();
@@ -113,23 +112,23 @@ final class SynonymRetriever
     {
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("SYNONYM_CATALOG"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("SYNONYM_SCHEMA"));
-        final String synonymName = quotedName(results
+        final String synonymName = nameQuotedName(results
           .getString("SYNONYM_NAME"));
-        final String referencedObjectCatalogName = quotedName(results
+        final String referencedObjectCatalogName = nameQuotedName(results
           .getString("REFERENCED_OBJECT_CATALOG"));
-        final String referencedObjectSchemaName = quotedName(results
+        final String referencedObjectSchemaName = nameQuotedName(results
           .getString("REFERENCED_OBJECT_SCHEMA"));
-        final String referencedObjectName = quotedName(results
+        final String referencedObjectName = nameQuotedName(results
           .getString("REFERENCED_OBJECT_NAME"));
 
         if (isBlank(referencedObjectName))
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("No reference for synonym, %s.%s.%s",
+                     new StringFormat("No reference for synonym <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       synonymName));

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -35,18 +35,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class ObjectToString
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(ObjectToString.class.getName());
 
   public static String toString(final Object object)
@@ -103,8 +103,8 @@ public final class ObjectToString
       catch (final Exception e)
       {
         LOGGER.log(Level.FINER,
-                   e,
-                   new StringFormat("Could not access field, %s", field));
+                   new StringFormat("Could not access field <%s>", field),
+                   e);
       }
     }
   }
@@ -276,9 +276,16 @@ public final class ObjectToString
       }
     }
     // Sort fields
-    Collections
-      .sort(allFields,
-            (field1, field2) -> field1.getName().compareTo(field2.getName()));
+    Collections.sort(allFields, new Comparator<Field>()
+    {
+
+      @Override
+      public int compare(final Field field1, final Field field2)
+      {
+        return field1.getName().compareTo(field2.getName());
+      }
+
+    });
 
     return allFields.toArray(new Field[allFields.size()]);
   }

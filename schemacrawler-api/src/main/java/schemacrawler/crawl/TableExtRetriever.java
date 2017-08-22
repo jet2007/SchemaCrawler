@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,22 +29,26 @@ http://www.gnu.org/licenses/
 package schemacrawler.crawl;
 
 
+import static java.util.Objects.requireNonNull;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.ActionOrientationType;
 import schemacrawler.schema.CheckOptionType;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ConditionTimingType;
 import schemacrawler.schema.EventManipulationType;
+import schemacrawler.schema.PrimaryKey;
+import schemacrawler.schema.SchemaReference;
 import schemacrawler.schema.Table;
 import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -57,7 +61,7 @@ final class TableExtRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(TableExtRetriever.class.getName());
 
   TableExtRetriever(final RetrieverConnection retrieverConnection,
@@ -100,11 +104,11 @@ final class TableExtRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("TABLE_CATALOG"));
-        final String schemaName = quotedName(results.getString("TABLE_SCHEMA"));
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
-        final String columnName = quotedName(results.getString("COLUMN_NAME"));
+        final String schemaName = nameQuotedName(results.getString("TABLE_SCHEMA"));
+        final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
+        final String columnName = nameQuotedName(results.getString("COLUMN_NAME"));
         LOGGER.log(Level.FINER,
                    "Retrieving additional column attributes: " + columnName);
 
@@ -114,7 +118,7 @@ final class TableExtRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName));
@@ -127,7 +131,7 @@ final class TableExtRetriever
         if (!columnOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find column, %s.%s.%s.%s",
+                     new StringFormat("Cannot find column <%s.%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName,
@@ -182,10 +186,10 @@ final class TableExtRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("TABLE_CATALOG"));
-        final String schemaName = quotedName(results.getString("TABLE_SCHEMA"));
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
+        final String schemaName = nameQuotedName(results.getString("TABLE_SCHEMA"));
+        final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
         LOGGER.log(Level.FINER,
                    "Retrieving additional table attributes: " + tableName);
 
@@ -195,7 +199,7 @@ final class TableExtRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName));
@@ -251,11 +255,11 @@ final class TableExtRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("INDEX_CATALOG"));
-        final String schemaName = quotedName(results.getString("INDEX_SCHEMA"));
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
-        final String indexName = quotedName(results.getString("INDEX_NAME"));
+        final String schemaName = nameQuotedName(results.getString("INDEX_SCHEMA"));
+        final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
+        final String indexName = nameQuotedName(results.getString("INDEX_NAME"));
 
         final Optional<MutableTable> tableOptional = lookupTable(catalogName,
                                                                  schemaName,
@@ -263,23 +267,23 @@ final class TableExtRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       indexName));
           continue;
         }
 
-        LOGGER
-          .log(Level.FINER,
-               new StringFormat("Retrieving index information, %s", indexName));
+        LOGGER.log(Level.FINER,
+                   new StringFormat("Retrieving index information <%s>",
+                                    indexName));
         final MutableTable table = tableOptional.get();
         final Optional<MutableIndex> indexOptional = table
           .lookupIndex(indexName);
         if (!indexOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find index, %s.%s.%s.%s",
+                     new StringFormat("Cannot find index <%s.%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName,
@@ -288,7 +292,7 @@ final class TableExtRetriever
         }
 
         final MutableIndex index = indexOptional.get();
-        final String indexColumnName = quotedName(results
+        final String indexColumnName = nameQuotedName(results
           .getString("COLUMN_NAME"));
 
         final Optional<MutableIndexColumn> indexColumnOptional = index
@@ -297,7 +301,7 @@ final class TableExtRetriever
         {
           LOGGER
             .log(Level.FINE,
-                 new StringFormat("Cannot find index column, %s.%s.%s.%s.%s",
+                 new StringFormat("Cannot find index column <%s.%s.%s.%s.%s>",
                                   catalogName,
                                   schemaName,
                                   tableName,
@@ -358,11 +362,11 @@ final class TableExtRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("INDEX_CATALOG"));
-        final String schemaName = quotedName(results.getString("INDEX_SCHEMA"));
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
-        final String indexName = quotedName(results.getString("INDEX_NAME"));
+        final String schemaName = nameQuotedName(results.getString("INDEX_SCHEMA"));
+        final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
+        final String indexName = nameQuotedName(results.getString("INDEX_NAME"));
 
         final Optional<MutableTable> tableOptional = lookupTable(catalogName,
                                                                  schemaName,
@@ -370,23 +374,23 @@ final class TableExtRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       indexName));
           continue;
         }
 
-        LOGGER
-          .log(Level.FINER,
-               new StringFormat("Retrieving index information, %s", indexName));
+        LOGGER.log(Level.FINER,
+                   new StringFormat("Retrieving index information <%s>",
+                                    indexName));
         final MutableTable table = tableOptional.get();
         final Optional<MutableIndex> indexOptional = table
           .lookupIndex(indexName);
         if (!indexOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find index, %s.%s.%s.%s",
+                     new StringFormat("Cannot find index <%s.%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName,
@@ -397,8 +401,10 @@ final class TableExtRetriever
         final MutableIndex index = indexOptional.get();
 
         final String definition = results.getString("INDEX_DEFINITION");
+        final String remarks = results.getString("REMARKS");
 
         index.appendDefinition(definition);
+        index.setRemarks(remarks);
 
         index.addAttributes(results.getAttributes());
       }
@@ -406,6 +412,82 @@ final class TableExtRetriever
     catch (final Exception e)
     {
       LOGGER.log(Level.WARNING, "Could not retrieve index information", e);
+    }
+
+  }
+
+  void retrievePrimaryKeyDefinitions(final NamedObjectList<MutableTable> allTables)
+  {
+    requireNonNull(allTables);
+
+    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
+      .getInformationSchemaViews();
+
+    final Connection connection = getDatabaseConnection();
+
+    if (!informationSchemaViews.hasExtPrimaryKeysSql())
+    {
+      LOGGER.log(Level.FINE,
+                 "Extended primary keys SQL statement was not provided");
+      return;
+    }
+
+    final NamedObjectList<MutablePrimaryKey> allPks = new NamedObjectList<>();
+    for (final MutableTable table: allTables)
+    {
+      if (table.hasPrimaryKey())
+      {
+        final PrimaryKey primaryKey = table.getPrimaryKey();
+        allPks.add((MutablePrimaryKey) primaryKey);
+      }
+    }
+
+    final Query extPrimaryKeysSql = informationSchemaViews
+      .getExtPrimaryKeysSql();
+
+    try (final Statement statement = connection.createStatement();
+        final MetadataResultSet results = new MetadataResultSet(extPrimaryKeysSql,
+                                                                statement,
+                                                                getSchemaInclusionRule());)
+    {
+      while (results.next())
+      {
+        final String catalogName = nameQuotedName(results
+          .getString("PRIMARY_KEY_CATALOG"));
+        final String schemaName = nameQuotedName(results
+          .getString("PRIMARY_KEY_SCHEMA"));
+        final String tableName = nameQuotedName(results
+          .getString("PRIMARY_KEY_TABLE_NAME"));
+        final String pkName = nameQuotedName(results.getString("PRIMARY_KEY_NAME"));
+
+        final String constraintKey = new SchemaReference(catalogName,
+                                                         schemaName)
+                                     + "." + tableName + "." + pkName;
+        LOGGER.log(Level.FINER,
+                   new StringFormat("Retrieving definition of primary key <%s>",
+                                    constraintKey));
+        final String definition = results.getString("PRIMARY_KEY_DEFINITION");
+
+        final Optional<MutablePrimaryKey> optionalPk = allPks
+          .lookup(constraintKey);
+        if (optionalPk.isPresent())
+        {
+          final MutablePrimaryKey pkConstraint = optionalPk.get();
+          pkConstraint.appendDefinition(definition);
+          pkConstraint.addAttributes(results.getAttributes());
+        }
+        else
+        {
+          LOGGER.log(Level.FINER,
+                     new StringFormat("Could not find primary key <%s>",
+                                      constraintKey));
+        }
+
+      }
+    }
+    catch (final Exception e)
+    {
+      LOGGER.log(Level.WARNING, "Could not retrieve check constraints", e);
     }
 
   }
@@ -465,10 +547,10 @@ final class TableExtRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("TABLE_CATALOG"));
-        final String schemaName = quotedName(results.getString("TABLE_SCHEMA"));
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
+        final String schemaName = nameQuotedName(results.getString("TABLE_SCHEMA"));
+        final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
 
         final Optional<MutableTable> tableOptional = lookupTable(catalogName,
                                                                  schemaName,
@@ -476,7 +558,7 @@ final class TableExtRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName));
@@ -485,9 +567,9 @@ final class TableExtRetriever
 
         final MutableTable table = tableOptional.get();
 
-        LOGGER
-          .log(Level.FINER,
-               new StringFormat("Retrieving table information, %s", tableName));
+        LOGGER.log(Level.FINER,
+                   new StringFormat("Retrieving table information <%s>",
+                                    tableName));
         final String definition = results.getString("TABLE_DEFINITION");
 
         table.appendDefinition(definition);
@@ -552,14 +634,14 @@ final class TableExtRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("TRIGGER_CATALOG"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("TRIGGER_SCHEMA"));
-        final String triggerName = quotedName(results
+        final String triggerName = nameQuotedName(results
           .getString("TRIGGER_NAME"));
         LOGGER.log(Level.FINER,
-                   new StringFormat("Retrieving trigger, %s", triggerName));
+                   new StringFormat("Retrieving trigger <%s>", triggerName));
 
         // "EVENT_OBJECT_CATALOG", "EVENT_OBJECT_SCHEMA"
         final String tableName = results.getString("EVENT_OBJECT_TABLE");
@@ -570,7 +652,7 @@ final class TableExtRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName));
@@ -650,10 +732,10 @@ final class TableExtRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("TABLE_CATALOG"));
-        final String schemaName = quotedName(results.getString("TABLE_SCHEMA"));
-        final String viewName = quotedName(results.getString("TABLE_NAME"));
+        final String schemaName = nameQuotedName(results.getString("TABLE_SCHEMA"));
+        final String viewName = nameQuotedName(results.getString("TABLE_NAME"));
 
         final Optional<MutableTable> viewOptional = lookupTable(catalogName,
                                                                 schemaName,
@@ -661,7 +743,7 @@ final class TableExtRetriever
         if (!viewOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       viewName));
@@ -671,7 +753,7 @@ final class TableExtRetriever
         final MutableView view = (MutableView) viewOptional.get();
         LOGGER
           .log(Level.FINER,
-               new StringFormat("Retrieving view information, %s", viewName));
+               new StringFormat("Retrieving view information <%s>", viewName));
         final String definition = results.getString("VIEW_DEFINITION");
         final CheckOptionType checkOption = results
           .getEnum("CHECK_OPTION", CheckOptionType.unknown);
@@ -697,13 +779,13 @@ final class TableExtRetriever
   {
     while (results.next())
     {
-      final String catalogName = quotedName(results.getString("TABLE_CAT"));
-      final String schemaName = quotedName(results.getString("TABLE_SCHEM"));
-      final String tableName = quotedName(results.getString("TABLE_NAME"));
+      final String catalogName = nameQuotedName(results.getString("TABLE_CAT"));
+      final String schemaName = nameQuotedName(results.getString("TABLE_SCHEM"));
+      final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
       final String columnName;
       if (privilegesForColumn)
       {
-        columnName = quotedName(results.getString("COLUMN_NAME"));
+        columnName = nameQuotedName(results.getString("COLUMN_NAME"));
       }
       else
       {

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,7 +34,6 @@ import static sf.util.DatabaseUtility.checkConnection;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.crawl.SchemaCrawler;
 import schemacrawler.schema.Catalog;
@@ -44,23 +43,31 @@ import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.tools.databaseconnector.DatabaseConnector;
 import schemacrawler.tools.databaseconnector.DatabaseConnectorRegistry;
+import sf.util.ObjectToString;
+import sf.util.SchemaCrawlerLogger;
+import sf.util.UtilityMarker;
 
 /**
  * SchemaCrawler utility methods.
  *
  * @author sfatehi
  */
+@UtilityMarker
 public final class SchemaCrawlerUtility
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SchemaCrawlerUtility.class.getName());
 
   public static Catalog getCatalog(final Connection connection,
                                    final SchemaCrawlerOptions schemaCrawlerOptions)
-                                     throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     checkConnection(connection);
+    if (LOGGER.isLoggable(Level.CONFIG))
+    {
+      LOGGER.log(Level.CONFIG, ObjectToString.toString(schemaCrawlerOptions));
+    }
 
     final DatabaseSpecificOverrideOptions dbSpecificOverrideOptions = matchDatabaseSpecificOverrideOptions(connection);
     final SchemaCrawler schemaCrawler = new SchemaCrawler(connection,

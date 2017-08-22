@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,8 +29,6 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.text.schema;
 
 
-import static sf.util.Utility.enumValue;
-
 import java.sql.Connection;
 
 import schemacrawler.schema.Catalog;
@@ -38,7 +36,6 @@ import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.tools.analysis.associations.CatalogWithAssociations;
 import schemacrawler.tools.analysis.counts.CatalogWithCounts;
 import schemacrawler.tools.executable.BaseStagedExecutable;
-import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.traversal.SchemaTraversalHandler;
 import schemacrawler.tools.traversal.SchemaTraverser;
@@ -66,20 +63,18 @@ public final class SchemaTextExecutable
   {
     loadSchemaTextOptions();
 
-    final InfoLevel infoLevel = enumValue(schemaCrawlerOptions
-      .getSchemaInfoLevel().getTag(), InfoLevel.unknown);
-
-    final Catalog catalog;
-    if (infoLevel == InfoLevel.maximum)
+    // Determine what decorators to apply to the database
+    Catalog catalog = db;
+    if (schemaTextOptions.isShowWeakAssociations())
     {
-      final Catalog catalogAssociations = new CatalogWithAssociations(db);
-      catalog = new CatalogWithCounts(catalogAssociations,
+      catalog = new CatalogWithAssociations(catalog);
+    }
+    if (schemaTextOptions.isShowRowCounts()
+        || schemaCrawlerOptions.isHideEmptyTables())
+    {
+      catalog = new CatalogWithCounts(catalog,
                                       connection,
                                       schemaCrawlerOptions);
-    }
-    else
-    {
-      catalog = db;
     }
 
     final SchemaTraversalHandler formatter = getSchemaTraversalHandler();

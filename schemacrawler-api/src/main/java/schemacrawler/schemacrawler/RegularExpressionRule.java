@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -32,8 +32,10 @@ package schemacrawler.schemacrawler;
 import static sf.util.Utility.isBlank;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import sf.util.SchemaCrawlerLogger;
+import sf.util.StringFormat;
 
 /**
  * Specifies inclusion and exclusion patterns that can be applied to the
@@ -42,10 +44,10 @@ import java.util.regex.Pattern;
  * @author Sualeh Fatehi
  */
 public final class RegularExpressionRule
-  implements InclusionRule
+  implements InclusionRuleWithRegularExpression
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(RegularExpressionRule.class.getName());
 
   private static final long serialVersionUID = 3443758881974362293L;
@@ -162,45 +164,44 @@ public final class RegularExpressionRule
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schemacrawler.InclusionRule#test(java.lang.String)
    */
   @Override
   public boolean test(final String text)
   {
 
-    final String actionMessage;
+    final StringFormat actionMessage;
     boolean include = false;
     if (!isBlank(text))
     {
       if (!patternInclude.matcher(text).matches())
       {
-        actionMessage = "Excluding \"" + text
-                        + "\" since it does not match the include pattern";
+        actionMessage = new StringFormat("Excluding <%s> since it does not match /%s/",
+                                         text,
+                                         patternInclude.pattern());
       }
       else if (patternExclude.matcher(text).matches())
       {
-        actionMessage = "Excluding \"" + text
-                        + "\" since it matches the exclude pattern";
+        actionMessage = new StringFormat("Excluding <%s> since it matches /%s/",
+                                         text,
+                                         patternExclude.pattern());
       }
       else
       {
-        actionMessage = "Including \"" + text + "\"";
+        actionMessage = new StringFormat("Including <%s> since it matches /%s/",
+                                         text,
+                                         patternInclude.pattern());
         include = true;
       }
     }
     else
     {
-      actionMessage = "Excluding, since text is bank";
+      actionMessage = new StringFormat("Excluding, since text is bank");
     }
 
+    // Log caller
     if (LOGGER.isLoggable(Level.FINE))
     {
-      final StackTraceElement caller = new Exception().getStackTrace()[1];
-      LOGGER.logp(Level.FINE,
-                  caller.getClassName(),
-                  caller.getMethodName(),
-                  actionMessage);
+      LOGGER.log(Level.FINE, 5, actionMessage.get(), null);
     }
 
     return include;
@@ -208,13 +209,11 @@ public final class RegularExpressionRule
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#toString()
    */
   @Override
   public String toString()
   {
-    return String.format("%s@%h-include/%s/-exclude/%s/]",
+    return String.format("%s@%h {+/%s/ -/%s/}",
                          getClass().getSimpleName(),
                          System.identityHashCode(this),
                          patternInclude.pattern(),

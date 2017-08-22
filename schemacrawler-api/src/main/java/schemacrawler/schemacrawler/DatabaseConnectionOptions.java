@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -37,16 +37,17 @@ public final class DatabaseConnectionOptions
 
   private static final long serialVersionUID = -8141436553988174836L;
 
-  public DatabaseConnectionOptions(final Map<String, String> properties)
-    throws SchemaCrawlerException
-  {
-    super(properties);
-  }
-
   public DatabaseConnectionOptions(final String connectionUrl)
     throws SchemaCrawlerException
   {
-    super(toMap(connectionUrl));
+    super(new SingleUseUserCredentials(), toMap(connectionUrl));
+  }
+
+  public DatabaseConnectionOptions(final UserCredentials userCredentials,
+                                   final Map<String, String> properties)
+    throws SchemaCrawlerException
+  {
+    super(userCredentials, properties);
   }
 
 }

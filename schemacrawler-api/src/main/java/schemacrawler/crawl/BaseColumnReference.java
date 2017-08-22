@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -116,8 +116,6 @@ public abstract class BaseColumnReference
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ForeignKeyColumnReference#getForeignKeyColumn()
    */
   @Override
   public Column getForeignKeyColumn()
@@ -127,8 +125,6 @@ public abstract class BaseColumnReference
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ForeignKeyColumnReference#getPrimaryKeyColumn()
    */
   @Override
   public Column getPrimaryKeyColumn()

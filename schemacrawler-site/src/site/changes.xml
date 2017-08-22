@@ -5,6 +5,175 @@
     <author email="sualeh@hotmail.com">Sualeh Fatehi</author>
   </properties>
   <body>
+     <release version="14.16.03" date="2017-07-08" description="Miscellaneous fixes">
+      <action dev="Sualeh Fatehi" type="fixes"><![CDATA[
+        Updating depdencies.
+      ]]></action> 
+     </release>  
+     <release version="14.16.02" date="2017-06-20" description="Miscellaneous fixes">
+      <action dev="Sualeh Fatehi" type="fixes"><![CDATA[
+        Bug fix for an issue with retrieving SQLite primary keys if the DDL used quoted names.
+      ]]></action>                                 
+      <action dev="Sualeh Fatehi" type="fixes"><![CDATA[
+        Moved Sybase IQ plugin to new GitHub project.
+      ]]></action> 
+     </release>     
+     <release version="14.16.01" date="2017-04-10" description="Java 8 dial down">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Better protection of user credentials in memory.
+      ]]></action>        
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Support for index remarks.
+      ]]></action>      
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Organize metadata views for extensibility. Please refer to http://sualeh.github.io/SchemaCrawler/data-dictionary-extensions.html
+      ]]></action>      
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Remove reliance on Java 8 features where they add an overhaead. 
+      ]]></action>                                 
+     </release>   
+     <release version="14.15.04" date="2017-04-02" description="Foreign key retrieval strategies">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Added foreign key retrieval strategies, and exposed overrides in configuration properties. 
+      ]]></action>                                 
+     </release>  
+     <release version="14.15.03" date="2017-03-28" description="Table retrieval strategies">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Added table retrieval strategies, and exposed overrides in configuration properties. 
+      ]]></action>                                 
+     </release>  	
+     <release version="14.15.02" date="2017-03-23" description="Licenses">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Clarified licensing terms. 
+      ]]></action>                                 
+     </release>   
+     <release version="14.15.01" date="2017-03-21" description="Licenses">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Fixed licenses published in jar files and on Maven Central. 
+      ]]></action>     
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Cleaner description of column data types. 
+      ]]></action>                                 
+     </release>  
+     <release version="14.14.04" date="2017-03-11" description="Better logging and error messages">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Better and more efficient logging and error messages. 
+      ]]></action>  
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Added short forms, -fmt for -outputformat command-line option, and -i for -infolevel.
+      ]]></action>     
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Made the output format command-line option optional. The output format
+        is derived from the output file extension if it is not explicitly provided.
+      ]]></action>                                        
+     </release>   
+     <release version="14.14.03" date="2017-02-23" description="Utility for MySQL enum suport">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Java utility class to parse enum values from column.getAttribute("COLUMN_TYPE"), for MySQL.
+      ]]></action>  
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Better error message for bad commands.
+      ]]></action>                               
+     </release>     
+     <release version="14.14.02" date="2017-02-08" description="Adding MySQL enum suport">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        To get the enum values from column.getAttribute("COLUMN_TYPE"), run SchemaCrawler 
+        for MySQL with -infolevel=maximum.
+      ]]></action>  
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        New SchemaCrawler for SQLite utility, schemacrawler.tools.sqlite.SchemaCrawlerSQLiteUtility.
+      ]]></action>                               
+     </release>    
+     <release version="14.14.01" date="2017-01-11" description="Removing the graph command">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        The graph command is removed. Graphs are generated based on the output format. 
+      ]]></action>                         
+     </release>  
+     <release version="14.12.01" date="2016-12-24" description="Option to show weak associations">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        New command-line option to show weak associations, irrespective of the infolevel. 
+      ]]></action>
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Changed the boolean property, schemacrawler.format.hide_weak_associations to 
+        schemacrawler.format.show_weak_associations, since weak associations are hidden by default
+        in SchemaCrawler output. Also added a new command-line switch, -weakassociations to
+        show weak associations. Weak associations now can be shown with any infolevel setting.
+      ]]></action>                           
+     </release>   
+     <release version="14.11.02" date="2016-12-20" description="Fix to support Teradata driver">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Support for the Teradata JDBC driver.
+        The Teradata JDBC driver does not follow JDBC specifications. 
+        It should throw a SQLFeatureNotSupportedException for getFunctions, or at the least 
+        a SQLException state HYC00 ("Optional feature not implemented"). 
+        Instead, it throws with a state of HY000 ("General error"). 
+      ]]></action>                          
+     </release>    
+     <release version="14.11.01" date="2016-12-16" description="Fix to support Teradata driver">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Show a better error message when a script file cannot be read.
+      ]]></action>  
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Handle SQLException when retrieving JDBC driver information.                                                                                   
+      ]]></action> 
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Extended copyright messages through 2017.                                                                                   
+      ]]></action>                         
+     </release>  
+     <release version="14.10.06" date="2016-10-29" description="Offline executable">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Made OfflineSnapshotExecutable constructor public, so that offline 
+        snapshots can be loaded programatically.
+      ]]></action>                                                                                                   
+     </release>   
+     <release version="14.10.05" date="2016-10-26" description="SQLite diagrams">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Fixed issue with generating SQLite diagrams.
+      ]]></action> 
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Distribution now contains an example SQLite database.
+      ]]></action> 
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Fail if the SQLite database does not exist.
+      ]]></action>                                                                                                   
+     </release>   
+     <release version="14.10.04" date="2016-10-23" description="Loading JDBC drivers">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Fixed issue with loading of JDBC drivers.
+      ]]></action>                                                                                      
+     </release>   
+     <release version="14.10.03" date="2016-10-01" description="Formatting remarks in HTML">
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Fixed formatting of multi-line column remarks in HTML output.
+      ]]></action>                                                                                      
+     </release>   
+     <release version="14.10.02" date="2016-09-17" description="Lint changes">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        New lint to recommend that a surrogate key column be used as a primary key.
+      ]]></action> 
+      <action dev="Sualeh Fatehi" type="fix"><![CDATA[
+        Fixed lint that checks foreign key and primry key data types.
+      ]]></action>   
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Additional documentation on how to connect to Microsoft SQL Server with Windows authentication.
+      ]]></action>                                                                                      
+     </release>    
+     <release version="14.10.01" date="2016-08-31" description="Configuration changes">
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Support for newlines in table and column comments.
+      ]]></action>     
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Ability to read default configuration settings from the classpath, from a file called 
+        schemacrawler.config.properties. This file is distributed in the lib/ folder.
+      ]]></action> 
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Removed command-line option -p to specify an additional configuration file.
+      ]]></action>  
+      <action dev="Sualeh Fatehi" type="add"><![CDATA[
+        Added documentation on how to do programmatic diff of schemas on the website. Added
+        code examples to the website.
+      ]]></action>                                                                           
+     </release>   
      <release version="14.09.03" date="2016-08-01" description="Do not show schema colors">
       <action dev="Sualeh Fatehi" type="add"><![CDATA[
         A new configuration options <code>schemacrawler.format.no_schema_colors<code> if you do not want to show catalog and schema colors.
@@ -119,7 +288,7 @@
         Performance boost by using Oracle data dictionary query for table columns. Idea courtesy of Patric Rufflar.
       ]]></action>                                               
      </release>  
-     <release version="14.09.03" date="2016-02-03" description="Fixed logging">
+     <release version="14.10.06" date="2016-02-03" description="Fixed logging">
       <action dev="Sualeh Fatehi" type="fix"><![CDATA[
         Fixed logging for features that the JDBC driver does not support.
       ]]></action>  

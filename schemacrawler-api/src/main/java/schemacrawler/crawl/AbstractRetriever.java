@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -35,10 +35,8 @@ import static sf.util.Utility.isBlank;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.DatabaseObject;
 import schemacrawler.schema.JavaSqlType;
@@ -47,6 +45,8 @@ import schemacrawler.schema.SchemaReference;
 import schemacrawler.schemacrawler.InclusionRule;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.utility.TypeMap;
+import sf.util.SchemaCrawlerLogger;
+import sf.util.StringFormat;
 
 /**
  * Base class for retriever that uses database metadata to get the
@@ -58,7 +58,7 @@ abstract class AbstractRetriever
   implements Retriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(AbstractRetriever.class.getName());
 
   private final RetrieverConnection retrieverConnection;
@@ -119,6 +119,11 @@ abstract class AbstractRetriever
     return belongsToCatalog && belongsToSchema;
   }
 
+  NamedObjectList<SchemaReference> getAllSchemas()
+  {
+    return catalog.getAllSchemas();
+  }
+
   Connection getDatabaseConnection()
   {
     return retrieverConnection.getConnection();
@@ -139,12 +144,25 @@ abstract class AbstractRetriever
     return options.getSchemaInclusionRule();
   }
 
-  Collection<Schema> getSchemas()
+  void logPossiblyUnsupportedSQLFeature(final StringFormat message,
+                                        final SQLException e)
   {
-    return catalog.getSchemas();
+    // HYC00 = Optional feature not implemented
+    // HY000 = General error
+    // (HY000 is thrown by the Teradata JDBC driver for unsupported
+    // functions)
+    if ("HYC00".equalsIgnoreCase(e.getSQLState())
+        || "HY000".equalsIgnoreCase(e.getSQLState()))
+    {
+      logSQLFeatureNotSupported(message, e);
+    }
+    else
+    {
+      LOGGER.log(Level.WARNING, message, e);
+    }
   }
 
-  void logSQLFeatureNotSupported(final String message, final Throwable e)
+  void logSQLFeatureNotSupported(final StringFormat message, final Throwable e)
   {
     LOGGER.log(Level.WARNING, message);
     LOGGER.log(Level.FINE, message, e);
@@ -250,9 +268,9 @@ abstract class AbstractRetriever
                                tableName);
   }
 
-  String quotedName(final String name)
+  String nameQuotedName(final String name)
   {
-    return retrieverConnection.getIdentifiers().quotedName(name);
+    return retrieverConnection.getIdentifiers().nameQuotedName(name);
   }
 
   String unquotedName(final String name)

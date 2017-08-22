@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -33,8 +33,8 @@ import static sf.util.Utility.isBlank;
 
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public final class DatabaseConfigConnectionOptions
@@ -43,7 +43,7 @@ public final class DatabaseConfigConnectionOptions
 
   private static final long serialVersionUID = -8141436553988174836L;
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(DatabaseConfigConnectionOptions.class.getName());
 
   private static final String HOST = "host";
@@ -51,10 +51,11 @@ public final class DatabaseConfigConnectionOptions
   private static final String DATABASE = "database";
   private static final String URLX = "urlx";
 
-  public DatabaseConfigConnectionOptions(final Map<String, String> properties)
+  public DatabaseConfigConnectionOptions(final UserCredentials userCredentials,
+                                         final Map<String, String> properties)
     throws SchemaCrawlerException
   {
-    super(properties);
+    super(userCredentials, properties);
   }
 
   public String getDatabase()

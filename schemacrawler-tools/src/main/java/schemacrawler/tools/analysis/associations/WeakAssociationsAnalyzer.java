@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -38,17 +38,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.Column;
 import schemacrawler.schema.Table;
 import schemacrawler.utility.MetaDataUtility;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 final class WeakAssociationsAnalyzer
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(WeakAssociationsAnalyzer.class.getName());
 
   private final List<Table> tables;
@@ -97,17 +97,18 @@ final class WeakAssociationsAnalyzer
 
     if (LOGGER.isLoggable(Level.FINER))
     {
+      LOGGER
+        .log(Level.FINER,
+             new StringFormat("Column match keys <%s>", columnMatchKeysMap));
       LOGGER.log(Level.FINER,
-                 new StringFormat("Column match keys, %s", columnMatchKeysMap));
-      LOGGER.log(Level.FINER,
-                 new StringFormat("Column match keys, %s", tableMatchKeys));
+                 new StringFormat("Column match keys <%s>", tableMatchKeys));
     }
     for (final Table table: tables)
     {
       final TableCandidateKeys tableCandidateKeys = new TableCandidateKeys(table);
       LOGGER
         .log(Level.FINER,
-             new StringFormat("Table candidate keys, %s", tableCandidateKeys));
+             new StringFormat("Table candidate keys <%s>", tableCandidateKeys));
       for (final Column pkColumn: tableCandidateKeys)
       {
         final Set<String> fkColumnMatchKeys = new HashSet<>();
@@ -144,7 +145,7 @@ final class WeakAssociationsAnalyzer
               && !foreignKeys.contains(weakAssociation))
           {
             LOGGER.log(Level.FINE,
-                       new StringFormat("Found weak association, %s",
+                       new StringFormat("Found weak association <%s>",
                                         weakAssociation));
             addWeakAssociation(weakAssociation);
           }

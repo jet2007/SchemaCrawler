@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -80,9 +80,6 @@ public enum NamedObjectSort
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.util.Comparator#compare(java.lang.Object,
-   *      java.lang.Object)
    */
   @Override
   public abstract int compare(final NamedObject namedObject1,

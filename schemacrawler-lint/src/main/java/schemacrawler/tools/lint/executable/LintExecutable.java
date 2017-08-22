@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,7 +34,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Table;
@@ -100,8 +99,7 @@ public class LintExecutable
 
   private void dispatch(final Linters linters)
   {
-    if (!StreamSupport.stream(linters.spliterator(), false)
-      .anyMatch(linter -> linter.exceedsThreshold()))
+    if (!linters.exceedsThreshold())
     {
       return;
     }

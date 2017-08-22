@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,6 +28,7 @@ http://www.gnu.org/licenses/
 package schemacrawler.integration.test;
 
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -35,13 +36,11 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static schemacrawler.test.utility.TestUtility.createTempFile;
 import static schemacrawler.test.utility.TestUtility.flattenCommandlineArgs;
 import static sf.util.DatabaseUtility.checkConnection;
 
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.util.HashMap;
@@ -64,6 +63,7 @@ import schemacrawler.tools.databaseconnector.DatabaseConnector;
 import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.TextOutputFormat;
+import sf.util.IOUtility;
 
 public class TestHsqldbCommandline
   extends BaseDatabaseTest
@@ -74,9 +74,10 @@ public class TestHsqldbCommandline
     throws Exception
   {
 
-    final Path testConfigFile = createTempFile("test", "properties");
+    final Path testConfigFile = IOUtility.createTempFilePath("test",
+                                                             "properties");
     try (final Writer writer = new PrintWriter(newBufferedWriter(testConfigFile,
-                                                                 StandardCharsets.UTF_8,
+                                                                 UTF_8,
                                                                  WRITE,
                                                                  TRUNCATE_EXISTING,
                                                                  CREATE));)

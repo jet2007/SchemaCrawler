@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,11 +30,11 @@ package schemacrawler.tools.executable;
 
 import java.sql.Connection;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.Catalog;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.tools.text.operation.OperationExecutable;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -51,7 +51,7 @@ public final class SchemaCrawlerExecutable
   extends BaseStagedExecutable
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SchemaCrawlerExecutable.class.getName());
 
   public SchemaCrawlerExecutable(final String command)
@@ -83,8 +83,10 @@ public final class SchemaCrawlerExecutable
       if (!isCommand && !isConfiguredQuery)
       {
         LOGGER.log(Level.INFO,
-                   new StringFormat("Executing as a query, %s", getCommand()));
+                   new StringFormat("Executing as a query <%s>", getCommand()));
         executable = new OperationExecutable(getCommand());
+        executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
+        executable.setOutputOptions(outputOptions);
         break;
       }
     }
@@ -93,9 +95,9 @@ public final class SchemaCrawlerExecutable
     {
       if (commands.hasMultipleCommands())
       {
-        LOGGER
-          .log(Level.INFO,
-               String.format("Executing commands [%s] in sequence", commands));
+        LOGGER.log(Level.INFO,
+                   new StringFormat("Executing commands <%s> in sequence",
+                                    commands));
         executable = new CommandDaisyChainExecutable(getCommand());
         executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
         executable.setOutputOptions(outputOptions);
@@ -107,7 +109,7 @@ public final class SchemaCrawlerExecutable
                                   schemaCrawlerOptions,
                                   outputOptions);
         LOGGER.log(Level.INFO,
-                   new StringFormat("Executing command \"%s\" using executable %s",
+                   new StringFormat("Executing command <%s> using executable <%s>",
                                     getCommand(),
                                     executable.getClass().getName()));
       }

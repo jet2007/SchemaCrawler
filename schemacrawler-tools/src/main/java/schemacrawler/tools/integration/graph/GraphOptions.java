@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -31,7 +31,6 @@ package schemacrawler.tools.integration.graph;
 import java.util.ArrayList;
 import java.util.List;
 
-import schemacrawler.tools.text.schema.SchemaTextDetailType;
 import schemacrawler.tools.text.schema.SchemaTextOptions;
 
 public class GraphOptions
@@ -40,27 +39,20 @@ public class GraphOptions
 
   private static final long serialVersionUID = -5850945398335496207L;
 
-  private List<String> graphVizOpts;
-  private SchemaTextDetailType schemaTextDetailType;
+  private List<String> graphvizOpts;
   private boolean isShowForeignKeyCardinality;
   private boolean isShowPrimaryKeyCardinality;
 
   public GraphOptions()
   {
-    graphVizOpts = new ArrayList<>();
-    schemaTextDetailType = SchemaTextDetailType.details;
+    graphvizOpts = new ArrayList<>();
     isShowForeignKeyCardinality = true;
     isShowPrimaryKeyCardinality = true;
   }
 
-  public List<String> getGraphVizOpts()
+  public List<String> getGraphvizOpts()
   {
-    return graphVizOpts;
-  }
-
-  public SchemaTextDetailType getSchemaTextDetailType()
-  {
-    return schemaTextDetailType;
+    return graphvizOpts;
   }
 
   public boolean isShowForeignKeyCardinality()
@@ -73,25 +65,16 @@ public class GraphOptions
     return isShowPrimaryKeyCardinality;
   }
 
-  public void setGraphVizOpts(final List<String> graphVizOpts)
+  public void setGraphvizOpts(final List<String> graphvizOpts)
   {
-    if (graphVizOpts == null)
+    if (graphvizOpts == null)
     {
-      this.graphVizOpts = new ArrayList<>();
+      this.graphvizOpts = new ArrayList<>();
     }
     else
     {
-      this.graphVizOpts = graphVizOpts;
+      this.graphvizOpts = graphvizOpts;
     }
-  }
-
-  public void setSchemaTextDetailType(final SchemaTextDetailType schemaTextDetailType)
-  {
-    if (schemaTextDetailType == null)
-    {
-      return;
-    }
-    this.schemaTextDetailType = schemaTextDetailType;
   }
 
   public void setShowForeignKeyCardinality(final boolean isShowForeignKeyCardinality)

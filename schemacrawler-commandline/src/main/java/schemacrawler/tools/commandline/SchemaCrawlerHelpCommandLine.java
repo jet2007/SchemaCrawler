@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,8 +29,8 @@ package schemacrawler.tools.commandline;
 
 
 import static java.util.Objects.requireNonNull;
+import static sf.util.IOUtility.readResourceFully;
 import static sf.util.Utility.isBlank;
-import static sf.util.Utility.readResourceFully;
 
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
@@ -77,7 +77,7 @@ public final class SchemaCrawlerHelpCommandLine
    */
   public SchemaCrawlerHelpCommandLine(final Config argsMap,
                                       final boolean showVersionOnly)
-                                        throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     requireNonNull(argsMap, "No command-line arguments provided");
 
@@ -107,8 +107,6 @@ public final class SchemaCrawlerHelpCommandLine
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.commandline.CommandLine#execute()
    */
   @Override
   public void execute()

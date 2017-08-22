@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -115,27 +115,21 @@ public abstract class BaseTextOptionsBuilder<O extends BaseTextOptions>
     return this;
   }
 
-  public BaseTextOptionsBuilder<O> hideFooter()
+  public BaseTextOptionsBuilder<O> noFooter(final boolean value)
   {
-    options.setNoFooter(true);
+    options.setNoFooter(value);
     return this;
   }
 
-  public BaseTextOptionsBuilder<O> hideHeader()
+  public BaseTextOptionsBuilder<O> noHeader(final boolean value)
   {
-    options.setNoHeader(true);
+    options.setNoHeader(value);
     return this;
   }
 
-  public BaseTextOptionsBuilder<O> hideInfo()
+  public BaseTextOptionsBuilder<O> noInfo(final boolean value)
   {
-    options.setNoInfo(true);
-    return this;
-  }
-
-  public BaseTextOptionsBuilder<O> naturalSortTables()
-  {
-    options.setAlphabeticalSortForTables(false);
+    options.setNoInfo(value);
     return this;
   }
 
@@ -145,33 +139,15 @@ public abstract class BaseTextOptionsBuilder<O extends BaseTextOptions>
     return this;
   }
 
-  public BaseTextOptionsBuilder<O> showFooter()
+  public BaseTextOptionsBuilder<O> sortTableColumns(final boolean value)
   {
-    options.setNoFooter(false);
+    options.setAlphabeticalSortForTableColumns(value);
     return this;
   }
 
-  public BaseTextOptionsBuilder<O> showHeader()
+  public BaseTextOptionsBuilder<O> sortTables(final boolean value)
   {
-    options.setNoHeader(false);
-    return this;
-  }
-
-  public BaseTextOptionsBuilder<O> showInfo()
-  {
-    options.setNoInfo(false);
-    return this;
-  }
-
-  public BaseTextOptionsBuilder<O> sortTableColumns()
-  {
-    options.setAlphabeticalSortForTableColumns(true);
-    return this;
-  }
-
-  public BaseTextOptionsBuilder<O> sortTables()
-  {
-    options.setAlphabeticalSortForTables(true);
+    options.setAlphabeticalSortForTables(value);
     return this;
   }
 

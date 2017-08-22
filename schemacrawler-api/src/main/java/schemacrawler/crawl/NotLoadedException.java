@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -41,13 +41,13 @@ public class NotLoadedException
   public NotLoadedException(final Constraint constraint)
   {
     super(String.format(
-                        "Complete table constraint metadata has not been loaded, %s",
+                        "Complete metadata has not been loaded for table constraint <%s>",
                         constraint));
   }
 
   public NotLoadedException(final PartialDatabaseObject databaseObject)
   {
-    super(String.format("Complete database metadata has not been loaded, %s",
+    super(String.format("Complete metadata has not been loaded for <%s>",
                         databaseObject));
   }
 

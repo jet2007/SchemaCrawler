@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -36,7 +36,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import schemacrawler.schema.Table;
+import sf.util.UtilityMarker;
 
+@UtilityMarker
 public final class WeakAssociationsUtility
 {
 

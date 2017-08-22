@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,9 +29,9 @@ http://www.gnu.org/licenses/
 package schemacrawler.integration.test;
 
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static schemacrawler.test.utility.TestUtility.flattenCommandlineArgs;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -136,8 +136,8 @@ public class TemplatingIntegrationTest
     {
       final OutputOptions outputOptions = new OutputOptions(outputFormatValue,
                                                             out);
-      outputOptions.setInputEncoding(StandardCharsets.UTF_8);
-      outputOptions.setOutputEncoding(StandardCharsets.UTF_8);
+      outputOptions.setInputEncoding(UTF_8);
+      outputOptions.setOutputEncoding(UTF_8);
 
       executable.setOutputOptions(outputOptions);
       executable.execute(getConnection());

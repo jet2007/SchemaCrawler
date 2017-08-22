@@ -1,5 +1,8 @@
 # SchemaCrawler
 
+> SchemaCrawler is free and open-source software. 
+> [Donations are appreciated.](https://www.paypal.me/sualeh)  
+
 SchemaCrawler is a free database schema discovery and comprehension tool.
 SchemaCrawler has a good mix of useful features for data governance. You can
 [search for database schema objects](schemacrawler_grep.html) using regular
@@ -18,9 +21,12 @@ Java SE 8, Compact Profile 2 or better.
 
 [![Build Status](https://travis-ci.org/sualeh/SchemaCrawler.svg?branch=master)](https://travis-ci.org/sualeh/SchemaCrawler)
 [![Coverage Status](https://coveralls.io/repos/sualeh/SchemaCrawler/badge.svg?branch=master&service=github)](https://coveralls.io/github/sualeh/SchemaCrawler?branch=master)
-[![Maven Central](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aus.fatehi%20schemacrawler)
+[![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aus.fatehi%20schemacrawler)
 [![Main distribution](https://img.shields.io/badge/zip-download-brightgreen.svg)](https://github.com/sualeh/SchemaCrawler/releases/latest)
-[![Join the chat at https://gitter.im/sualeh/SchemaCrawler](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/sualeh/SchemaCrawler?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Docker Pulls](https://img.shields.io/docker/pulls/sualeh/schemacrawler.svg)](https://hub.docker.com/r/sualeh/schemacrawler/)
+[![StackExchange](https://img.shields.io/stackexchange/Stack Overflow/t/schemacrawler.svg)](http://Stack Overflow.com/search?tab=newest&q=schemacrawler)
+
+-----
 
 ## SchemaCrawler Command-line
 
@@ -40,7 +46,7 @@ SchemaCrawler has [grep](schemacrawler_grep.html) functionality that allows
 you to search for table and column names using regular expressions.
 SchemaCrawler is capable of creating entity-relationship diagrams in 
 [DOT format,](http://www.graphviz.org/doc/info/lang.html ) which
-[GraphViz](http://www.graphviz.org/) can convert into [schema diagrams.](diagramming.html) 
+[Graphviz](http://www.graphviz.org/) can convert into [schema diagrams.](diagramming.html) 
 SchemaCrawler has powerful scripting ability,
 using JavaScript, Groovy, Ruby or Python. A live connection is provided to the
 script context to allow you to select from or even modify your database.
@@ -49,13 +55,15 @@ Examples are provided for all of these with the
 
 SchemaCrawler is integrated with, and allows you to write templates to
 generate SQL scripts or any other text output, using templating engines, such
-as [Apache Velocity](http://velocity.apache.org/) or
+as [Apache Velocity](http://velocity.apache.org/), [Thymeleaf](http://www.thymeleaf.org/) or
 [&lt;FreeMarker&gt;](http://freemarker.org/) . However, you will need to download
 Apache Velocity or &lt;FreeMarker&gt; separately, since these are not part of the
 SchemaCrawler download.
 
 Complete SchemaCrawler command-line help is available with the -h or -help command-line
 options.
+
+-----
 
 ## SchemaCrawler API
 
@@ -104,31 +112,6 @@ code. SchemaCrawler allows you to compare structures between two different
 database servers, or even two different database systems, from different
 vendors.
 
-The sample code below demonstrates just how easy it is to use SchemaCrawler:
-
-<div class="source"><pre>
-final SchemaCrawlerOptions options = new SchemaCrawlerOptions();
-// Set what details are required in the schema - this affects the
-// time taken to crawl the schema
-options.setSchemaInfoLevel(SchemaInfoLevel.standard());
-
-final Catalog catalog = SchemaCrawlerUtility.getCatalog(connection, options);
-for (final Schema schema: catalog.getSchemas())
-{
-  System.out.println(schema);
-  for (final Table table: catalog.getTables(schema))
-  {
-    System.out.print(&quot;o--&gt; &quot; + table);
-    for (final Column column: table.getColumns())
-    {
-      System.out.println(&quot;     o--&gt; &quot; + column);
-    }
-  }
-}
-</pre></div>
-        
-For more details, please refer to the [javadocs](apidocs/index.html).
-        
 SchemaCrawler provides metadata for the following database objects:  
      
 * Column data types
@@ -144,3 +127,8 @@ SchemaCrawler provides metadata for the following database objects:
 * Synonyms
 * Privileges and grants
 
+The sample code below demonstrates just how easy it is to use SchemaCrawler:
+
+<script src="https://gist.github.com/sualeh/63e4b8cb0515c6e928e7a9a419f46411.js"></script>
+        
+For more details, please refer to the [javadocs](apidocs/index.html).

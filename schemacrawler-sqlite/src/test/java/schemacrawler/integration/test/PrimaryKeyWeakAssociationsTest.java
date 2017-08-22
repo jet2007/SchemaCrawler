@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -47,6 +47,7 @@ import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.ConnectionOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaInfoLevelBuilder;
+import schemacrawler.schemacrawler.SingleUseUserCredentials;
 import schemacrawler.test.utility.BaseDatabaseTest;
 import schemacrawler.test.utility.TestName;
 import schemacrawler.test.utility.TestWriter;
@@ -88,7 +89,7 @@ public class PrimaryKeyWeakAssociationsTest
 
   private void weakAssociations(final String currentMethodFullName,
                                 final String database)
-                                  throws Exception
+    throws Exception
   {
     final Path sqliteDbFile = copyResourceToTempFile(database);
     final Config config = new Config();
@@ -101,7 +102,7 @@ public class PrimaryKeyWeakAssociationsTest
       schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
 
       final ConnectionOptions connectionOptions = new SQLiteDatabaseConnector()
-        .newDatabaseConnectionOptions(config);
+        .newDatabaseConnectionOptions(new SingleUseUserCredentials(), config);
 
       final Catalog baseCatalog = SchemaCrawlerUtility
         .getCatalog(connectionOptions.getConnection(), schemaCrawlerOptions);

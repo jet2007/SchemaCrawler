@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -42,7 +42,11 @@ public final class DatabaseSpecificOverrideOptions
 
   private final Optional<Boolean> supportsSchemas;
   private final Optional<Boolean> supportsCatalogs;
+  private final MetadataRetrievalStrategy tableRetrievalStrategy;
   private final MetadataRetrievalStrategy tableColumnRetrievalStrategy;
+  private final MetadataRetrievalStrategy pkRetrievalStrategy;
+  private final MetadataRetrievalStrategy indexRetrievalStrategy;
+  private final MetadataRetrievalStrategy fkRetrievalStrategy;
   private final String identifierQuoteString;
   private final InformationSchemaViews informationSchemaViews;
 
@@ -53,24 +57,23 @@ public final class DatabaseSpecificOverrideOptions
 
   protected DatabaseSpecificOverrideOptions(final DatabaseSpecificOverrideOptionsBuilder builder)
   {
-    if (builder == null)
-    {
-      supportsSchemas = Optional.empty();
-      supportsCatalogs = Optional.empty();
-      tableColumnRetrievalStrategy = MetadataRetrievalStrategy.metadata;
-      identifierQuoteString = "";
-      informationSchemaViews = new InformationSchemaViews();
-    }
-    else
-    {
-      supportsSchemas = builder.getSupportsSchemas();
-      supportsCatalogs = builder.getSupportsCatalogs();
-      tableColumnRetrievalStrategy = builder.getTableColumnRetrievalStrategy();
-      identifierQuoteString = builder.getIdentifierQuoteString();
-      informationSchemaViews = builder.getInformationSchemaViewsBuilder()
-        .toOptions();
-    }
+    final DatabaseSpecificOverrideOptionsBuilder bldr = builder == null? new DatabaseSpecificOverrideOptionsBuilder()
+                                                                       : builder;
+    supportsSchemas = bldr.getSupportsSchemas();
+    supportsCatalogs = bldr.getSupportsCatalogs();
+    tableRetrievalStrategy = bldr.getTableRetrievalStrategy();
+    tableColumnRetrievalStrategy = bldr.getTableColumnRetrievalStrategy();
+    pkRetrievalStrategy = bldr.getPrimaryKeyRetrievalStrategy();
+    indexRetrievalStrategy = bldr.getIndexRetrievalStrategy();
+    fkRetrievalStrategy = bldr.getForeignKeyRetrievalStrategy();
+    identifierQuoteString = bldr.getIdentifierQuoteString();
+    informationSchemaViews = bldr.getInformationSchemaViewsBuilder()
+      .toOptions();
+  }
 
+  public MetadataRetrievalStrategy getForeignKeyRetrievalStrategy()
+  {
+    return fkRetrievalStrategy;
   }
 
   public String getIdentifierQuoteString()
@@ -82,14 +85,29 @@ public final class DatabaseSpecificOverrideOptions
     return identifierQuoteString;
   }
 
+  public MetadataRetrievalStrategy getIndexRetrievalStrategy()
+  {
+    return indexRetrievalStrategy;
+  }
+
   public InformationSchemaViews getInformationSchemaViews()
   {
     return informationSchemaViews;
   }
 
+  public MetadataRetrievalStrategy getPrimaryKeyRetrievalStrategy()
+  {
+    return pkRetrievalStrategy;
+  }
+
   public MetadataRetrievalStrategy getTableColumnRetrievalStrategy()
   {
     return tableColumnRetrievalStrategy;
+  }
+
+  public MetadataRetrievalStrategy getTableRetrievalStrategy()
+  {
+    return tableRetrievalStrategy;
   }
 
   public boolean hasOverrideForIdentifierQuoteString()

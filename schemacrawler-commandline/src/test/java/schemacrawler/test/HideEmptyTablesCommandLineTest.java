@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -31,7 +31,6 @@ package schemacrawler.test;
 import static org.junit.Assert.fail;
 import static schemacrawler.test.utility.TestUtility.clean;
 import static schemacrawler.test.utility.TestUtility.compareOutput;
-import static schemacrawler.test.utility.TestUtility.createTempFile;
 import static schemacrawler.test.utility.TestUtility.flattenCommandlineArgs;
 
 import java.nio.file.Path;
@@ -48,6 +47,7 @@ import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
+import sf.util.IOUtility;
 
 public class HideEmptyTablesCommandLineTest
   extends BaseDatabaseTest
@@ -67,7 +67,8 @@ public class HideEmptyTablesCommandLineTest
     final InfoLevel infoLevel = InfoLevel.maximum;
 
     final String referenceFile = "hideEmptyTables.txt";
-    final Path testOutputFile = createTempFile(referenceFile, "data");
+    final Path testOutputFile = IOUtility.createTempFilePath(referenceFile,
+                                                             "data");
 
     final OutputFormat outputFormat = TextOutputFormat.text;
 
@@ -82,9 +83,8 @@ public class HideEmptyTablesCommandLineTest
     args.put("noinfo", "true");
     args.put("routines", "");
     args.put("hideemptytables", "true");
-    final String[] flattenCommandlineArgs = flattenCommandlineArgs(args);
 
-    Main.main(flattenCommandlineArgs);
+    Main.main(flattenCommandlineArgs(args));
 
     failures.addAll(compareOutput(HIDE_EMPTY_TABLES_OUTPUT + referenceFile,
                                   testOutputFile,

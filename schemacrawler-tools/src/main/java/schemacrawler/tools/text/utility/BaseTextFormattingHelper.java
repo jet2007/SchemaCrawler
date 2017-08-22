@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -107,8 +107,6 @@ abstract class BaseTextFormattingHelper
 
   /**
    * {@inheritDoc}
-   *
-   * @see TextFormattingHelper#writeDescriptionRow(java.lang.String)
    */
   @Override
   public void writeDescriptionRow(final String description)
@@ -129,28 +127,46 @@ abstract class BaseTextFormattingHelper
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.text.utility.TextFormattingHelper#writeDetailRow(java.lang.String,
-   *      java.lang.String, boolean, java.lang.String, boolean)
    */
   @Override
-  public void writeDetailRow(final String ordinal,
-                             final String subName,
-                             final boolean escapeText,
-                             final String type,
-                             final boolean emphasize)
+  public void writeDetailRow(final String text1,
+                             final String text2,
+                             final String text3)
   {
-    final int subNameWidth = 32;
-    final int typeWidth = 28;
+    writeDetailRow(text1, text2, text3, true, false, "");
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void writeDetailRow(final String text1,
+                             final String text2,
+                             final String text3,
+                             final boolean escapeText,
+                             final boolean emphasize,
+                             final String style)
+  {
+    final int text2Width = 32;
+    final int text3Width = 28;
+    final String text3Sytle;
+    if (!isBlank(style))
+    {
+      text3Sytle = " " + style;
+    }
+    else
+    {
+      text3Sytle = "";
+    }
 
     final TableRow row = new TableRow(outputFormat);
-    if (isBlank(ordinal))
+    if (isBlank(text1))
     {
       row.add(newTableCell("", "spacer", outputFormat));
     }
     else
     {
-      row.add(new TableCell(ordinal,
+      row.add(new TableCell(text1,
                             true,
                             2,
                             Alignment.inherit,
@@ -160,39 +176,25 @@ abstract class BaseTextFormattingHelper
                             1,
                             outputFormat));
     }
-    row.add(new TableCell(subName,
+    row.add(new TableCell(text2,
                           escapeText,
-                          subNameWidth,
+                          text2Width,
                           Alignment.inherit,
                           emphasize,
-                          "subname",
+                          "minwidth",
                           Color.white,
                           1,
                           outputFormat));
-    row.add(new TableCell(type,
+    row.add(new TableCell(text3,
                           true,
-                          typeWidth,
+                          text3Width,
                           Alignment.inherit,
                           false,
-                          "type",
+                          "minwidth" + text3Sytle,
                           Color.white,
                           1,
                           outputFormat));
     out.println(row.toString());
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see TextFormattingHelper#writeDetailRow(java.lang.String,
-   *      java.lang.String, java.lang.String)
-   */
-  @Override
-  public void writeDetailRow(final String ordinal,
-                             final String subName,
-                             final String type)
-  {
-    writeDetailRow(ordinal, subName, true, type, false);
   }
 
   /**

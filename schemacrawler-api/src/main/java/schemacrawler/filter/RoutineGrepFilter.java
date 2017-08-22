@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,19 +30,19 @@ package schemacrawler.filter;
 
 import java.util.function.Predicate;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.Routine;
 import schemacrawler.schema.RoutineColumn;
 import schemacrawler.schemacrawler.InclusionRule;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 class RoutineGrepFilter
   implements Predicate<Routine>
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(RoutineGrepFilter.class.getName());
 
   private final boolean invertMatch;
@@ -62,8 +62,6 @@ class RoutineGrepFilter
    * column inclusion rule is found, and at least one column matches the
    * rule.
    *
-   * @param options
-   *        Options
    * @param routine
    *        Table to check
    * @return Whether the column should be included
@@ -123,8 +121,7 @@ class RoutineGrepFilter
     if (!include)
     {
       LOGGER.log(Level.FINE,
-                 new StringFormat("Removing routine since it does not match the grep pattern, %s",
-                                  routine));
+                 new StringFormat("Excluding routine <%s>", routine));
     }
 
     return include;

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,8 +29,8 @@ package sf.util;
 
 
 import static java.util.Objects.requireNonNull;
+import static sf.util.IOUtility.readResourceFully;
 import static sf.util.Utility.isBlank;
-import static sf.util.Utility.readResourceFully;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -40,7 +40,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 
@@ -49,10 +48,11 @@ import schemacrawler.schemacrawler.SchemaCrawlerException;
  *
  * @author Sualeh Fatehi
  */
+@UtilityMarker
 public final class DatabaseUtility
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(DatabaseUtility.class.getName());
 
   public static void checkConnection(final Connection connection)
@@ -100,7 +100,7 @@ public final class DatabaseUtility
           {
             LOGGER
               .log(Level.WARNING,
-                   new StringFormat("Ignoring results from query, %s", sql));
+                   new StringFormat("Ignoring results from query <%s>", sql));
             resultSet.close();
           }
         }
@@ -163,8 +163,8 @@ public final class DatabaseUtility
     catch (final SQLException e)
     {
       LOGGER.log(Level.WARNING,
-                 e,
-                 new StringFormat("Error executing SQL, %s", sql));
+                 new StringFormat("Error executing SQL <%s>", sql),
+                 e);
       if (throwSQLException)
       {
         throw e;
@@ -212,9 +212,9 @@ public final class DatabaseUtility
       }
       else
       {
-        LOGGER
-          .log(Level.WARNING,
-               new StringFormat("No rows of data returned for query, %s", sql));
+        LOGGER.log(Level.WARNING,
+                   new StringFormat("No rows of data returned for query <%s>",
+                                    sql));
         scalar = null;
       }
 

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,13 +34,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import sf.util.SchemaCrawlerLogger;
 
 public class InputReader
   extends Reader
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(InputReader.class.getName());
 
   private final String description;
@@ -159,7 +160,7 @@ public class InputReader
     if (!isClosed)
     {
       throw new IllegalStateException(String
-        .format("Input reader \"%s\" was not closed", description));
+        .format("Could not close input reader <%s>", description));
     }
     super.finalize();
   }
@@ -172,7 +173,7 @@ public class InputReader
   {
     if (isClosed)
     {
-      throw new IOException(String.format("Input reader \"%s\" is not open",
+      throw new IOException(String.format("Input reader <%s> is not open",
                                           description));
     }
   }

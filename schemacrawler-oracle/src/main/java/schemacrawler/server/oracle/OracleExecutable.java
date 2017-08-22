@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ public class OracleExecutable
   @Override
   public void execute(final Connection connection,
                       final DatabaseSpecificOverrideOptions databaseSpecificOverrideOptions)
-                        throws Exception
+    throws Exception
   {
     executeOracleScripts(connection);
 

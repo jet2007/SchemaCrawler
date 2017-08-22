@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,25 +28,24 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.iosource;
 
 
-import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isReadable;
 import static java.nio.file.Files.newBufferedReader;
 import static java.util.Objects.requireNonNull;
+import static sf.util.IOUtility.isFileReadable;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public class FileInputResource
   implements InputResource
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(FileInputResource.class.getName());
 
   private final Path inputFile;
@@ -56,9 +55,11 @@ public class FileInputResource
   {
     inputFile = requireNonNull(filePath, "No file path provided").normalize()
       .toAbsolutePath();
-    if (!exists(filePath) || !isReadable(filePath))
+    if (!isFileReadable(inputFile))
     {
-      throw new IOException("Cannot read file, " + filePath);
+      final IOException e = new IOException("Cannot read file, " + inputFile);
+      LOGGER.log(Level.CONFIG, e.getMessage(), e);
+      throw e;
     }
   }
 
@@ -74,7 +75,7 @@ public class FileInputResource
     requireNonNull(charset, "No input charset provided");
     final Reader reader = newBufferedReader(inputFile, charset);
     LOGGER.log(Level.INFO,
-               new StringFormat("Opened input reader to file, %s", inputFile));
+               new StringFormat("Opened input reader to file <%s>", inputFile));
 
     return new InputReader(getDescription(), reader, true);
   }

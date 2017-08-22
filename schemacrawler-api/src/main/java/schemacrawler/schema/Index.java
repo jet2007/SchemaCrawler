@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -73,17 +73,6 @@ public interface Index
    * @return Pages
    */
   int getPages();
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.TypedObject#getType()
-   */
-  @Override
-  default IndexType getType()
-  {
-    return getIndexType();
-  }
 
   /**
    * If the index is unique.

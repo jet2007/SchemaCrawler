@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -50,9 +50,9 @@ import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaInfoLevelBuilder;
 import schemacrawler.test.utility.BaseExecutableTest;
 import schemacrawler.test.utility.TestName;
-import schemacrawler.test.utility.TestUtility;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
+import sf.util.IOUtility;
 
 public class GraphExecutableOptionsTest
   extends BaseExecutableTest
@@ -87,7 +87,8 @@ public class GraphExecutableOptionsTest
     schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
     final GraphOptions graphOptions = new GraphOptions();
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -100,7 +101,8 @@ public class GraphExecutableOptionsTest
     graphOptions.setAlphabeticalSortForTableColumns(true);
     graphOptions.setShowOrdinalNumbers(true);
 
-    executableGraph(new SchemaCrawlerOptions(),
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    new SchemaCrawlerOptions(),
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -112,7 +114,8 @@ public class GraphExecutableOptionsTest
     final GraphOptions graphOptions = new GraphOptions();
     graphOptions.setHideForeignKeyNames(true);
 
-    executableGraph(new SchemaCrawlerOptions(),
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    new SchemaCrawlerOptions(),
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -124,7 +127,8 @@ public class GraphExecutableOptionsTest
     final GraphOptions graphOptions = new GraphOptions();
     graphOptions.setNoInfo(true);
 
-    executableGraph(new SchemaCrawlerOptions(),
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    new SchemaCrawlerOptions(),
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -136,7 +140,8 @@ public class GraphExecutableOptionsTest
     final GraphOptions graphOptions = new GraphOptions();
     graphOptions.setShowUnqualifiedNames(true);
 
-    executableGraph(new SchemaCrawlerOptions(),
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    new SchemaCrawlerOptions(),
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -150,7 +155,8 @@ public class GraphExecutableOptionsTest
       .setTableInclusionRule(new RegularExpressionInclusionRule(".*BOOKS"));
     final GraphOptions graphOptions = new GraphOptions();
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -162,9 +168,9 @@ public class GraphExecutableOptionsTest
     final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
     schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
     final GraphOptions graphOptions = new GraphOptions();
-    graphOptions.setSchemaTextDetailType(SchemaTextDetailType.brief);
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.brief.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -176,9 +182,9 @@ public class GraphExecutableOptionsTest
     final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
     schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
     final GraphOptions graphOptions = new GraphOptions();
-    graphOptions.setSchemaTextDetailType(SchemaTextDetailType.schema);
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -195,7 +201,8 @@ public class GraphExecutableOptionsTest
     graphOptions.setShowUnqualifiedNames(true);
     graphOptions.setHideForeignKeyNames(true);
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -213,7 +220,8 @@ public class GraphExecutableOptionsTest
     graphOptions.setShowUnqualifiedNames(true);
     graphOptions.setHideForeignKeyNames(true);
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -228,7 +236,8 @@ public class GraphExecutableOptionsTest
 
     final GraphOptions graphOptions = new GraphOptions();
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -244,7 +253,8 @@ public class GraphExecutableOptionsTest
 
     final GraphOptions graphOptions = new GraphOptions();
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -259,7 +269,8 @@ public class GraphExecutableOptionsTest
     final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
     schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
@@ -274,12 +285,14 @@ public class GraphExecutableOptionsTest
       .setSchemaInclusionRule(new RegularExpressionInclusionRule(".*\\.FOR_LINT"));
     final GraphOptions graphOptions = new GraphOptions();
 
-    executableGraph(schemaCrawlerOptions,
+    executableGraph(SchemaTextDetailType.schema.name(),
+                    schemaCrawlerOptions,
                     graphOptions,
                     testName.currentMethodName());
   }
 
-  private void executableGraph(final SchemaCrawlerOptions schemaCrawlerOptions,
+  private void executableGraph(final String command,
+                               final SchemaCrawlerOptions schemaCrawlerOptions,
                                final GraphOptions graphOptions,
                                final String testMethodName)
     throws Exception
@@ -290,11 +303,15 @@ public class GraphExecutableOptionsTest
         .setSchemaInclusionRule(new RegularExpressionExclusionRule(".*\\.SYSTEM_LOBS|.*\\.FOR_LINT"));
     }
 
-    final GraphExecutable executable = new GraphExecutable();
+    final GraphExecutable executable = new GraphExecutable(command);
     executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
 
     final GraphOptionsBuilder graphOptionsBuilder = new GraphOptionsBuilder(graphOptions);
-    graphOptionsBuilder.sortTables();
+    graphOptionsBuilder.sortTables(true);
+    if (!"maximum".equals(schemaCrawlerOptions.getSchemaInfoLevel().getTag()))
+    {
+      graphOptionsBuilder.weakAssociations(true);
+    }
     executable.setAdditionalConfiguration(graphOptionsBuilder.toConfig());
 
     // Generate diagram, so that we have something to look at, even if
@@ -316,8 +333,8 @@ public class GraphExecutableOptionsTest
   {
     final String outputFormatValue = GraphOutputFormat.png.getFormat();
 
-    final Path testOutputFile = TestUtility
-      .createTempFile(executable.getCommand(), outputFormatValue);
+    final Path testOutputFile = IOUtility
+      .createTempFilePath(executable.getCommand(), outputFormatValue);
 
     final OutputOptions outputOptions = new OutputOptions(outputFormatValue,
                                                           testOutputFile);

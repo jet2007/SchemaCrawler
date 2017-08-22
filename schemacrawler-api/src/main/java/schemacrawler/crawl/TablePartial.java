@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -158,6 +158,15 @@ final class TablePartial
   public boolean hasDefinition()
   {
     throw new NotLoadedException(this);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public final boolean hasPrimaryKey()
+  {
+    return getPrimaryKey() != null;
   }
 
   @Override

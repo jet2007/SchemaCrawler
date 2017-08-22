@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,10 +29,10 @@ package schemacrawler.tools.options;
 
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.SchemaInfoLevel;
 import schemacrawler.schemacrawler.SchemaInfoLevelBuilder;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public enum InfoLevel
@@ -44,7 +44,7 @@ public enum InfoLevel
  detailed,
  maximum,;
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(InfoLevel.class.getName());
 
   public static InfoLevel valueOfFromString(final String infoLevelValue)
@@ -56,7 +56,7 @@ public enum InfoLevel
     catch (final IllegalArgumentException | NullPointerException e)
     {
       LOGGER.log(Level.INFO,
-                 new StringFormat("Unknown infolevel, %s", infoLevelValue));
+                 new StringFormat("Unknown infolevel <%s>", infoLevelValue));
       return unknown;
     }
   }

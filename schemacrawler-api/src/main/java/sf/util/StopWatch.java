@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -41,6 +41,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 public final class StopWatch
 {
@@ -66,7 +67,7 @@ public final class StopWatch
     public String toString()
     {
       final LocalTime durationLocal = LocalTime.ofNanoOfDay(duration.toNanos());
-      return String.format("%s - \"%s\"", durationLocal.format(df), taskName);
+      return String.format("%s - <%s>", durationLocal.format(df), taskName);
     }
 
   }
@@ -78,7 +79,7 @@ public final class StopWatch
     .toFormatter();
 
   private final String id;
-  private final List<TaskInfo> tasks = new LinkedList<TaskInfo>();
+  private final List<TaskInfo> tasks = new LinkedList<>();
 
   // State for current task
   private Instant start;
@@ -100,7 +101,7 @@ public final class StopWatch
   /**
    * Return whether the stop watch is currently running.
    *
-   * @see #currentTaskName()
+   * @see #currentTaskName
    */
   public boolean isRunning()
   {
@@ -120,7 +121,7 @@ public final class StopWatch
     if (running)
     {
       throw new IllegalStateException(String
-        .format("Cannot stop \"%s\", since it is already running", id));
+        .format("Cannot stop <%s>, since it is already running", id));
     }
 
     running = true;
@@ -133,7 +134,7 @@ public final class StopWatch
     if (!running)
     {
       throw new IllegalStateException(String
-        .format("Cannot stop \"%s\", since it is not running", id));
+        .format("Cannot stop <%s>, since it is not running", id));
     }
 
     final Instant stop = Instant.now();
@@ -149,6 +150,34 @@ public final class StopWatch
     start = null;
   }
 
+  /**
+   * Allows for a deferred conversion to a string. Useful in logging.
+   *
+   * @return String supplier.
+   */
+  public Supplier<String> stringify()
+  {
+    return () -> {
+      final StringBuilder buffer = new StringBuilder(1024);
+
+      final LocalTime totalDurationLocal = LocalTime
+        .ofNanoOfDay(totalDuration.toNanos());
+      buffer.append(String.format("Total time taken for <%s> - %s hours%n",
+                                  id,
+                                  totalDurationLocal.format(df)));
+
+      for (final TaskInfo task: tasks)
+      {
+        buffer.append(String
+          .format("-%5.1f%% - %s%n",
+                  calculatePercentage(task.getDuration(), totalDuration),
+                  task));
+      }
+
+      return buffer.toString();
+    };
+  }
+
   public <V> V time(final String taskName, final Callable<V> callable)
     throws Exception
   {
@@ -158,39 +187,17 @@ public final class StopWatch
     return returnValue;
   }
 
-  @Override
-  public String toString()
-  {
-    final StringBuilder buffer = new StringBuilder(1024);
-
-    final LocalTime totalDurationLocal = LocalTime
-      .ofNanoOfDay(totalDuration.toNanos());
-    buffer.append(String.format("Total time taken for \"%s\" - %s hours%n",
-                                id,
-                                totalDurationLocal.format(df)));
-
-    for (final TaskInfo task: tasks)
-    {
-      buffer.append(String
-        .format("- %4.1f%% - %s%n",
-                calculatePercentage(task.getDuration(), totalDuration),
-                task));
-    }
-
-    return buffer.toString();
-  }
-
   private double calculatePercentage(final Duration duration,
                                      final Duration totalDuration)
   {
-    final long totalSeconds = totalDuration.getSeconds();
-    if (totalSeconds == 0)
+    final long totalMillis = totalDuration.toMillis();
+    if (totalMillis == 0)
     {
       return 0;
     }
     else
     {
-      return duration.getSeconds() * 100D / totalSeconds;
+      return duration.toMillis() * 100D / totalMillis;
     }
   }
 

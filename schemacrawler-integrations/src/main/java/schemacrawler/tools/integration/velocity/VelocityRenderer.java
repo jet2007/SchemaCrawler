@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,7 +34,6 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -49,6 +48,7 @@ import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 import schemacrawler.schema.Catalog;
 import schemacrawler.schemacrawler.SchemaCrawlerCommandLineException;
 import schemacrawler.tools.executable.BaseStagedExecutable;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -62,7 +62,7 @@ public final class VelocityRenderer
 
   static final String COMMAND = "velocity";
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(VelocityRenderer.class.getName());
 
   private static void setVelocityResourceLoaderProperty(final Properties p,
@@ -86,7 +86,7 @@ public final class VelocityRenderer
   @Override
   public final void executeOn(final Catalog catalog,
                               final Connection connection)
-                                throws Exception
+    throws Exception
   {
     // Set the file path, in case the template is a file template
     // This allows Velocity to load templates from any directory
@@ -126,7 +126,7 @@ public final class VelocityRenderer
                                       templatePath);
 
     LOGGER.log(Level.CONFIG,
-               new StringFormat("Velocity configuration properties, %s",
+               new StringFormat("Velocity configuration properties <%s>",
                                 p.toString()));
 
     ve.init(p);
@@ -138,7 +138,7 @@ public final class VelocityRenderer
     {
       final String templateEncoding = outputOptions.getInputCharset().name();
       LOGGER.log(Level.INFO,
-                 new StringFormat("Reading Velocity template, %s, with encoding \"%s\"",
+                 new StringFormat("Reading Velocity template <%s>, with encoding <%s>",
                                   templateLocation,
                                   templateEncoding));
       final Template template = ve.getTemplate(templateLocation,
@@ -147,7 +147,8 @@ public final class VelocityRenderer
     }
     catch (final ResourceNotFoundException e)
     {
-      throw new SchemaCrawlerCommandLineException("No template specified", e);
+      throw new SchemaCrawlerCommandLineException("Please specify an Apache Velocity template",
+                                                  e);
     }
 
   }

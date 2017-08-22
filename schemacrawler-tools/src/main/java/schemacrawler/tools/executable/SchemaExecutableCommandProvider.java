@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ class SchemaExecutableCommandProvider
   @Override
   public Executable configureNewExecutable(final SchemaCrawlerOptions schemaCrawlerOptions,
                                            final OutputOptions outputOptions)
-                                             throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     final boolean isGraph;
     final boolean isEmbeddedGraph;

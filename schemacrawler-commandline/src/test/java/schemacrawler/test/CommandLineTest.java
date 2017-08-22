@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,12 +28,11 @@ http://www.gnu.org/licenses/
 package schemacrawler.test;
 
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newBufferedWriter;
-import static schemacrawler.test.utility.TestUtility.createTempFile;
 import static schemacrawler.test.utility.TestUtility.flattenCommandlineArgs;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +46,7 @@ import schemacrawler.schemacrawler.Config;
 import schemacrawler.test.utility.BaseDatabaseTest;
 import schemacrawler.test.utility.TestName;
 import schemacrawler.test.utility.TestWriter;
+import sf.util.IOUtility;
 
 public class CommandLineTest
   extends BaseDatabaseTest
@@ -61,7 +61,7 @@ public class CommandLineTest
   public void commandLineOverridesWithConfig()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("tables", ".*");
     args.put("routines", ".*");
     args.put("sequences", ".*");
@@ -84,7 +84,7 @@ public class CommandLineTest
   public void commandLineRoutinesWithColumnsSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("tables", "");
     args.put("sortcolumns", Boolean.TRUE.toString());
     // Testing no tables, all routines
@@ -97,7 +97,7 @@ public class CommandLineTest
   public void commandLineRoutinesWithoutColumnsSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("tables", "");
     args.put("sortcolumns", Boolean.FALSE.toString());
     // Testing no tables, all routines
@@ -110,7 +110,7 @@ public class CommandLineTest
   public void commandLineRoutinesWithoutSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("tables", "");
     args.put("sortroutines", Boolean.FALSE.toString());
     // Testing no tables, all routines
@@ -123,7 +123,7 @@ public class CommandLineTest
   public void commandLineRoutinesWithSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("tables", "");
     args.put("sortroutines", Boolean.TRUE.toString());
     // Testing no tables, all routines
@@ -136,7 +136,7 @@ public class CommandLineTest
   public void commandLineTablesWithColumnsSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("routines", "");
     args.put("sortcolumns", Boolean.TRUE.toString());
     // Testing all tables, no routines
@@ -149,7 +149,7 @@ public class CommandLineTest
   public void commandLineTablesWithoutColumnsSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("routines", "");
     args.put("sortcolumns", Boolean.FALSE.toString());
     // Testing all tables, no routines
@@ -162,7 +162,7 @@ public class CommandLineTest
   public void commandLineTablesWithoutSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("routines", "");
     args.put("sorttables", Boolean.FALSE.toString());
     // Testing all tables, no routines
@@ -175,7 +175,7 @@ public class CommandLineTest
   public void commandLineTablesWithSorting()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("routines", "");
     args.put("sorttables", Boolean.TRUE.toString());
     // Testing all tables, no routines
@@ -188,7 +188,7 @@ public class CommandLineTest
   public void commandLineWithConfig()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
 
     final Map<String, String> config = new HashMap<>();
     config.put("schemacrawler.format.show_unqualified_names",
@@ -209,7 +209,7 @@ public class CommandLineTest
   public void commandLineWithDefaults()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("portablenames", Boolean.TRUE.toString());
     // Testing all tables, routines
     // Testing no sequences, synonyms
@@ -221,7 +221,7 @@ public class CommandLineTest
   public void commandLineWithNonDefaults()
     throws Exception
   {
-    final Map<String, String> args = new HashMap<String, String>();
+    final Map<String, String> args = new HashMap<>();
     args.put("portablenames", Boolean.TRUE.toString());
     args.put("tables", "");
     args.put("routines", "");
@@ -235,11 +235,10 @@ public class CommandLineTest
     throws IOException
   {
     final String prefix = "SchemaCrawler.TestCommandLineConfig";
-    final Path configFile = createTempFile(prefix, "properties");
+    final Path configFile = IOUtility.createTempFilePath(prefix, "properties");
     final Properties configProperties = new Properties();
     configProperties.putAll(config);
-    configProperties
-      .store(newBufferedWriter(configFile, StandardCharsets.UTF_8), prefix);
+    configProperties.store(newBufferedWriter(configFile, UTF_8), prefix);
     return configFile;
   }
 

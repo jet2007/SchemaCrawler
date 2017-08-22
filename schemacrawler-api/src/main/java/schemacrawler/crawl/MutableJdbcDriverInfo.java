@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -51,17 +51,15 @@ final class MutableJdbcDriverInfo
 
   private static final long serialVersionUID = 8030156654422512161L;
 
-  private String driverName;
-  private String driverClassName;
-  private String driverVersion;
-  private String connectionUrl;
+  private String driverName = "";
+  private String driverClassName = "";
+  private String driverVersion = "";
+  private String connectionUrl = "";
   private boolean jdbcCompliant;
   private final Set<ImmutableJdbcDriverProperty> jdbcDriverProperties = new HashSet<>();
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverInfo#getConnectionUrl()
    */
   @Override
   public String getConnectionUrl()
@@ -71,8 +69,6 @@ final class MutableJdbcDriverInfo
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverInfo#getDriverClassName()
    */
   @Override
   public String getDriverClassName()
@@ -82,8 +78,6 @@ final class MutableJdbcDriverInfo
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverInfo#getDriverName()
    */
   @Override
   public String getDriverName()
@@ -93,8 +87,6 @@ final class MutableJdbcDriverInfo
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverInfo#getDriverProperties()
    */
   @Override
   public Collection<JdbcDriverProperty> getDriverProperties()
@@ -106,8 +98,6 @@ final class MutableJdbcDriverInfo
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverInfo#getDriverVersion()
    */
   @Override
   public String getDriverVersion()
@@ -117,8 +107,6 @@ final class MutableJdbcDriverInfo
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverInfo#isJdbcCompliant()
    */
   @Override
   public boolean isJdbcCompliant()
@@ -128,8 +116,6 @@ final class MutableJdbcDriverInfo
 
   /**
    * {@inheritDoc}
-   *
-   * @see Object#toString()
    */
   @Override
   public String toString()

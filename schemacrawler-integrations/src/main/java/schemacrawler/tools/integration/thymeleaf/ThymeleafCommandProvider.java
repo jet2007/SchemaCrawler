@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -57,6 +57,15 @@ public class ThymeleafCommandProvider
   public String getCommand()
   {
     return ThymeleafRenderer.COMMAND;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String getHelpAdditionalText()
+  {
+    return "";
   }
 
   @Override

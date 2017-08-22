@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -63,8 +63,6 @@ abstract class AbstractProperty
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public final boolean equals(final Object obj)
@@ -127,8 +125,6 @@ abstract class AbstractProperty
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#hashCode()
    */
   @Override
   public final int hashCode()

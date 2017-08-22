@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -151,9 +151,9 @@ final class SchemaJsonFormatter
       catch (final JSONException e)
       {
         LOGGER.log(Level.FINER,
-                   e,
                    new StringFormat("Error outputting ColumnDataType: %s",
-                                    e.getMessage()));
+                                    e.getMessage()),
+                   e);
       }
     }
   }
@@ -210,8 +210,8 @@ final class SchemaJsonFormatter
     {
       LOGGER
         .log(Level.FINER,
-             e,
-             new StringFormat("Error outputting Routine: %s", e.getMessage()));
+             new StringFormat("Error outputting Routine: %s", e.getMessage()),
+             e);
     }
 
   }
@@ -249,8 +249,8 @@ final class SchemaJsonFormatter
     {
       LOGGER
         .log(Level.FINER,
-             e,
-             new StringFormat("Error outputting sequence: %s", e.getMessage()));
+             new StringFormat("Error outputting sequence: %s", e.getMessage()),
+             e);
     }
 
   }
@@ -294,8 +294,8 @@ final class SchemaJsonFormatter
     {
       LOGGER
         .log(Level.FINER,
-             e,
-             new StringFormat("Error outputting synonym: %s", e.getMessage()));
+             new StringFormat("Error outputting synonym: %s", e.getMessage()),
+             e);
     }
 
   }
@@ -347,7 +347,7 @@ final class SchemaJsonFormatter
           final List<WeakAssociationForeignKey> weakAssociations = new ArrayList<>(weakAssociationsCollection);
           Collections.sort(weakAssociations);
 
-          if (!options.isHideWeakAssociations())
+          if (options.isShowWeakAssociations())
           {
             jsonTable.put("weakAssociations",
                           handleWeakAssociations(weakAssociations));
@@ -416,10 +416,9 @@ final class SchemaJsonFormatter
     }
     catch (final JSONException e)
     {
-      LOGGER
-        .log(Level.FINER,
-             e,
-             new StringFormat("Error outputting table: %s", e.getMessage()));
+      LOGGER.log(Level.FINER,
+                 new StringFormat("Error outputting table: %s", e.getMessage()),
+                 e);
     }
   }
 
@@ -524,9 +523,9 @@ final class SchemaJsonFormatter
       catch (final JSONException e)
       {
         LOGGER.log(Level.FINER,
-                   e,
                    new StringFormat("Error outputting column reference: %s",
-                                    e.getMessage()));
+                                    e.getMessage()),
+                   e);
       }
     }
     return jsonColumnReferences;
@@ -571,9 +570,9 @@ final class SchemaJsonFormatter
         catch (final JSONException e)
         {
           LOGGER.log(Level.FINER,
-                     e,
                      new StringFormat("Error outputting foreign key: %s",
-                                      e.getMessage()));
+                                      e.getMessage()),
+                     e);
         }
       }
     }
@@ -602,6 +601,8 @@ final class SchemaJsonFormatter
         jsonIndex.put("name", index.getName());
       }
 
+      printRemarks(index, jsonIndex);
+
       final IndexType indexType = index.getIndexType();
       if (indexType != IndexType.unknown && indexType != IndexType.other)
       {
@@ -617,10 +618,9 @@ final class SchemaJsonFormatter
     }
     catch (final JSONException e)
     {
-      LOGGER
-        .log(Level.FINER,
-             e,
-             new StringFormat("Error outputting index: %s", e.getMessage()));
+      LOGGER.log(Level.FINER,
+                 new StringFormat("Error outputting index: %s", e.getMessage()),
+                 e);
     }
 
     return jsonIndex;
@@ -648,9 +648,9 @@ final class SchemaJsonFormatter
     catch (final JSONException e)
     {
       LOGGER.log(Level.FINER,
-                 e,
                  new StringFormat("Error outputting routine column: %s",
-                                  e.getMessage()));
+                                  e.getMessage()),
+                 e);
     }
 
     return jsonColumn;
@@ -697,8 +697,8 @@ final class SchemaJsonFormatter
     {
       LOGGER
         .log(Level.FINER,
-             e,
-             new StringFormat("Error outputting column: %s", e.getMessage()));
+             new StringFormat("Error outputting column: %s", e.getMessage()),
+             e);
     }
 
     return jsonColumn;
@@ -739,9 +739,9 @@ final class SchemaJsonFormatter
     catch (final JSONException e)
     {
       LOGGER.log(Level.FINER,
-                 e,
                  new StringFormat("Error outputting table constraint: %s",
-                                  e.getMessage()));
+                                  e.getMessage()),
+                 e);
     }
 
     return jsonConstraint;
@@ -783,9 +783,9 @@ final class SchemaJsonFormatter
         catch (final JSONException e)
         {
           LOGGER.log(Level.FINER,
-                     e,
                      new StringFormat("Error outputting trigger: %s",
-                                      e.getMessage()));
+                                      e.getMessage()),
+                     e);
         }
       }
     }
@@ -813,9 +813,9 @@ final class SchemaJsonFormatter
         catch (final JSONException e)
         {
           LOGGER.log(Level.FINER,
-                     e,
                      new StringFormat("Error outputting weak association: ",
-                                      e.getMessage()));
+                                      e.getMessage()),
+                     e);
         }
       }
     }

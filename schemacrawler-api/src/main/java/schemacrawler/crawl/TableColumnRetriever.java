@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,15 +29,14 @@ http://www.gnu.org/licenses/
 package schemacrawler.crawl;
 
 
+import static java.util.Objects.requireNonNull;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 import schemacrawler.filter.InclusionRuleFilter;
 import schemacrawler.schema.Column;
@@ -47,6 +46,7 @@ import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerSQLException;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -59,7 +59,7 @@ final class TableColumnRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(TableColumnRetriever.class.getName());
 
   TableColumnRetriever(final RetrieverConnection retrieverConnection,
@@ -171,12 +171,12 @@ final class TableColumnRetriever
     final String defaultValue = results.getString("COLUMN_DEF");
     //
 
-    final String columnCatalogName = quotedName(results.getString("TABLE_CAT"));
-    final String schemaName = quotedName(results.getString("TABLE_SCHEM"));
-    final String tableName = quotedName(results.getString("TABLE_NAME"));
-    final String columnName = quotedName(results.getString("COLUMN_NAME"));
+    final String columnCatalogName = nameQuotedName(results.getString("TABLE_CAT"));
+    final String schemaName = nameQuotedName(results.getString("TABLE_SCHEM"));
+    final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
+    final String columnName = nameQuotedName(results.getString("COLUMN_NAME"));
     LOGGER.log(Level.FINE,
-               new StringFormat("Retrieving column: %s.%s.%s.%s",
+               new StringFormat("Retrieving column <%s.%s.%s.%s>",
                                 columnCatalogName,
                                 schemaName,
                                 tableName,
@@ -229,7 +229,7 @@ final class TableColumnRetriever
       column.addAttributes(results.getAttributes());
 
       LOGGER.log(Level.FINER,
-                 new StringFormat("Adding %scolumn to table: %s",
+                 new StringFormat("Adding %scolumn to table <%s>",
                                   isHidden? "hidden ": "",
                                   column.getFullName()));
       if (isHidden)
@@ -308,8 +308,10 @@ final class TableColumnRetriever
       }
       catch (final SQLException e)
       {
-        throw new SchemaCrawlerSQLException("Could not retrieve columns for table "
-                                            + table, e);
+        throw new SchemaCrawlerSQLException(String
+          .format("Could not retrieve columns for %s <%s>",
+                  table.getTableType(),
+                  table), e);
       }
     }
   }

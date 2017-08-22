@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -31,7 +31,9 @@ package schemacrawler.tools.analysis.counts;
 import static java.util.Objects.requireNonNull;
 
 import schemacrawler.schema.Table;
+import sf.util.UtilityMarker;
 
+@UtilityMarker
 public final class CountsUtility
 {
 

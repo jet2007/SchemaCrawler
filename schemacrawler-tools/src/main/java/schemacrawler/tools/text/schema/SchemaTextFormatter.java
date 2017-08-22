@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import schemacrawler.crawl.NotLoadedException;
 import schemacrawler.schema.ActionOrientationType;
@@ -130,8 +129,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handle(schemacrawler.schema.ColumnDataType)
    */
   @Override
   public void handle(final ColumnDataType columnDataType)
@@ -147,8 +144,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handle(Routine)
    */
   @Override
   public void handle(final Routine routine)
@@ -197,8 +192,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handle(schemacrawler.schema.Sequence)
    */
   @Override
   public void handle(final Sequence sequence)
@@ -245,8 +238,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handle(schemacrawler.schema.Synonym)
    */
   @Override
   public void handle(final Synonym synonym)
@@ -283,13 +274,13 @@ final class SchemaTextFormatter
       {
         referencedObjectName = synonym.getReferencedObject().getFullName();
       }
-      formattingHelper.writeDetailRow("",
-                                      String.format("%s %s %s",
-                                                    synonym.getName(),
-                                                    formattingHelper
-                                                      .createRightArrow(),
-                                                    referencedObjectName),
-                                      "");
+      formattingHelper
+        .writeDetailRow("",
+                        String.format("%s %s %s",
+                                      synonym.getName(),
+                                      formattingHelper.createRightArrow(),
+                                      referencedObjectName),
+                        "");
     }
 
     formattingHelper.writeObjectEnd();
@@ -324,10 +315,7 @@ final class SchemaTextFormatter
     printForeignKeys(table);
     if (!isBrief)
     {
-      if (isVerbose && !options.isHideWeakAssociations())
-      {
-        printWeakAssociations(table);
-      }
+      printWeakAssociations(table);
       printIndexes(table.getIndexes());
       printTriggers(table.getTriggers());
       printTableConstraints(table.getTableConstraints());
@@ -346,8 +334,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleColumnDataTypesEnd()
    */
   @Override
   public void handleColumnDataTypesEnd()
@@ -356,8 +342,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleColumnDataTypesStart()
    */
   @Override
   public void handleColumnDataTypesStart()
@@ -370,8 +354,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleRoutinesEnd()
    */
   @Override
   public void handleRoutinesEnd()
@@ -381,8 +363,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleRoutinesStart()
    */
   @Override
   public void handleRoutinesStart()
@@ -393,8 +373,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleSequencesEnd()
    */
   @Override
   public void handleSequencesEnd()
@@ -404,8 +382,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleSequencesStart()
    */
   @Override
   public void handleSequencesStart()
@@ -416,8 +392,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleSynonymsEnd()
    */
   @Override
   public void handleSynonymsEnd()
@@ -427,8 +401,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleSynonymsStart()
    */
   @Override
   public void handleSynonymsStart()
@@ -439,8 +411,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleTablesEnd()
    */
   @Override
   public void handleTablesEnd()
@@ -450,8 +420,6 @@ final class SchemaTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.SchemaTraversalHandler#handleTablesStart()
    */
   @Override
   public void handleTablesStart()
@@ -462,6 +430,11 @@ final class SchemaTextFormatter
 
   private void printColumnDataType(final ColumnDataType columnDataType)
   {
+
+    final boolean isUserDefined = columnDataType.isUserDefined();
+    final String dataType = String.format("[%sdata type]",
+                                          isUserDefined? "user defined ": "");
+
     final String typeName;
     if (options.isShowUnqualifiedNames())
     {
@@ -472,29 +445,11 @@ final class SchemaTextFormatter
       typeName = columnDataType.getFullName();
     }
 
-    final String baseTypeName;
-    final ColumnDataType baseColumnDataType = columnDataType.getBaseType();
-    if (baseColumnDataType == null)
-    {
-      baseTypeName = "";
-    }
-    else
-    {
-      if (options.isShowUnqualifiedNames())
-      {
-        baseTypeName = baseColumnDataType.getName();
-      }
-      else
-      {
-        baseTypeName = baseColumnDataType.getFullName();
-      }
-    }
-
-    final String userDefined = negate(columnDataType.isUserDefined(),
-                                      "user defined");
     final String nullable = negate(columnDataType.isNullable(), "nullable");
+
     final String autoIncrementable = negate(columnDataType
       .isAutoIncrementable(), "auto-incrementable");
+
     String definedWith = "defined with ";
     if (columnDataType.getCreateParameters() == null)
     {
@@ -504,14 +459,39 @@ final class SchemaTextFormatter
     {
       definedWith = definedWith + columnDataType.getCreateParameters();
     }
-    formattingHelper.writeNameRow(typeName, "[data type]");
-    formattingHelper.writeDetailRow("", "based on", baseTypeName);
-    formattingHelper.writeDescriptionRow(userDefined);
+    formattingHelper.writeNameRow(typeName, dataType);
     formattingHelper.writeDescriptionRow(definedWith);
     formattingHelper.writeDescriptionRow(nullable);
     formattingHelper.writeDescriptionRow(autoIncrementable);
     formattingHelper
       .writeDescriptionRow(columnDataType.getSearchable().toString());
+    if (isUserDefined)
+    {
+      final String baseTypeName;
+      final ColumnDataType baseColumnDataType = columnDataType.getBaseType();
+      if (baseColumnDataType == null)
+      {
+        baseTypeName = "";
+      }
+      else
+      {
+        if (options.isShowUnqualifiedNames())
+        {
+          baseTypeName = baseColumnDataType.getName();
+        }
+        else
+        {
+          baseTypeName = baseColumnDataType.getFullName();
+        }
+      }
+      formattingHelper.writeDetailRow("", "based on", baseTypeName);
+
+      final String remarks = columnDataType.getRemarks();
+      if (!isBlank(remarks))
+      {
+        formattingHelper.writeDetailRow("", "remarks", remarks);
+      }
+    }
   }
 
   private void printColumnReferences(final boolean isForeignKey,
@@ -593,9 +573,10 @@ final class SchemaTextFormatter
       }
       formattingHelper.writeDetailRow(keySequenceString,
                                       relationship,
-                                      false,
                                       "",
-                                      false);
+                                      false,
+                                      false,
+                                      "");
     }
   }
 
@@ -731,6 +712,8 @@ final class SchemaTextFormatter
                                     + "unique " + indexTypeString + "index]";
         formattingHelper.writeNameRow(indexName, indexDetails);
 
+        printRemarks(index);
+
         if (!isBrief)
         {
           printTableColumns(index.getColumns(), true);
@@ -760,6 +743,7 @@ final class SchemaTextFormatter
         pkName = "";
       }
       formattingHelper.writeNameRow(pkName, "[primary key]");
+      printRemarks(primaryKey);
       printTableColumns(primaryKey.getColumns(), false);
       printDependantObjectDefinition(primaryKey);
     }
@@ -801,7 +785,7 @@ final class SchemaTextFormatter
     {
       return;
     }
-    formattingHelper.writeWideRow(object.getRemarks(), "");
+    formattingHelper.writeWideRow(object.getRemarks(), "remarks");
   }
 
   private void printRoutineColumns(final List<? extends RoutineColumn<?>> columns)
@@ -873,7 +857,8 @@ final class SchemaTextFormatter
     {
       return;
     }
-    formattingHelper.writeDetailRow("", "", column.getRemarks());
+    formattingHelper
+      .writeDetailRow("", "", column.getRemarks(), true, false, "remarks");
   }
 
   private void printTableColumns(final List<? extends Column> columns,
@@ -940,9 +925,10 @@ final class SchemaTextFormatter
       }
       formattingHelper.writeDetailRow(ordinalNumberString,
                                       columnName,
-                                      true,
                                       columnDetails,
-                                      emphasize);
+                                      true,
+                                      emphasize,
+                                      "");
 
       printTableColumnAutoIncremented(column);
       printTableColumnRemarks(column);
@@ -956,20 +942,26 @@ final class SchemaTextFormatter
   private void printTableConstraints(final Collection<TableConstraint> constraintsCollection)
   {
 
-    final List<TableConstraint> constraints = constraintsCollection.stream()
-      .filter(constraint -> (EnumSet
-        .of(TableConstraintType.check, TableConstraintType.unique)
-        .contains(constraint.getConstraintType())))
-      .collect(Collectors.toList());
-    Collections
-      .sort(constraints,
-            NamedObjectSort
-              .getNamedObjectSort(options.isAlphabeticalSortForIndexes()));
+    final EnumSet<TableConstraintType> printableConstraints = EnumSet
+      .of(TableConstraintType.check, TableConstraintType.unique);
 
+    final List<TableConstraint> constraints = new ArrayList<>();
+    for (final TableConstraint constraint: constraintsCollection)
+    {
+      if (printableConstraints.contains(constraint.getConstraintType()))
+      {
+        constraints.add(constraint);
+      }
+    }
     if (constraints.isEmpty())
     {
       return;
     }
+
+    Collections
+      .sort(constraints,
+            NamedObjectSort
+              .getNamedObjectSort(options.isAlphabeticalSortForIndexes()));
 
     formattingHelper.writeEmptyRow();
     formattingHelper.writeWideRow("Table Constraints", "section");
@@ -1076,6 +1068,11 @@ final class SchemaTextFormatter
 
   private void printWeakAssociations(final Table table)
   {
+    if (!options.isShowWeakAssociations())
+    {
+      return;
+    }
+
     final Collection<WeakAssociationForeignKey> weakAssociationsCollection = WeakAssociationsUtility
       .getWeakAssociations(table);
     if (weakAssociationsCollection.isEmpty())

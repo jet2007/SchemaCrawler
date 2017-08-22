@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * @author Sualeh Fatehi
  */
 public final class RegularExpressionInclusionRule
-  implements InclusionRule
+  implements InclusionRuleWithRegularExpression
 {
 
   private static final long serialVersionUID = 6274652266761961575L;
@@ -107,7 +107,15 @@ public final class RegularExpressionInclusionRule
   @Override
   public Pattern getInclusionPattern()
   {
-    return inclusionRule.getInclusionPattern();
+    if (inclusionRule instanceof InclusionRuleWithRegularExpression)
+    {
+      return ((InclusionRuleWithRegularExpression) inclusionRule)
+        .getInclusionPattern();
+    }
+    else
+    {
+      return Pattern.compile(".*");
+    }
   }
 
   @Override
@@ -122,8 +130,6 @@ public final class RegularExpressionInclusionRule
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schemacrawler.InclusionRule#test(java.lang.String)
    */
   @Override
   public boolean test(final String text)
@@ -133,8 +139,6 @@ public final class RegularExpressionInclusionRule
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#toString()
    */
   @Override
   public String toString()

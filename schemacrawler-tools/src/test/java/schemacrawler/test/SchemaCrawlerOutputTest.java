@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -32,7 +32,6 @@ package schemacrawler.test;
 import static org.junit.Assert.fail;
 import static schemacrawler.test.utility.TestUtility.clean;
 import static schemacrawler.test.utility.TestUtility.compareOutput;
-import static schemacrawler.test.utility.TestUtility.createTempFile;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -63,6 +62,7 @@ import schemacrawler.tools.text.operation.Operation;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
 import schemacrawler.tools.text.schema.SchemaTextOptions;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
+import sf.util.IOUtility;
 
 public class SchemaCrawlerOutputTest
   extends BaseDatabaseTest
@@ -71,7 +71,7 @@ public class SchemaCrawlerOutputTest
   private static final String COMPOSITE_OUTPUT = "composite_output/";
   private static final String ORDINAL_OUTPUT = "ordinal_output/";
   private static final String TABLE_ROW_COUNT_OUTPUT = "table_row_count_output/";
-  private static final String HIDE_WEAK_ASSOCIATIONS_OUTPUT = "hide_weak_associations_output/";
+  private static final String SHOW_WEAK_ASSOCIATIONS_OUTPUT = "show_weak_associations_output/";
   private static final String JSON_OUTPUT = "json_output/";
   private static final String HIDE_CONSTRAINT_NAMES_OUTPUT = "hide_constraint_names_output/";
   private static final String UNQUALIFIED_NAMES_OUTPUT = "unqualified_names_output/";
@@ -113,8 +113,8 @@ public class SchemaCrawlerOutputTest
       {
         final String referenceFile = command + "." + outputFormat.getFormat();
 
-        final Path testOutputFile = createTempFile(referenceFile,
-                                                   outputFormat.getFormat());
+        final Path testOutputFile = IOUtility
+          .createTempFilePath(referenceFile, outputFormat.getFormat());
 
         final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                               testOutputFile);
@@ -173,8 +173,8 @@ public class SchemaCrawlerOutputTest
       final String referenceFile = "details_maximum."
                                    + outputFormat.getFormat();
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                             testOutputFile);
@@ -192,7 +192,7 @@ public class SchemaCrawlerOutputTest
       schemaCrawlerOptions.setSequenceInclusionRule(new IncludeAll());
 
       final SchemaTextOptionsBuilder schemaTextOptionsBuilder = new SchemaTextOptionsBuilder(textOptions);
-      schemaTextOptionsBuilder.sortTables();
+      schemaTextOptionsBuilder.sortTables(true);
 
       final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(SchemaTextDetailType.details
                                                                              + ","
@@ -218,58 +218,6 @@ public class SchemaCrawlerOutputTest
   }
 
   @Test
-  public void compareHideWeakAssociationsOutput()
-    throws Exception
-  {
-    clean(HIDE_WEAK_ASSOCIATIONS_OUTPUT);
-
-    final List<String> failures = new ArrayList<>();
-
-    final SchemaTextOptions textOptions = new SchemaTextOptions();
-    textOptions.setNoInfo(false);
-    textOptions.setNoHeader(false);
-    textOptions.setNoFooter(false);
-    textOptions.setHideWeakAssociations(true);
-
-    for (final OutputFormat outputFormat: getOutputFormats())
-    {
-      final String referenceFile = "details_maximum."
-                                   + outputFormat.getFormat();
-
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
-
-      final OutputOptions outputOptions = new OutputOptions(outputFormat,
-                                                            testOutputFile);
-
-      final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
-      schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
-      schemaCrawlerOptions
-        .setSchemaInclusionRule(new RegularExpressionExclusionRule(".*\\.SYSTEM_LOBS|.*\\.FOR_LINT"));
-
-      final SchemaTextOptionsBuilder schemaTextOptionsBuilder = new SchemaTextOptionsBuilder(textOptions);
-      schemaTextOptionsBuilder.sortTables();
-
-      final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(SchemaTextDetailType.details
-        .name());
-      executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
-      executable.setOutputOptions(outputOptions);
-      executable
-        .setAdditionalConfiguration(schemaTextOptionsBuilder.toConfig());
-      executable.execute(getConnection());
-
-      failures
-        .addAll(compareOutput(HIDE_WEAK_ASSOCIATIONS_OUTPUT + referenceFile,
-                              testOutputFile,
-                              outputFormat.getFormat()));
-    }
-    if (failures.size() > 0)
-    {
-      fail(failures.toString());
-    }
-  }
-
-  @Test
   public void compareJsonOutput()
     throws Exception
   {
@@ -283,9 +231,8 @@ public class SchemaCrawlerOutputTest
       final String referenceFile = schemaTextDetailType + "_" + infoLevel
                                    + ".json";
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 TextOutputFormat.json
-                                                   .getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, TextOutputFormat.json.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(TextOutputFormat.json,
                                                             testOutputFile);
@@ -336,8 +283,8 @@ public class SchemaCrawlerOutputTest
       final String referenceFile = "schema_detailed."
                                    + outputFormat.getFormat();
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                             testOutputFile);
@@ -385,8 +332,8 @@ public class SchemaCrawlerOutputTest
       final String referenceFile = "schema_detailed."
                                    + outputFormat.getFormat();
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                             testOutputFile);
@@ -435,8 +382,8 @@ public class SchemaCrawlerOutputTest
       final String referenceFile = "details_maximum."
                                    + outputFormat.getFormat();
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                             testOutputFile);
@@ -454,7 +401,7 @@ public class SchemaCrawlerOutputTest
       schemaCrawlerOptions.setSequenceInclusionRule(new IncludeAll());
 
       final SchemaTextOptionsBuilder schemaTextOptionsBuilder = new SchemaTextOptionsBuilder(textOptions);
-      schemaTextOptionsBuilder.sortTables();
+      schemaTextOptionsBuilder.sortTables(true);
 
       final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(SchemaTextDetailType.details
                                                                              + ","
@@ -496,8 +443,8 @@ public class SchemaCrawlerOutputTest
     {
       final String referenceFile = "routines." + outputFormat.getFormat();
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                             testOutputFile);
@@ -518,7 +465,7 @@ public class SchemaCrawlerOutputTest
       schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
 
       final SchemaTextOptionsBuilder schemaTextOptionsBuilder = new SchemaTextOptionsBuilder(textOptions);
-      schemaTextOptionsBuilder.sortTables();
+      schemaTextOptionsBuilder.sortTables(true);
 
       final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(SchemaTextDetailType.details
         .name());
@@ -532,6 +479,59 @@ public class SchemaCrawlerOutputTest
       failures.addAll(compareOutput(ROUTINES_OUTPUT + referenceFile,
                                     testOutputFile,
                                     outputFormat.getFormat()));
+    }
+    if (failures.size() > 0)
+    {
+      fail(failures.toString());
+    }
+  }
+
+  @Test
+  public void compareShowWeakAssociationsOutput()
+    throws Exception
+  {
+    clean(SHOW_WEAK_ASSOCIATIONS_OUTPUT);
+
+    final List<String> failures = new ArrayList<>();
+
+    final SchemaTextOptions textOptions = new SchemaTextOptions();
+    textOptions.setNoInfo(false);
+    textOptions.setNoHeader(false);
+    textOptions.setNoFooter(false);
+    textOptions.setShowWeakAssociations(true);
+
+    for (final OutputFormat outputFormat: getOutputFormats())
+    {
+      final String referenceFile = "schema_standard."
+                                   + outputFormat.getFormat();
+
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
+
+      final OutputOptions outputOptions = new OutputOptions(outputFormat,
+                                                            testOutputFile);
+
+      final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
+      schemaCrawlerOptions
+        .setSchemaInfoLevel(SchemaInfoLevelBuilder.standard());
+      schemaCrawlerOptions
+        .setSchemaInclusionRule(new RegularExpressionExclusionRule(".*\\.SYSTEM_LOBS|.*\\.FOR_LINT"));
+
+      final SchemaTextOptionsBuilder schemaTextOptionsBuilder = new SchemaTextOptionsBuilder(textOptions);
+      schemaTextOptionsBuilder.sortTables(true);
+
+      final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(SchemaTextDetailType.schema
+        .name());
+      executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
+      executable.setOutputOptions(outputOptions);
+      executable
+        .setAdditionalConfiguration(schemaTextOptionsBuilder.toConfig());
+      executable.execute(getConnection());
+
+      failures
+        .addAll(compareOutput(SHOW_WEAK_ASSOCIATIONS_OUTPUT + referenceFile,
+                              testOutputFile,
+                              outputFormat.getFormat()));
     }
     if (failures.size() > 0)
     {
@@ -558,8 +558,8 @@ public class SchemaCrawlerOutputTest
       final String referenceFile = "details_maximum."
                                    + outputFormat.getFormat();
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                             testOutputFile);
@@ -570,7 +570,7 @@ public class SchemaCrawlerOutputTest
         .setSchemaInclusionRule(new RegularExpressionExclusionRule(".*\\.SYSTEM_LOBS|.*\\.FOR_LINT"));
 
       final SchemaTextOptionsBuilder schemaTextOptionsBuilder = new SchemaTextOptionsBuilder(textOptions);
-      schemaTextOptionsBuilder.sortTables();
+      schemaTextOptionsBuilder.sortTables(true);
 
       final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(SchemaTextDetailType.details
         .name());
@@ -609,8 +609,8 @@ public class SchemaCrawlerOutputTest
       final String referenceFile = "details_maximum."
                                    + outputFormat.getFormat();
 
-      final Path testOutputFile = createTempFile(referenceFile,
-                                                 outputFormat.getFormat());
+      final Path testOutputFile = IOUtility
+        .createTempFilePath(referenceFile, outputFormat.getFormat());
 
       final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                             testOutputFile);
@@ -628,7 +628,7 @@ public class SchemaCrawlerOutputTest
       schemaCrawlerOptions.setSequenceInclusionRule(new IncludeAll());
 
       final SchemaTextOptionsBuilder schemaTextOptionsBuilder = new SchemaTextOptionsBuilder(textOptions);
-      schemaTextOptionsBuilder.sortTables();
+      schemaTextOptionsBuilder.sortTables(true);
 
       final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(SchemaTextDetailType.details
                                                                              + ","

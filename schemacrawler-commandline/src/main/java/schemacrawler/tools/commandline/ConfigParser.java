@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,8 +29,6 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.commandline;
 
 
-import java.io.IOException;
-
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 
@@ -44,38 +42,25 @@ public class ConfigParser
 {
 
   private static final String CONFIG_FILE = "configfile";
-  private static final String ADDITIONAL_CONFIG_FILE = "additionalconfigfile";
 
   public ConfigParser(final Config config)
   {
     super(config);
     normalizeOptionName(CONFIG_FILE, "g");
-    normalizeOptionName(ADDITIONAL_CONFIG_FILE, "p");
+  }
+
+  public void consumeOptions()
+  {
+    consumeOption(CONFIG_FILE);
   }
 
   @Override
   public void loadConfig()
     throws SchemaCrawlerException
   {
-    try
-    {
-      final String configfile = config
-        .getStringValue(CONFIG_FILE, "schemacrawler.config.properties");
-      final String additionalconfigfile = config
-        .getStringValue(ADDITIONAL_CONFIG_FILE,
-                        "schemacrawler.additional.config.properties");
-      config.putAll(Config.load(configfile, additionalconfigfile));
-    }
-    catch (final IOException e)
-    {
-      throw new SchemaCrawlerException("Could not load config files", e);
-    }
-  }
-
-  public void consumeOptions()
-  {
-    consumeOption(CONFIG_FILE);
-    consumeOption(ADDITIONAL_CONFIG_FILE);
+    final String configfile = config
+      .getStringValue(CONFIG_FILE, "schemacrawler.config.properties");
+    config.putAll(Config.loadFile(configfile));
   }
 
 }

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -43,12 +43,14 @@ import schemacrawler.schema.Index;
 import schemacrawler.schema.PartialDatabaseObject;
 import schemacrawler.schema.PrimaryKey;
 import schemacrawler.schema.Table;
+import sf.util.UtilityMarker;
 
 /**
  * SchemaCrawler utility methods.
  *
  * @author sfatehi
  */
+@UtilityMarker
 public final class MetaDataUtility
 {
 

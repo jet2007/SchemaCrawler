@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -33,9 +33,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.filter.InclusionRuleFilter;
 import schemacrawler.schema.Schema;
@@ -45,6 +43,7 @@ import schemacrawler.schemacrawler.InclusionRule;
 import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 
 /**
  * A retriever that uses database metadata to get the extended details
@@ -56,7 +55,7 @@ final class SequenceRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SequenceRetriever.class.getName());
 
   SequenceRetriever(final RetrieverConnection retrieverConnection,
@@ -98,7 +97,7 @@ final class SequenceRetriever
       return;
     }
 
-    final Collection<Schema> schemas = catalog.getSchemaNames();
+    final NamedObjectList<SchemaReference> schemas = getAllSchemas();
 
     final Query sequencesDefinitionSql = informationSchemaViews
       .getSequencesSql();
@@ -111,11 +110,11 @@ final class SequenceRetriever
     {
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("SEQUENCE_CATALOG"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("SEQUENCE_SCHEMA"));
-        final String sequenceName = quotedName(results
+        final String sequenceName = nameQuotedName(results
           .getString("SEQUENCE_NAME"));
         final BigInteger minimumValue = results.getBigInteger("MINIMUM_VALUE");
         final BigInteger maximumValue = results.getBigInteger("MAXIMUM_VALUE");

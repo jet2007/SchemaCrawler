@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -95,9 +95,13 @@ class NamedObjectList<N extends NamedObject>
   private static String makeLookupKey(final String fullName)
   {
     final String key;
-    if (isBlank(fullName))
+    if (fullName == null)
     {
       key = null;
+    }
+    else if (isBlank(fullName))
+    {
+      key = "";
     }
     else
     {
@@ -162,8 +166,6 @@ class NamedObjectList<N extends NamedObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Iterable#iterator()
    */
   @Override
   public Iterator<N> iterator()
@@ -249,8 +251,6 @@ class NamedObjectList<N extends NamedObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#toString()
    */
   @Override
   public String toString()

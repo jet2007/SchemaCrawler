@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -36,9 +36,19 @@ public class DatabaseSpecificOverrideOptionsBuilder
   implements OptionsBuilder<DatabaseSpecificOverrideOptions>
 {
 
+  private static final String SC_RETRIEVAL_TABLES = "schemacrawler.schema.retrieval.strategy.tables";
+  private static final String SC_RETRIEVAL_TABLE_COLUMNS = "schemacrawler.schema.retrieval.strategy.tablecolumns";
+  private static final String SC_RETRIEVAL_PRIMARY_KEYS = "schemacrawler.schema.retrieval.strategy.primarykeys";
+  private static final String SC_RETRIEVAL_INDEXES = "schemacrawler.schema.retrieval.strategy.indexes";
+  private static final String SC_RETRIEVAL_FOREIGN_KEYS = "schemacrawler.schema.retrieval.strategy.foreignkeys";
+
   private Optional<Boolean> supportsSchemas;
   private Optional<Boolean> supportsCatalogs;
+  private MetadataRetrievalStrategy tableRetrievalStrategy;
   private MetadataRetrievalStrategy tableColumnRetrievalStrategy;
+  private MetadataRetrievalStrategy pkRetrievalStrategy;
+  private MetadataRetrievalStrategy indexRetrievalStrategy;
+  private MetadataRetrievalStrategy fkRetrievalStrategy;
   private String identifierQuoteString;
   private final InformationSchemaViewsBuilder informationSchemaViewsBuilder;
 
@@ -48,7 +58,11 @@ public class DatabaseSpecificOverrideOptionsBuilder
     supportsSchemas = Optional.empty();
     supportsCatalogs = Optional.empty();
     identifierQuoteString = "";
+    tableRetrievalStrategy = MetadataRetrievalStrategy.metadata;
     tableColumnRetrievalStrategy = MetadataRetrievalStrategy.metadata;
+    pkRetrievalStrategy = MetadataRetrievalStrategy.metadata;
+    indexRetrievalStrategy = MetadataRetrievalStrategy.metadata;
+    fkRetrievalStrategy = MetadataRetrievalStrategy.metadata;
   }
 
   public DatabaseSpecificOverrideOptionsBuilder(final Config map)
@@ -78,10 +92,37 @@ public class DatabaseSpecificOverrideOptionsBuilder
   }
 
   @Override
-  public DatabaseSpecificOverrideOptionsBuilder fromConfig(final Config map)
+  public DatabaseSpecificOverrideOptionsBuilder fromConfig(final Config config)
   {
-    informationSchemaViewsBuilder.fromConfig(map);
+    final Config configProperties;
+    if (config == null)
+    {
+      configProperties = new Config();
+    }
+    else
+    {
+      configProperties = new Config(config);
+    }
+
+    informationSchemaViewsBuilder.fromConfig(configProperties);
+
+    tableRetrievalStrategy = configProperties
+      .getEnumValue(SC_RETRIEVAL_TABLES, tableRetrievalStrategy);
+    tableColumnRetrievalStrategy = configProperties
+      .getEnumValue(SC_RETRIEVAL_TABLE_COLUMNS, tableColumnRetrievalStrategy);
+    pkRetrievalStrategy = configProperties
+      .getEnumValue(SC_RETRIEVAL_PRIMARY_KEYS, pkRetrievalStrategy);
+    indexRetrievalStrategy = configProperties
+      .getEnumValue(SC_RETRIEVAL_INDEXES, indexRetrievalStrategy);
+    fkRetrievalStrategy = configProperties
+      .getEnumValue(SC_RETRIEVAL_FOREIGN_KEYS, fkRetrievalStrategy);
+
     return this;
+  }
+
+  public MetadataRetrievalStrategy getForeignKeyRetrievalStrategy()
+  {
+    return fkRetrievalStrategy;
   }
 
   public String getIdentifierQuoteString()
@@ -89,9 +130,19 @@ public class DatabaseSpecificOverrideOptionsBuilder
     return identifierQuoteString;
   }
 
+  public MetadataRetrievalStrategy getIndexRetrievalStrategy()
+  {
+    return indexRetrievalStrategy;
+  }
+
   public InformationSchemaViewsBuilder getInformationSchemaViewsBuilder()
   {
     return informationSchemaViewsBuilder;
+  }
+
+  public MetadataRetrievalStrategy getPrimaryKeyRetrievalStrategy()
+  {
+    return pkRetrievalStrategy;
   }
 
   public Optional<Boolean> getSupportsCatalogs()
@@ -109,11 +160,16 @@ public class DatabaseSpecificOverrideOptionsBuilder
     return tableColumnRetrievalStrategy;
   }
 
+  public MetadataRetrievalStrategy getTableRetrievalStrategy()
+  {
+    return tableRetrievalStrategy;
+  }
+
   /**
    * Overrides the JDBC driver provided information about the identifier
    * quote string.
    *
-   * @param getIdentifierQuoteString
+   * @param identifierQuoteString
    *        Value for the override
    */
   public DatabaseSpecificOverrideOptionsBuilder identifierQuoteString(final String identifierQuoteString)
@@ -154,6 +210,32 @@ public class DatabaseSpecificOverrideOptionsBuilder
     return new DatabaseSpecificOverrideOptions(this);
   }
 
+  public DatabaseSpecificOverrideOptionsBuilder withForeignKeyRetrievalStrategy(final MetadataRetrievalStrategy fkRetrievalStrategy)
+  {
+    if (fkRetrievalStrategy == null)
+    {
+      this.fkRetrievalStrategy = MetadataRetrievalStrategy.metadata;
+    }
+    else
+    {
+      this.fkRetrievalStrategy = fkRetrievalStrategy;
+    }
+    return this;
+  }
+
+  public DatabaseSpecificOverrideOptionsBuilder withIndexRetrievalStrategy(final MetadataRetrievalStrategy indexRetrievalStrategy)
+  {
+    if (indexRetrievalStrategy == null)
+    {
+      this.indexRetrievalStrategy = MetadataRetrievalStrategy.metadata;
+    }
+    else
+    {
+      this.indexRetrievalStrategy = indexRetrievalStrategy;
+    }
+    return this;
+  }
+
   public InformationSchemaViewsBuilder withInformationSchemaViews()
   {
     return informationSchemaViewsBuilder;
@@ -177,6 +259,19 @@ public class DatabaseSpecificOverrideOptionsBuilder
     return this;
   }
 
+  public DatabaseSpecificOverrideOptionsBuilder withPrimaryKeyRetrievalStrategy(final MetadataRetrievalStrategy pkRetrievalStrategy)
+  {
+    if (pkRetrievalStrategy == null)
+    {
+      this.pkRetrievalStrategy = MetadataRetrievalStrategy.metadata;
+    }
+    else
+    {
+      this.pkRetrievalStrategy = pkRetrievalStrategy;
+    }
+    return this;
+  }
+
   public DatabaseSpecificOverrideOptionsBuilder withTableColumnRetrievalStrategy(final MetadataRetrievalStrategy tableColumnRetrievalStrategy)
   {
     if (tableColumnRetrievalStrategy == null)
@@ -186,6 +281,19 @@ public class DatabaseSpecificOverrideOptionsBuilder
     else
     {
       this.tableColumnRetrievalStrategy = tableColumnRetrievalStrategy;
+    }
+    return this;
+  }
+
+  public DatabaseSpecificOverrideOptionsBuilder withTableRetrievalStrategy(final MetadataRetrievalStrategy tableRetrievalStrategy)
+  {
+    if (tableRetrievalStrategy == null)
+    {
+      this.tableRetrievalStrategy = MetadataRetrievalStrategy.metadata;
+    }
+    else
+    {
+      this.tableRetrievalStrategy = tableRetrievalStrategy;
     }
     return this;
   }

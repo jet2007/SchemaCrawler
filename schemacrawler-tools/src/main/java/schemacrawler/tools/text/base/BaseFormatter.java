@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ public abstract class BaseFormatter<O extends BaseTextOptions>
     this.outputOptions = requireNonNull(outputOptions,
                                         "Output options not provided");
 
-    colorMap = new DatabaseObjectColorMap(options.isNoSchemaColors());
+    colorMap = DatabaseObjectColorMap.initialize(options.isNoSchemaColors());
 
     this.printVerboseDatabaseInfo = !options.isNoInfo()
                                     && printVerboseDatabaseInfo;

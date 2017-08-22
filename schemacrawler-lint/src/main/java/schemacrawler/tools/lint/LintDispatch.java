@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,7 +29,8 @@ package schemacrawler.tools.lint;
 
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import sf.util.SchemaCrawlerLogger;
 
 public enum LintDispatch
 {
@@ -67,7 +68,7 @@ public enum LintDispatch
    }
  },;
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(LintDispatch.class.getName());
 
   private static final String dispatchMessage = "Too many schema lints were found";

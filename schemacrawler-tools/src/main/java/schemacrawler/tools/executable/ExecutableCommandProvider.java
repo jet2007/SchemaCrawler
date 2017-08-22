@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,18 +30,18 @@ package schemacrawler.tools.executable;
 
 import java.lang.reflect.Constructor;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.tools.options.OutputOptions;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 abstract class ExecutableCommandProvider
   implements CommandProvider
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(ExecutableCommandProvider.class.getName());
 
   private final String command;
@@ -80,7 +80,7 @@ abstract class ExecutableCommandProvider
     catch (final Exception e)
     {
       LOGGER.log(Level.FINE,
-                 new StringFormat("Could not instantiate using the default constructor, %s",
+                 new StringFormat("Could not instantiate using default constructor for class <%s>",
                                   executableClassName));
       try
       {
@@ -105,6 +105,15 @@ abstract class ExecutableCommandProvider
   public String getCommand()
   {
     return command;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String getHelpAdditionalText()
+  {
+    return "";
   }
 
   @Override

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -89,8 +89,6 @@ final class ImmutableJdbcDriverProperty
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverProperty#getChoices()
    */
   @Override
   public Collection<String> getChoices()
@@ -100,8 +98,6 @@ final class ImmutableJdbcDriverProperty
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverProperty#getDescription()
    */
   @Override
   public String getDescription()
@@ -127,8 +123,6 @@ final class ImmutableJdbcDriverProperty
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.JdbcDriverProperty#isRequired()
    */
   @Override
   public boolean isRequired()

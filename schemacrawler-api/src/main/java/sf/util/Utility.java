@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,15 +30,6 @@ package sf.util;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -59,13 +49,47 @@ import java.util.logging.Logger;
  *
  * @author Sualeh Fatehi
  */
+@UtilityMarker
 public final class Utility
 {
 
-  private static final Logger LOGGER = Logger
-    .getLogger(Utility.class.getName());
+  /**
+   * Sets the application-wide log level.
+   *
+   * @param applicationLogLevel
+   *        Log level to set
+   */
+  public static void applyApplicationLogLevel(final Level applicationLogLevel)
+  {
+    final Level logLevel;
+    if (applicationLogLevel == null)
+    {
+      logLevel = Level.OFF;
+    }
+    else
+    {
+      logLevel = applicationLogLevel;
+    }
 
-  public static final Predicate<String> filterOutBlank = word -> !isBlank(word);
+    final LogManager logManager = LogManager.getLogManager();
+    final List<String> loggerNames = Collections
+      .list(logManager.getLoggerNames());
+    for (final String loggerName: loggerNames)
+    {
+      final Logger logger = logManager.getLogger(loggerName);
+      if (logger != null)
+      {
+        logger.setLevel(null);
+        for (final Handler handler: logger.getHandlers())
+        {
+          handler.setLevel(logLevel);
+        }
+      }
+    }
+
+    final Logger rootLogger = Logger.getLogger("");
+    rootLogger.setLevel(logLevel);
+  }
 
   public static String commonPrefix(final String string1, final String string2)
   {
@@ -123,53 +147,6 @@ public final class Utility
 
     final String textWithoutQuotes = builder.toString();
     return textWithoutQuotes;
-  }
-
-  /**
-   * Reads the stream fully, and writes to the writer.
-   *
-   * @param reader
-   *        Reader to read.
-   * @return Byte array
-   */
-  public static void copy(final Reader reader, final Writer writer)
-  {
-    if (reader == null)
-    {
-      LOGGER.log(Level.WARNING, "Cannot read null reader");
-      return;
-    }
-    if (writer == null)
-    {
-      LOGGER.log(Level.WARNING, "Cannot write null writer");
-      return;
-    }
-
-    final char[] buffer = new char[0x10000];
-    try
-    {
-      // Do not close resources - that is the responsibility of the
-      // caller
-      final Reader bufferedReader = new BufferedReader(reader, buffer.length);
-      final BufferedWriter bufferedWriter = new BufferedWriter(writer,
-                                                               buffer.length);
-
-      int read;
-      do
-      {
-        read = bufferedReader.read(buffer, 0, buffer.length);
-        if (read > 0)
-        {
-          bufferedWriter.write(buffer, 0, read);
-        }
-      } while (read >= 0);
-
-      bufferedWriter.flush();
-    }
-    catch (final IOException e)
-    {
-      LOGGER.log(Level.WARNING, e.getMessage(), e);
-    }
   }
 
   public static <E extends Enum<E>> E enumValue(final String value,
@@ -334,79 +311,6 @@ public final class Utility
     return join(Arrays.asList(collection), separator);
   }
 
-  public static String readFully(final InputStream stream)
-  {
-    if (stream == null)
-    {
-      return null;
-    }
-    final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
-    return readFully(reader);
-  }
-
-  /**
-   * Reads the stream fully, and returns a byte array of data.
-   *
-   * @param reader
-   *        Reader to read.
-   * @return Byte array
-   */
-  public static String readFully(final Reader reader)
-  {
-    if (reader == null)
-    {
-      LOGGER.log(Level.WARNING, "Cannot read null reader");
-      return "";
-    }
-
-    try
-    {
-      final StringWriter writer = new StringWriter();
-      copy(reader, writer);
-      writer.close();
-      return writer.toString();
-    }
-    catch (final IOException e)
-    {
-      LOGGER.log(Level.WARNING, e.getMessage(), e);
-      return "";
-    }
-
-  }
-
-  public static String readResourceFully(final String resource)
-  {
-    return readFully(Utility.class.getResourceAsStream(resource));
-  }
-
-  /**
-   * Sets the application-wide log level.
-   *
-   * @param logLevel
-   *        Log level to set
-   */
-  public static void setApplicationLogLevel(final Level logLevel)
-  {
-    final LogManager logManager = LogManager.getLogManager();
-    final List<String> loggerNames = Collections
-      .list(logManager.getLoggerNames());
-    for (final String loggerName: loggerNames)
-    {
-      final Logger logger = logManager.getLogger(loggerName);
-      if (logger != null)
-      {
-        logger.setLevel(null);
-        for (final Handler handler: logger.getHandlers())
-        {
-          handler.setLevel(logLevel);
-        }
-      }
-    }
-
-    final Logger rootLogger = Logger.getLogger("");
-    rootLogger.setLevel(logLevel);
-  }
-
   private static int indexOfDifference(final String string1,
                                        final String string2)
   {
@@ -430,7 +334,8 @@ public final class Utility
   }
 
   private Utility()
-  { // Prevent instantiation
+  {
+    // Prevent instantiation
   }
 
 }

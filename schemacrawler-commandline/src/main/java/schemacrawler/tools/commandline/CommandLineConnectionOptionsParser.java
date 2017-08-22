@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ final class CommandLineConnectionOptionsParser
     final String connectionUrl = config.getStringValue(URL, null);
     if (isBlank(connectionUrl))
     {
-      throw new SchemaCrawlerCommandLineException("No database connection URL provided");
+      throw new SchemaCrawlerCommandLineException("Please provde a database connection URL");
     }
   }
 

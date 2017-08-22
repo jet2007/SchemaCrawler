@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,19 +28,19 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.integration.embeddedgraph;
 
 
-import static java.nio.file.Files.createTempFile;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newBufferedReader;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static sf.util.Utility.copy;
+import static sf.util.IOUtility.copy;
+import static sf.util.IOUtility.createTempFilePath;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.util.regex.Pattern;
@@ -68,9 +68,9 @@ public class EmbeddedGraphExecutable
   public void executeOn(final Catalog catalog, final Connection connection)
     throws Exception
   {
-    final Path finalHtmlFile = createTempFile("schemacrawler", ".html");
-    final Path baseHtmlFile = createTempFile("schemacrawler", ".html");
-    final Path baseSvgFile = createTempFile("schemacrawler", ".svg");
+    final Path finalHtmlFile = createTempFilePath("schemacrawler", "html");
+    final Path baseHtmlFile = createTempFilePath("schemacrawler", "html");
+    final Path baseSvgFile = createTempFilePath("schemacrawler", "svg");
 
     final CommandChainExecutable chain = new CommandChainExecutable();
     chain.setSchemaCrawlerOptions(schemaCrawlerOptions);
@@ -84,14 +84,14 @@ public class EmbeddedGraphExecutable
     // Interleave HTML and SVG
     try (
         final BufferedWriter finalHtmlFileWriter = newBufferedWriter(finalHtmlFile,
-                                                                     StandardCharsets.UTF_8,
+                                                                     UTF_8,
                                                                      WRITE,
                                                                      CREATE,
                                                                      TRUNCATE_EXISTING);
         final BufferedReader baseHtmlFileReader = newBufferedReader(baseHtmlFile,
-                                                                    StandardCharsets.UTF_8);
+                                                                    UTF_8);
         final BufferedReader baseSvgFileReader = newBufferedReader(baseSvgFile,
-                                                                   StandardCharsets.UTF_8);)
+                                                                   UTF_8);)
     {
       String line;
       while ((line = baseHtmlFileReader.readLine()) != null)
@@ -106,13 +106,13 @@ public class EmbeddedGraphExecutable
 
     try (final Writer writer = outputOptions.openNewOutputWriter();)
     {
-      copy(newBufferedReader(finalHtmlFile, StandardCharsets.UTF_8), writer);
+      copy(newBufferedReader(finalHtmlFile, UTF_8), writer);
     }
   }
 
   private void insertSvg(final BufferedWriter finalHtmlFileWriter,
                          final BufferedReader baseSvgFileReader)
-                           throws IOException
+    throws IOException
   {
     finalHtmlFileWriter.append(System.lineSeparator());
     boolean skipLines = true;

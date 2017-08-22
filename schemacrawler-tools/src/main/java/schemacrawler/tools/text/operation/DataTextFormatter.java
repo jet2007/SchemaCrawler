@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ final class DataTextFormatter
   DataTextFormatter(final Operation operation,
                     final OperationOptions options,
                     final OutputOptions outputOptions)
-                      throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     super(options, /* printVerboseDatabaseInfo */false, outputOptions);
     this.operation = operation;
@@ -79,9 +79,6 @@ final class DataTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @throws SchemaCrawlerException
-   * @see schemacrawler.tools.traversal.DataTraversalHandler#end()
    */
   @Override
   public void end()
@@ -97,9 +94,6 @@ final class DataTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.DataTraversalHandler#handleData(schemacrawler.utility.Query,
-   *      java.sql.ResultSet)
    */
   @Override
   public void handleData(final Query query, final ResultSet rows)
@@ -120,9 +114,6 @@ final class DataTextFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.DataTraversalHandler#handleData(schemacrawler.schema.Table,
-   *      java.sql.ResultSet)
    */
   @Override
   public void handleData(final Table table, final ResultSet rows)
@@ -173,7 +164,7 @@ final class DataTextFormatter
    */
   private void handleAggregateOperationForTable(final String title,
                                                 final ResultSet results)
-                                                  throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     long aggregate = 0;
     try

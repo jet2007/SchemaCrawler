@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -37,18 +37,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.Column;
 import schemacrawler.schema.IndexColumnSortSequence;
 import schemacrawler.schema.IndexType;
-import schemacrawler.schema.PrimaryKey;
 import schemacrawler.schema.SchemaReference;
 import schemacrawler.schema.View;
 import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerSQLException;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -61,7 +60,7 @@ final class IndexRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(IndexRetriever.class.getName());
 
   IndexRetriever(final RetrieverConnection retrieverConnection,
@@ -77,94 +76,29 @@ final class IndexRetriever
   {
     requireNonNull(allTables);
 
-    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
-      .getInformationSchemaViews();
-
-    if (!informationSchemaViews.hasIndexesSql())
+    final MetadataRetrievalStrategy indexRetrievalStrategy = getRetrieverConnection()
+      .getIndexRetrievalStrategy();
+    switch (indexRetrievalStrategy)
     {
-      LOGGER.log(Level.INFO, "Retrieving indexes, using database metadata");
-      retrieveIndexesUsingDatabaseMetadata(allTables);
-    }
-    else
-    {
-      LOGGER.log(Level.INFO, "Retrieving indexes, using SQL");
-      retrieveIndexesUsingSql(informationSchemaViews, allTables);
-    }
+      case data_dictionary_all:
+        LOGGER.log(Level.INFO,
+                   "Retrieving indexes, using fast data dictionary retrieval");
+        retrieveIndexesFromDataDictionary(allTables);
+        break;
 
-  }
+      case metadata_all:
+        LOGGER.log(Level.INFO,
+                   "Retrieving indexes, using fast meta-data retrieval");
+        retrieveIndexesFromMetadataForAllTables(allTables);
+        break;
 
-  void retrievePrimaryKeyDefinitions(final NamedObjectList<MutableTable> allTables)
-  {
-    requireNonNull(allTables);
+      case metadata:
+        LOGGER.log(Level.INFO, "Retrieving indexes");
+        retrieveIndexesFromMetadata(allTables);
+        break;
 
-    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
-      .getInformationSchemaViews();
-
-    final Connection connection = getDatabaseConnection();
-
-    if (!informationSchemaViews.hasExtPrimaryKeysSql())
-    {
-      LOGGER.log(Level.FINE,
-                 "Extended primary keys SQL statement was not provided");
-      return;
-    }
-
-    final NamedObjectList<MutablePrimaryKey> allPks = new NamedObjectList<>();
-    for (final MutableTable table: allTables)
-    {
-      if (table.hasPrimaryKey())
-      {
-        final PrimaryKey primaryKey = table.getPrimaryKey();
-        allPks.add((MutablePrimaryKey) primaryKey);
-      }
-    }
-
-    final Query extPrimaryKeysSql = informationSchemaViews
-      .getExtPrimaryKeysSql();
-
-    try (final Statement statement = connection.createStatement();
-        final MetadataResultSet results = new MetadataResultSet(extPrimaryKeysSql,
-                                                                statement,
-                                                                getSchemaInclusionRule());)
-    {
-      while (results.next())
-      {
-        final String catalogName = quotedName(results
-          .getString("PRIMARY_KEY_CATALOG"));
-        final String schemaName = quotedName(results
-          .getString("PRIMARY_KEY_SCHEMA"));
-        final String tableName = quotedName(results
-          .getString("PRIMARY_KEY_TABLE_NAME"));
-        final String pkName = quotedName(results.getString("PRIMARY_KEY_NAME"));
-
-        final String constraintKey = new SchemaReference(catalogName,
-                                                         schemaName)
-                                     + "." + tableName + "." + pkName;
-        LOGGER.log(Level.FINER,
-                   new StringFormat("Retrieving primary key definition, %s",
-                                    constraintKey));
-        final String definition = results.getString("PRIMARY_KEY_DEFINITION");
-
-        final Optional<MutablePrimaryKey> optionalPk = allPks
-          .lookup(constraintKey);
-        if (optionalPk.isPresent())
-        {
-          final MutablePrimaryKey pkConstraint = optionalPk.get();
-          pkConstraint.appendDefinition(definition);
-          pkConstraint.addAttributes(results.getAttributes());
-        }
-        else
-        {
-          LOGGER.log(Level.FINER,
-                     new StringFormat("Could not find primary key, %s",
-                                      constraintKey));
-        }
-
-      }
-    }
-    catch (final Exception e)
-    {
-      LOGGER.log(Level.WARNING, "Could not retrieve check constraints", e);
+      default:
+        break;
     }
 
   }
@@ -174,19 +108,30 @@ final class IndexRetriever
   {
     requireNonNull(allTables);
 
-    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
-      .getInformationSchemaViews();
+    final MetadataRetrievalStrategy pkRetrievalStrategy = getRetrieverConnection()
+      .getPrimaryKeyRetrievalStrategy();
+    switch (pkRetrievalStrategy)
+    {
+      case data_dictionary_all:
+        LOGGER
+          .log(Level.INFO,
+               "Retrieving primary keys, using fast data dictionary retrieval");
+        retrievePrimaryKeysFromDataDictionary(allTables);
+        break;
 
-    if (!informationSchemaViews.hasPrimaryKeysSql())
-    {
-      LOGGER.log(Level.INFO,
-                 "Retrieving primary keys, using database metadata");
-      retrievePrimaryKeysUsingDatabaseMetadata(allTables);
-    }
-    else
-    {
-      LOGGER.log(Level.INFO, "Retrieving primary keys, using SQL");
-      retrievePrimaryKeysUsingSql(informationSchemaViews, allTables);
+      case metadata_all:
+        LOGGER.log(Level.INFO,
+                   "Retrieving primary keys, using fast meta-data retrieval");
+        retrievePrimaryKeysFromMetadataForAllTables(allTables);
+        break;
+
+      case metadata:
+        LOGGER.log(Level.INFO, "Retrieving primary keys");
+        retrievePrimaryKeysFromMetadata(allTables);
+        break;
+
+      default:
+        break;
     }
 
   }
@@ -195,16 +140,9 @@ final class IndexRetriever
                              final MetadataResultSet results)
     throws SQLException
   {
-    try
+    while (results.next())
     {
-      while (results.next())
-      {
-        createIndexForTable(table, results);
-      }
-    }
-    finally
-    {
-      results.close();
+      createIndexForTable(table, results);
     }
   }
 
@@ -212,9 +150,9 @@ final class IndexRetriever
                                    final MetadataResultSet results)
   {
     // "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME"
-    String indexName = quotedName(results.getString("INDEX_NAME"));
+    String indexName = nameQuotedName(results.getString("INDEX_NAME"));
     LOGGER.log(Level.FINE,
-               new StringFormat("Retrieving index: %s.%s",
+               new StringFormat("Retrieving index <%s.%s>",
                                 table.getFullName(),
                                 indexName));
 
@@ -224,7 +162,7 @@ final class IndexRetriever
     // http://www.postgresql.org/message-id/200707231358.l6NDwlWh026230@wwwmaster.postgresql.org
     // #6253 -
     // http://www.postgresql.org/message-id/201110121403.p9CE3fsx039675@wwwmaster.postgresql.org
-    final String columnName = quotedName(unquotedName(results
+    final String columnName = nameQuotedName(unquotedName(results
       .getString("COLUMN_NAME")));
     if (isBlank(columnName))
     {
@@ -298,8 +236,8 @@ final class IndexRetriever
   {
     MutablePrimaryKey primaryKey;
     // "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME"
-    final String columnName = quotedName(results.getString("COLUMN_NAME"));
-    final String primaryKeyName = quotedName(results.getString("PK_NAME"));
+    final String columnName = nameQuotedName(results.getString("COLUMN_NAME"));
+    final String primaryKeyName = nameQuotedName(results.getString("PK_NAME"));
     final int keySequence = Integer.parseInt(results.getString("KEY_SEQ"));
 
     primaryKey = table.getPrimaryKey();
@@ -325,45 +263,59 @@ final class IndexRetriever
     }
   }
 
-  private void retrieveIndexes(final MutableTable table, final boolean unique)
-    throws SQLException
+  private Optional<MutableTable> lookupTable(final NamedObjectList<MutableTable> allTables,
+                                             final MetadataResultSet results)
   {
+    final String catalogName = nameQuotedName(results.getString("TABLE_CAT"));
+    final String schemaName = nameQuotedName(results.getString("TABLE_SCHEM"));
+    final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
 
-    SQLException sqlEx = null;
-    try
+    final Optional<MutableTable> optionalTable = allTables
+      .lookup(new SchemaReference(catalogName, schemaName), tableName);
+    return optionalTable;
+  }
+
+  private void retrieveIndexesFromDataDictionary(final NamedObjectList<MutableTable> allTables)
+    throws SchemaCrawlerSQLException
+  {
+    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
+      .getInformationSchemaViews();
+
+    if (!informationSchemaViews.hasIndexesSql())
     {
-      retrieveIndexes1(table, unique);
+      LOGGER.log(Level.FINE, "Extended indexes SQL statement was not provided");
+      return;
+    }
+
+    final Query indexesSql = informationSchemaViews.getIndexesSql();
+    final Connection connection = getDatabaseConnection();
+    try (final Statement statement = connection.createStatement();
+        final MetadataResultSet results = new MetadataResultSet(indexesSql,
+                                                                statement,
+                                                                getSchemaInclusionRule());)
+    {
+      results.setDescription("retrieveIndexesFromDataDictionary");
+      while (results.next())
+      {
+        final Optional<MutableTable> optionalTable = lookupTable(allTables,
+                                                                 results);
+        if (!optionalTable.isPresent())
+        {
+          continue;
+        }
+        final MutableTable table = optionalTable.get();
+        createIndexForTable(table, results);
+      }
     }
     catch (final SQLException e)
     {
-      LOGGER.log(Level.WARNING,
-                 e.getCause(),
-                 new StringFormat("Could not retrieve %sindexes for table %s, trying again",
-                                  unique? "unique ": "",
-                                  table));
-      sqlEx = e;
-    }
-
-    if (sqlEx != null)
-    {
-      try
-      {
-        sqlEx = null;
-        retrieveIndexes2(table, unique);
-      }
-      catch (final SQLException e)
-      {
-        sqlEx = e;
-      }
-    }
-
-    if (sqlEx != null)
-    {
-      throw sqlEx;
+      throw new SchemaCrawlerSQLException("Could not retrieve indexes from SQL:\n"
+                                          + indexesSql, e);
     }
   }
 
-  private void retrieveIndexes1(final MutableTable table, final boolean unique)
+  private void retrieveIndexesFromMetadata(final MutableTable table,
+                                           final boolean unique)
     throws SQLException
   {
 
@@ -381,31 +333,9 @@ final class IndexRetriever
       throw new SchemaCrawlerSQLException("Could not retrieve indexes for table "
                                           + table, e);
     }
-
   }
 
-  private void retrieveIndexes2(final MutableTable table, final boolean unique)
-    throws SQLException
-  {
-
-    try (final MetadataResultSet results = new MetadataResultSet(getMetaData()
-      .getIndexInfo(null,
-                    null,
-                    table.getName(),
-                    unique,
-                    true/* approximate */));)
-    {
-      createIndexes(table, results);
-    }
-    catch (final SQLException e)
-    {
-      throw new SchemaCrawlerSQLException("Could not retrieve indexes for table "
-                                          + table, e);
-    }
-
-  }
-
-  private void retrieveIndexesUsingDatabaseMetadata(final NamedObjectList<MutableTable> allTables)
+  private void retrieveIndexesFromMetadata(final NamedObjectList<MutableTable> allTables)
     throws SQLException
   {
     for (final MutableTable table: allTables)
@@ -414,31 +344,33 @@ final class IndexRetriever
       {
         continue;
       }
-      retrieveIndexes(table, false);
-      retrieveIndexes(table, true);
+      retrieveIndexesFromMetadata(table, false);
+      retrieveIndexesFromMetadata(table, true);
     }
   }
 
-  private void retrieveIndexesUsingSql(final InformationSchemaViews informationSchemaViews,
-                                       final NamedObjectList<MutableTable> allTables)
-    throws SchemaCrawlerSQLException
+  private void retrieveIndexesFromMetadataForAllTables(final NamedObjectList<MutableTable> allTables)
+    throws SQLException
   {
-    final Query indexesSql = informationSchemaViews.getIndexesSql();
-    final Connection connection = getDatabaseConnection();
-    try (final Statement statement = connection.createStatement();
-        final MetadataResultSet results = new MetadataResultSet(indexesSql,
-                                                                statement,
-                                                                getSchemaInclusionRule());)
+    retrieveIndexesFromMetadataForAllTables(allTables, false);
+    retrieveIndexesFromMetadataForAllTables(allTables, true);
+  }
+
+  private void retrieveIndexesFromMetadataForAllTables(final NamedObjectList<MutableTable> allTables,
+                                                       final boolean unique)
+    throws SQLException
+  {
+    try (final MetadataResultSet results = new MetadataResultSet(getMetaData()
+      .getIndexInfo(null,
+                    null,
+                    "%",
+                    unique,
+                    true/* approximate */));)
     {
-      results.setDescription("retrieveIndexesUsingSql");
       while (results.next())
       {
-        final String catalogName = quotedName(results.getString("TABLE_CAT"));
-        final String schemaName = quotedName(results.getString("TABLE_SCHEM"));
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
-
-        final Optional<MutableTable> optionalTable = allTables
-          .lookup(new SchemaReference(catalogName, schemaName), tableName);
+        final Optional<MutableTable> optionalTable = lookupTable(allTables,
+                                                                 results);
         if (!optionalTable.isPresent())
         {
           continue;
@@ -449,51 +381,25 @@ final class IndexRetriever
     }
     catch (final SQLException e)
     {
-      throw new SchemaCrawlerSQLException("Could not retrieve indexes from SQL:\n"
-                                          + indexesSql, e);
-    }
-  }
-
-  private void retrievePrimaryKey(final MutableTable table)
-    throws SQLException
-  {
-
-    try (final MetadataResultSet results = new MetadataResultSet(getMetaData()
-      .getPrimaryKeys(unquotedName(table.getSchema().getCatalogName()),
-                      unquotedName(table.getSchema().getName()),
-                      unquotedName(table.getName())));)
-    {
-
-      while (results.next())
-      {
-        createPrimaryKeyForTable(table, results);
-      }
-    }
-    catch (final SQLException e)
-    {
-      throw new SchemaCrawlerSQLException("Could not retrieve primary keys for table "
-                                          + table, e);
+      throw new SchemaCrawlerSQLException("Could not retrieve indexes for tables",
+                                          e);
     }
 
   }
 
-  private void retrievePrimaryKeysUsingDatabaseMetadata(final NamedObjectList<MutableTable> allTables)
-    throws SQLException
-  {
-    for (final MutableTable table: allTables)
-    {
-      if (table instanceof View)
-      {
-        continue;
-      }
-      retrievePrimaryKey(table);
-    }
-  }
-
-  private void retrievePrimaryKeysUsingSql(final InformationSchemaViews informationSchemaViews,
-                                           final NamedObjectList<MutableTable> allTables)
+  private void retrievePrimaryKeysFromDataDictionary(final NamedObjectList<MutableTable> allTables)
     throws SchemaCrawlerSQLException
   {
+    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
+      .getInformationSchemaViews();
+
+    if (!informationSchemaViews.hasPrimaryKeysSql())
+    {
+      LOGGER.log(Level.FINE,
+                 "Extended primary keys SQL statement was not provided");
+      return;
+    }
+
     final Query pkSql = informationSchemaViews.getPrimaryKeysSql();
     final Connection connection = getDatabaseConnection();
     try (final Statement statement = connection.createStatement();
@@ -501,15 +407,11 @@ final class IndexRetriever
                                                                 statement,
                                                                 getSchemaInclusionRule());)
     {
-      results.setDescription("retrievePrimaryKeysUsingSql");
+      results.setDescription("retrievePrimaryKeysFromDataDictionary");
       while (results.next())
       {
-        final String catalogName = quotedName(results.getString("TABLE_CAT"));
-        final String schemaName = quotedName(results.getString("TABLE_SCHEM"));
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
-
-        final Optional<MutableTable> optionalTable = allTables
-          .lookup(new SchemaReference(catalogName, schemaName), tableName);
+        final Optional<MutableTable> optionalTable = lookupTable(allTables,
+                                                                 results);
         if (!optionalTable.isPresent())
         {
           continue;
@@ -522,6 +424,60 @@ final class IndexRetriever
     {
       throw new SchemaCrawlerSQLException("Could not retrieve primary keys from SQL:\n"
                                           + pkSql, e);
+    }
+  }
+
+  private void retrievePrimaryKeysFromMetadata(final NamedObjectList<MutableTable> allTables)
+    throws SQLException
+  {
+    for (final MutableTable table: allTables)
+    {
+      if (table instanceof View)
+      {
+        continue;
+      }
+      try (final MetadataResultSet results = new MetadataResultSet(getMetaData()
+        .getPrimaryKeys(unquotedName(table.getSchema().getCatalogName()),
+                        unquotedName(table.getSchema().getName()),
+                        unquotedName(table.getName())));)
+      {
+        while (results.next())
+        {
+          createPrimaryKeyForTable(table, results);
+        }
+      }
+      catch (final SQLException e)
+      {
+        throw new SchemaCrawlerSQLException("Could not retrieve primary keys for table "
+                                            + table, e);
+      }
+    }
+  }
+
+  private void retrievePrimaryKeysFromMetadataForAllTables(final NamedObjectList<MutableTable> allTables)
+    throws SQLException
+  {
+    try (final MetadataResultSet results = new MetadataResultSet(getMetaData()
+      .getPrimaryKeys(null,
+                      null,
+                      "%"));)
+    {
+      while (results.next())
+      {
+        final Optional<MutableTable> optionalTable = lookupTable(allTables,
+                                                                 results);
+        if (!optionalTable.isPresent())
+        {
+          continue;
+        }
+        final MutableTable table = optionalTable.get();
+        createPrimaryKeyForTable(table, results);
+      }
+    }
+    catch (final SQLException e)
+    {
+      throw new SchemaCrawlerSQLException("Could not retrieve primary keys for tables",
+                                          e);
     }
   }
 

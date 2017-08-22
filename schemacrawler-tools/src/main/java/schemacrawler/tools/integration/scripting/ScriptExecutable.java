@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,6 +29,7 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.integration.scripting;
 
 
+import static sf.util.IOUtility.getFileExtension;
 import static sf.util.Utility.isBlank;
 
 import java.io.Reader;
@@ -36,7 +37,6 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -50,6 +50,7 @@ import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.tools.executable.BaseStagedExecutable;
 import schemacrawler.tools.executable.CommandChainExecutable;
 import sf.util.ObjectToString;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -61,26 +62,10 @@ public final class ScriptExecutable
   extends BaseStagedExecutable
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(ScriptExecutable.class.getName());
 
   static final String COMMAND = "script";
-
-  public static String getFileExtension(final String scriptFileName)
-  {
-    final String ext;
-    if (scriptFileName != null)
-    {
-      ext = scriptFileName.lastIndexOf('.') == -1? "": scriptFileName
-        .substring(scriptFileName.lastIndexOf('.') + 1,
-                   scriptFileName.length());
-    }
-    else
-    {
-      ext = "";
-    }
-    return ext;
-  }
 
   public ScriptExecutable()
   {
@@ -93,13 +78,13 @@ public final class ScriptExecutable
   @Override
   public final void executeOn(final Catalog catalog,
                               final Connection connection)
-                                throws Exception
+    throws Exception
   {
 
     final String scriptFileName = outputOptions.getOutputFormatValue();
     if (isBlank(scriptFileName))
     {
-      throw new SchemaCrawlerCommandLineException("No script specified");
+      throw new SchemaCrawlerCommandLineException("Please specify a script to execute");
     }
 
     // Create a new instance of the engine

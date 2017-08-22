@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,23 +30,22 @@ package schemacrawler.utility;
 
 import static java.util.Objects.requireNonNull;
 import static sf.util.Utility.containsWhitespace;
-import static sf.util.Utility.filterOutBlank;
 import static sf.util.Utility.isBlank;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import sf.util.SchemaCrawlerLogger;
 
 /**
  * Allows working with database object identifiers. All SQL 2003
@@ -67,17 +66,32 @@ public final class Identifiers
      */
     private static Collection<String> loadSql2003ReservedWords()
     {
-      final BufferedReader reader = new BufferedReader(new InputStreamReader(Identifiers.class
-        .getResourceAsStream("/sql2003_reserved_words.txt")));
-
       final Set<String> reservedWords = new HashSet<>();
-      reader.lines().filter(filterOutBlank).map(toUpperCase)
-        .forEach(reservedWord -> reservedWords.add(reservedWord));
+      try (
+          final BufferedReader reader = new BufferedReader(new InputStreamReader(Identifiers.class
+            .getResourceAsStream("/sql2003_reserved_words.txt")));)
+      {
+        String line;
+        while ((line = reader.readLine()) != null)
+        {
+          if (!isBlank(line))
+          {
+            reservedWords.add(line);
+          }
+        }
+      }
+      catch (final IOException e)
+      {
+        LOGGER.log(Level.WARNING,
+                   "Could not read list of SQL 2003 reserved words",
+                   e);
+      }
       if (reservedWords.isEmpty())
       {
         throw new RuntimeException("No SQL 2003 reserved words found");
       }
-      return reservedWords;
+
+      return toUpperCase(reservedWords);
     }
 
     /**
@@ -98,8 +112,23 @@ public final class Identifiers
                    e);
       }
 
-      return Stream.of(sqlKeywords.split(",")).filter(filterOutBlank)
-        .map(toUpperCase).collect(Collectors.toSet());
+      return toUpperCase(Arrays.asList(sqlKeywords.split(",")));
+    }
+
+    private static Collection<String> toUpperCase(final Iterable<String> words)
+    {
+      final Collection<String> upperCaseWords = new HashSet<>();
+      if (words != null)
+      {
+        for (final String word: words)
+        {
+          if (!isBlank(word))
+          {
+            upperCaseWords.add(word.toUpperCase());
+          }
+        }
+      }
+      return upperCaseWords;
     }
 
     private String identifierQuoteString;
@@ -107,7 +136,6 @@ public final class Identifiers
 
     private Builder()
     {
-      identifierQuoteString = "";
       reservedWords = loadSql2003ReservedWords();
     }
 
@@ -157,24 +185,28 @@ public final class Identifiers
      */
     public Builder withIdentifierQuoteString(final String identifierQuoteString)
     {
-      requireNonNull(identifierQuoteString,
-                     "No identifier quote string provided");
-      this.identifierQuoteString = identifierQuoteString;
+      if (isBlank(identifierQuoteString))
+      {
+        // The JDBC specification states that spaces are to treated as
+        // if identifier quoting is not supported.
+        this.identifierQuoteString = "";
+      }
+      else
+      {
+        this.identifierQuoteString = identifierQuoteString;
+      }
       return this;
     }
 
     private boolean isIdentifierQuoteStringSet()
     {
-      return identifierQuoteString == null || !identifierQuoteString.isEmpty();
+      return identifierQuoteString != null;
     }
 
   }
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(Identifiers.class.getName());
-
-  private static final Function<String, String> toUpperCase = word -> word
-    .trim().toUpperCase();
 
   private static final Pattern isIdentifierPattern = Pattern
     .compile("^[\\p{Nd}\\p{L}\\p{M}_]*$");
@@ -229,7 +261,15 @@ public final class Identifiers
 
   private Identifiers(final Builder builder)
   {
-    identifierQuoteString = builder.identifierQuoteString;
+    if (builder.isIdentifierQuoteStringSet())
+    {
+      identifierQuoteString = builder.identifierQuoteString;
+    }
+    else
+    {
+      // JDBC default is double quotes
+      identifierQuoteString = "\"";
+    }
     reservedWords = builder.reservedWords;
   }
 
@@ -283,8 +323,7 @@ public final class Identifiers
    */
   public boolean isReservedWord(final String word)
   {
-    return filterOutBlank.test(word)
-           && reservedWords.contains(toUpperCase.apply(word));
+    return !isBlank(word) && reservedWords.contains(word.trim().toUpperCase());
   }
 
   /**
@@ -319,16 +358,27 @@ public final class Identifiers
    * @return Identifier name after quoting it, or the original name if
    *         quoting is not required
    */
-  public String quotedName(final String name)
+  public String nameQuotedName(final String name)
   {
-    final String quotedName;
-    if (isToBeQuoted(name))
+    if (isBlank(name))
     {
-      quotedName = identifierQuoteString + name + identifierQuoteString;
+      return name;
+    }
+
+    // Some database drivers, such as SQLite may return quoted names,
+    // but only for some calls.
+    // So, normalize the name by unquoting it first, before attempting
+    // to quote it.
+    final String unquotedName = unquotedName(name);
+
+    final String quotedName;
+    if (isToBeQuoted(unquotedName))
+    {
+      quotedName = identifierQuoteString + unquotedName + identifierQuoteString;
     }
     else
     {
-      quotedName = name;
+      quotedName = unquotedName;
     }
     return quotedName;
   }

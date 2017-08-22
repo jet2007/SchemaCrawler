@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,11 +34,10 @@ import static sf.util.Utility.join;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.Config;
-import schemacrawler.tools.text.schema.SchemaTextDetailType;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public class GraphOptionsBuilder
@@ -47,11 +46,10 @@ public class GraphOptionsBuilder
 
   private static final String GRAPH_SHOW_PRIMARY_KEY_CARDINALITY = "schemacrawler.graph.show.primarykey.cardinality";
   private static final String GRAPH_SHOW_FOREIGN_KEY_CARDINALITY = "schemacrawler.graph.show.foreignkey.cardinality";
-  private static final String GRAPH_DETAILS = "schemacrawler.graph.details";
   private static final String GRAPH_GRAPHVIZ_OPTS = "schemacrawler.graph.graphviz_opts";
   private static final String SC_GRAPHVIZ_OPTS = "SC_GRAPHVIZ_OPTS";
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(GraphOptions.class.getName());
 
   public GraphOptionsBuilder()
@@ -82,10 +80,7 @@ public class GraphOptionsBuilder
     options.setShowForeignKeyCardinality(config
       .getBooleanValue(GRAPH_SHOW_FOREIGN_KEY_CARDINALITY, true));
 
-    options.setSchemaTextDetailType(config
-      .getEnumValue(GRAPH_DETAILS, SchemaTextDetailType.details));
-
-    options.setGraphVizOpts(listGraphVizOpts(readGraphVizOpts(config)));
+    options.setGraphvizOpts(listGraphvizOpts(readGraphvizOpts(config)));
 
     return this;
   }
@@ -102,10 +97,8 @@ public class GraphOptionsBuilder
     config.setBooleanValue(GRAPH_SHOW_FOREIGN_KEY_CARDINALITY,
                            options.isShowForeignKeyCardinality());
 
-    config.setEnumValue(GRAPH_DETAILS, options.getSchemaTextDetailType());
-
     config.setStringValue(GRAPH_GRAPHVIZ_OPTS,
-                          join(options.getGraphVizOpts(), " "));
+                          join(options.getGraphvizOpts(), " "));
 
     return config;
   }
@@ -116,41 +109,41 @@ public class GraphOptionsBuilder
     return (GraphOptions) super.toOptions();
   }
 
-  private List<String> listGraphVizOpts(final String graphVizOptions)
+  private List<String> listGraphvizOpts(final String graphVizOptions)
   {
     final List<String> graphVizOptionsList = Arrays
       .asList(graphVizOptions.split("\\s+"));
     return graphVizOptionsList;
   }
 
-  private String readGraphVizOpts(final Config config)
+  private String readGraphvizOpts(final Config config)
   {
-    final String scGraphVizOptsCfg = config.getStringValue(GRAPH_GRAPHVIZ_OPTS,
+    final String scGraphvizOptsCfg = config.getStringValue(GRAPH_GRAPHVIZ_OPTS,
                                                            "");
-    if (!isBlank(scGraphVizOptsCfg))
+    if (!isBlank(scGraphvizOptsCfg))
     {
       LOGGER.log(Level.CONFIG,
-                 new StringFormat("Using additional GraphViz command-line options from config, %s",
-                                  scGraphVizOptsCfg));
-      return scGraphVizOptsCfg;
+                 new StringFormat("Using additional Graphviz command-line options from config <%s>",
+                                  scGraphvizOptsCfg));
+      return scGraphvizOptsCfg;
     }
 
-    final String scGraphVizOptsProp = System.getProperty(SC_GRAPHVIZ_OPTS);
-    if (!isBlank(scGraphVizOptsProp))
+    final String scGraphvizOptsProp = System.getProperty(SC_GRAPHVIZ_OPTS);
+    if (!isBlank(scGraphvizOptsProp))
     {
       LOGGER.log(Level.CONFIG,
-                 new StringFormat("Using additional GraphViz command-line options from SC_GRAPHVIZ_OPTS system property, %s",
-                                  scGraphVizOptsProp));
-      return scGraphVizOptsProp;
+                 new StringFormat("Using additional Graphviz command-line options from SC_GRAPHVIZ_OPTS system property <%s>",
+                                  scGraphvizOptsProp));
+      return scGraphvizOptsProp;
     }
 
-    final String scGraphVizOptsEnv = System.getenv(SC_GRAPHVIZ_OPTS);
-    if (!isBlank(scGraphVizOptsEnv))
+    final String scGraphvizOptsEnv = System.getenv(SC_GRAPHVIZ_OPTS);
+    if (!isBlank(scGraphvizOptsEnv))
     {
       LOGGER.log(Level.CONFIG,
-                 new StringFormat("Using additional GraphViz command-line options from SC_GRAPHVIZ_OPTS environmental variable, %s",
-                                  scGraphVizOptsEnv));
-      return scGraphVizOptsEnv;
+                 new StringFormat("Using additional Graphviz command-line options from SC_GRAPHVIZ_OPTS environmental variable <%s>",
+                                  scGraphvizOptsEnv));
+      return scGraphvizOptsEnv;
     }
 
     return "";

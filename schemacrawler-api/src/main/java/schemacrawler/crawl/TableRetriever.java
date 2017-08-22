@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,22 +29,28 @@ http://www.gnu.org/licenses/
 package schemacrawler.crawl;
 
 
+import static java.util.Objects.requireNonNull;
+
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 import schemacrawler.filter.InclusionRuleFilter;
 import schemacrawler.schema.Schema;
+import schemacrawler.schema.SchemaReference;
 import schemacrawler.schema.Table;
 import schemacrawler.schema.TableType;
 import schemacrawler.schemacrawler.InclusionRule;
+import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
+import schemacrawler.schemacrawler.SchemaCrawlerSQLException;
+import schemacrawler.utility.Query;
 import schemacrawler.utility.TableTypes;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -57,7 +63,7 @@ final class TableRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(TableRetriever.class.getName());
 
   TableRetriever(final RetrieverConnection retrieverConnection,
@@ -68,13 +74,13 @@ final class TableRetriever
     super(retrieverConnection, catalog, options);
   }
 
-  void retrieveTables(final Schema schema,
+  void retrieveTables(final NamedObjectList<SchemaReference> schemas,
                       final String tableNamePattern,
                       final Collection<String> tableTypes,
                       final InclusionRule tableInclusionRule)
     throws SQLException
   {
-    requireNonNull(schema, "No schema provided");
+    requireNonNull(schemas);
 
     final InclusionRuleFilter<Table> tableFilter = new InclusionRuleFilter<>(tableInclusionRule,
                                                                              false);
@@ -85,74 +91,187 @@ final class TableRetriever
       return;
     }
 
-    final Optional<Schema> schemaOptional = catalog
-      .lookupSchema(schema.getFullName());
-    if (!schemaOptional.isPresent())
+    final MetadataRetrievalStrategy tableRetrievalStrategy = getRetrieverConnection()
+      .getTableRetrievalStrategy();
+    switch (tableRetrievalStrategy)
     {
-      LOGGER.log(Level.INFO,
-                 new StringFormat("Cannot locate schema, so not retrieving tables for schema: %s",
-                                  schema));
+      case data_dictionary_all:
+        LOGGER.log(Level.INFO,
+                   "Retrieving tables, using fast data dictionary retrieval");
+        retrieveTablesFromDataDictionary(schemas,
+                                         tableNamePattern,
+                                         tableTypes,
+                                         tableFilter);
+        break;
+
+      case metadata_all:
+        LOGGER.log(Level.INFO,
+                   "Retrieving tables, using fast meta-data retrieval");
+        retrieveTablesFromMetadataForAllTables(schemas,
+                                               tableNamePattern,
+                                               tableTypes,
+                                               tableFilter);
+        break;
+
+      case metadata:
+        LOGGER.log(Level.INFO, "Retrieving tables");
+        retrieveTablesFromMetadata(schemas,
+                                   tableNamePattern,
+                                   tableTypes,
+                                   tableFilter);
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  private void createTable(final MetadataResultSet results,
+                           final NamedObjectList<SchemaReference> schemas,
+                           final InclusionRuleFilter<Table> tableFilter,
+                           final TableTypes supportedTableTypes)
+  {
+    final String columnCatalogName = nameQuotedName(results.getString("TABLE_CAT"));
+    final String schemaName = nameQuotedName(results.getString("TABLE_SCHEM"));
+    final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
+    LOGGER.log(Level.FINE,
+               new StringFormat("Retrieving table <%s.%s.%s>",
+                                columnCatalogName,
+                                schemaName,
+                                tableName));
+    final String tableTypeString = results.getString("TABLE_TYPE");
+    final String remarks = results.getString("REMARKS");
+
+    final Optional<SchemaReference> optionalSchema = schemas
+      .lookup(new SchemaReference(columnCatalogName, schemaName).toString());
+    if (!optionalSchema.isPresent())
+    {
       return;
     }
+    final Schema schema = optionalSchema.get();
 
-    LOGGER.log(Level.INFO,
-               new StringFormat("Retrieving tables for schema: %s", schema));
+    final TableType tableType = supportedTableTypes
+      .lookupTableType(tableTypeString).orElse(TableType.UNKNOWN);
+    if (tableType.equals(TableType.UNKNOWN))
+    {
+      LOGGER.log(Level.FINE,
+                 new StringFormat("Unknown table type <%s> for <%s.%s>",
+                                  tableTypeString,
+                                  schema,
+                                  tableName));
+    }
 
+    final MutableTable table;
+    if (tableType.isView())
+    {
+      table = new MutableView(schema, tableName);
+    }
+    else
+    {
+      table = new MutableTable(schema, tableName);
+    }
+
+    if (tableFilter.test(table))
+    {
+      table.setTableType(tableType);
+      table.setRemarks(remarks);
+
+      catalog.addTable(table);
+    }
+  }
+
+  private void retrieveTablesFromDataDictionary(final NamedObjectList<SchemaReference> schemas,
+                                                final String tableNamePattern,
+                                                final Collection<String> tableTypes,
+                                                final InclusionRuleFilter<Table> tableFilter)
+    throws SchemaCrawlerSQLException, SQLException
+  {
+    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
+      .getInformationSchemaViews();
+    if (!informationSchemaViews.hasTablesSql())
+    {
+      throw new SchemaCrawlerSQLException("No tables SQL provided", null);
+    }
+    final Query tablesSql = informationSchemaViews.getTablesSql();
+    final Connection connection = getDatabaseConnection();
+    final TableTypes supportedTableTypes = getRetrieverConnection()
+      .getTableTypes();
+    try (final Statement statement = connection.createStatement();
+        final MetadataResultSet results = new MetadataResultSet(tablesSql,
+                                                                statement,
+                                                                getSchemaInclusionRule());)
+    {
+      results.setDescription("retrieveTablesFromDataDictionary");
+      while (results.next())
+      {
+        createTable(results, schemas, tableFilter, supportedTableTypes);
+      }
+    }
+  }
+
+  private void retrieveTablesFromMetadata(final NamedObjectList<SchemaReference> schemas,
+                                          final String tableNamePattern,
+                                          final Collection<String> tableTypes,
+                                          final InclusionRuleFilter<Table> tableFilter)
+    throws SQLException
+  {
+    for (final Schema schema: schemas)
+    {
+      LOGGER.log(Level.INFO,
+                 new StringFormat("Retrieving tables for schema <%s>", schema));
+
+      final TableTypes supportedTableTypes = getRetrieverConnection()
+        .getTableTypes();
+      final String[] filteredTableTypes = supportedTableTypes
+        .filterUnknown(tableTypes);
+      LOGGER.log(Level.FINER,
+                 new StringFormat("Retrieving table types <%s>",
+                                  filteredTableTypes == null? "<<all>>": Arrays
+                                    .asList(filteredTableTypes)));
+
+      final String catalogName = schema.getCatalogName();
+      final String schemaName = schema.getName();
+
+      try (final MetadataResultSet results = new MetadataResultSet(getMetaData()
+        .getTables(unquotedName(catalogName),
+                   unquotedName(schemaName),
+                   tableNamePattern,
+                   filteredTableTypes));)
+      {
+        results.setDescription("retrieveTables");
+        while (results.next())
+        {
+          createTable(results, schemas, tableFilter, supportedTableTypes);
+        }
+      }
+    }
+  }
+
+  private void retrieveTablesFromMetadataForAllTables(final NamedObjectList<SchemaReference> schemas,
+                                                      final String tableNamePattern,
+                                                      final Collection<String> tableTypes,
+                                                      final InclusionRuleFilter<Table> tableFilter)
+    throws SQLException
+  {
     final TableTypes supportedTableTypes = getRetrieverConnection()
       .getTableTypes();
     final String[] filteredTableTypes = supportedTableTypes
       .filterUnknown(tableTypes);
     LOGGER.log(Level.FINER,
-               new StringFormat("Retrieving table types: %s",
+               new StringFormat("Retrieving table types <%s>",
                                 filteredTableTypes == null? "<<all>>": Arrays
                                   .asList(filteredTableTypes)));
 
-    final String catalogName = schema.getCatalogName();
-    final String schemaName = schema.getName();
-
     try (final MetadataResultSet results = new MetadataResultSet(getMetaData()
-      .getTables(unquotedName(catalogName),
-                 unquotedName(schemaName),
+      .getTables(null,
+                 null,
                  tableNamePattern,
                  filteredTableTypes));)
     {
       results.setDescription("retrieveTables");
       while (results.next())
       {
-        // "TABLE_CAT", "TABLE_SCHEM"
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
-        LOGGER.log(Level.FINE,
-                   String.format("Retrieving table: %s.%s", schema, tableName));
-        final String tableTypeString = results.getString("TABLE_TYPE");
-        final String remarks = results.getString("REMARKS");
-
-        final TableType tableType = supportedTableTypes
-          .lookupTableType(tableTypeString).orElse(TableType.UNKNOWN);
-        if (tableType.equals(TableType.UNKNOWN))
-        {
-          LOGGER.log(Level.FINE,
-                     new StringFormat("Unknown table type, %s, for %s.%s",
-                                      tableTypeString,
-                                      schema,
-                                      tableName));
-        }
-
-        final MutableTable table;
-        if (tableType.isView())
-        {
-          table = new MutableView(schema, tableName);
-        }
-        else
-        {
-          table = new MutableTable(schema, tableName);
-        }
-        if (tableFilter.test(table))
-        {
-          table.setTableType(tableType);
-          table.setRemarks(remarks);
-
-          catalog.addTable(table);
-        }
+        createTable(results, schemas, tableFilter, supportedTableTypes);
       }
     }
   }

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -40,6 +40,8 @@ import schemacrawler.schemacrawler.DatabaseConnectionOptions;
 import schemacrawler.schemacrawler.DatabaseSpecificOverrideOptionsBuilder;
 import schemacrawler.schemacrawler.Options;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
+import schemacrawler.schemacrawler.SingleUseUserCredentials;
+import schemacrawler.schemacrawler.UserCredentials;
 import schemacrawler.tools.executable.Executable;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
 
@@ -107,9 +109,7 @@ public abstract class DatabaseConnector
   public void checkDatabaseConnectionOptions()
     throws SchemaCrawlerException
   {
-    final Config additionalConfig = new Config();
-    additionalConfig.put("user", "fake");
-    newDatabaseConnectionOptions(additionalConfig);
+    newDatabaseConnectionOptions(new SingleUseUserCredentials(), null);
   }
 
   /**
@@ -164,30 +164,35 @@ public abstract class DatabaseConnector
    *        Configuration from the command-line, and from configuration
    *        files.
    */
-  public ConnectionOptions newDatabaseConnectionOptions(final Config additionalConfig)
+  public ConnectionOptions newDatabaseConnectionOptions(final UserCredentials userCredentials,
+                                                        final Config additionalConfig)
     throws SchemaCrawlerException
   {
-    if (additionalConfig == null || additionalConfig.isEmpty())
+    if (userCredentials == null)
     {
-      throw new IllegalArgumentException("No connection configuration provided");
+      throw new IllegalArgumentException("No database connection user credentials provided");
     }
 
     final Config config = getConfig();
-    config.putAll(additionalConfig);
+    if (additionalConfig != null)
+    {
+      config.putAll(additionalConfig);
+      // Remove sensitive properties from the original configuration
+      additionalConfig.remove("user");
+      additionalConfig.remove("password");
+    }
 
     final ConnectionOptions connectionOptions;
     if (dbServerType.isUnknownDatabaseSystem() || config.hasValue("url"))
     {
-      connectionOptions = new DatabaseConnectionOptions(config);
+      connectionOptions = new DatabaseConnectionOptions(userCredentials,
+                                                        config);
     }
     else
     {
-      connectionOptions = new DatabaseConfigConnectionOptions(config);
+      connectionOptions = new DatabaseConfigConnectionOptions(userCredentials,
+                                                              config);
     }
-
-    // Remove sensitive properties from the original configuration
-    additionalConfig.remove("user");
-    additionalConfig.remove("password");
 
     return connectionOptions;
   }

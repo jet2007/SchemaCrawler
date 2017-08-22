@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.filter.TableTypesFilter;
 import schemacrawler.schema.Catalog;
@@ -47,6 +46,8 @@ import schemacrawler.schema.Table;
 import schemacrawler.schemacrawler.IncludeAll;
 import schemacrawler.schemacrawler.InclusionRule;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
+import sf.util.SchemaCrawlerLogger;
+import sf.util.StringFormat;
 
 /**
  * Evaluates a catalog and creates lints. This base class has core for
@@ -59,7 +60,7 @@ public abstract class BaseLinter
   extends Linter
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(BaseLinter.class.getName());
 
   private Catalog catalog;
@@ -190,9 +191,9 @@ public abstract class BaseLinter
       else
       {
         LOGGER.log(Level.FINE,
-                   String.format("Excluding table %s for lint %s",
-                                 table,
-                                 getLinterId()));
+                   new StringFormat("Excluding table %s for lint %s",
+                                    table,
+                                    getLinterId()));
       }
     }
     end(connection);

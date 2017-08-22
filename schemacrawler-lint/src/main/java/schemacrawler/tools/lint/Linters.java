@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -38,17 +38,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.Catalog;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public final class Linters
   implements Iterable<Linter>
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(Linters.class.getName());
 
   private final List<Linter> linters = new ArrayList<>();
@@ -79,7 +79,7 @@ public final class Linters
       if (!linterConfig.isRunLinter())
       {
         LOGGER.log(Level.FINE,
-                   new StringFormat("Not running configured linter, %s",
+                   new StringFormat("Not running configured linter <%s>",
                                     linterConfig));
         continue;
       }
@@ -100,6 +100,18 @@ public final class Linters
       final Linter linter = newLinter(linterId);
       linters.add(linter);
     }
+  }
+
+  public final boolean exceedsThreshold()
+  {
+    for (final Linter linter: linters)
+    {
+      if (linter.exceedsThreshold())
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   public LintCollector getCollector()
@@ -150,16 +162,19 @@ public final class Linters
     Collections.sort(linters, new LinterComparator());
 
     final StringBuilder buffer = new StringBuilder(1024);
+    for (final Linter linter: linters)
+    {
+      if (linter.getLintCount() > 0)
+      {
+        buffer
+          .append(String.format("%8s%s %5d- %s%n",
+                                "[" + linter.getSeverity() + "]",
+                                linter.exceedsThreshold()? "*": " ",
+                                linter.getLintCount(),
+                                linter.getSummary()));
+      }
+    }
 
-    linters.stream().filter(linter -> linter.getLintCount() > 0)
-      .forEach(linter -> buffer.append(String.format("%8s%s %5d- %s%n",
-                                                     "[" + linter.getSeverity()
-                                                                        + "]",
-                                                     linter
-                                                       .exceedsThreshold()? "*"
-                                                                          : " ",
-                                                     linter.getLintCount(),
-                                                     linter.getSummary())));
     if (buffer.length() > 0)
     {
       buffer.insert(0, "Summary of schema lints:\n");
@@ -180,7 +195,7 @@ public final class Linters
     for (final Linter linter: linters)
     {
       LOGGER.log(Level.FINE,
-                 new StringFormat("Linting with, %s",
+                 new StringFormat("Linting with <%s>",
                                   linter.getLinterInstanceId()));
       linter.lint(catalog, connection);
     }
@@ -202,7 +217,7 @@ public final class Linters
     else
     {
       LOGGER.log(Level.FINE,
-                 new StringFormat("Cannot find linter, %s", linterId));
+                 new StringFormat("Cannot find linter <%s>", linterId));
     }
     return linter;
   }

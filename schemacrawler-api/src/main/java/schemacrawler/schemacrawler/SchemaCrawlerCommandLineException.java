@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ public class SchemaCrawlerCommandLineException
   public SchemaCrawlerCommandLineException(final String message,
                                            final Throwable cause)
   {
-    super(message + ": " + cause.getMessage(), cause);
+    super(message, cause);
   }
 
 }

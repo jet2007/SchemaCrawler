@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,10 +29,8 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.integration.graph;
 
 
-import static sf.util.Utility.enumValue;
-import static sf.util.Utility.readResourceFully;
+import static sf.util.IOUtility.createTempFilePath;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 
@@ -41,7 +39,6 @@ import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.tools.analysis.associations.CatalogWithAssociations;
 import schemacrawler.tools.analysis.counts.CatalogWithCounts;
 import schemacrawler.tools.executable.BaseStagedExecutable;
-import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.text.schema.SchemaDotFormatter;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
@@ -56,14 +53,7 @@ public final class GraphExecutable
   extends BaseStagedExecutable
 {
 
-  static final String COMMAND = "graph";
-
   private GraphOptions graphOptions;
-
-  public GraphExecutable()
-  {
-    super(COMMAND);
-  }
 
   public GraphExecutable(final String command)
   {
@@ -77,21 +67,20 @@ public final class GraphExecutable
   public void executeOn(final Catalog db, final Connection connection)
     throws Exception
   {
-    // Determine what decorators to apply to the database
-    final InfoLevel infoLevel = enumValue(schemaCrawlerOptions
-      .getSchemaInfoLevel().getTag(), InfoLevel.unknown);
+    loadGraphOptions();
 
-    final Catalog catalog;
-    if (infoLevel == InfoLevel.maximum)
+    // Determine what decorators to apply to the database
+    Catalog catalog = db;
+    if (graphOptions.isShowWeakAssociations())
     {
-      final Catalog catalogAssociations = new CatalogWithAssociations(db);
-      catalog = new CatalogWithCounts(catalogAssociations,
+      catalog = new CatalogWithAssociations(catalog);
+    }
+    if (graphOptions.isShowRowCounts()
+        || schemaCrawlerOptions.isHideEmptyTables())
+    {
+      catalog = new CatalogWithCounts(catalog,
                                       connection,
                                       schemaCrawlerOptions);
-    }
-    else
-    {
-      catalog = db;
     }
 
     final GraphOutputFormat graphOutputFormat = GraphOutputFormat
@@ -100,8 +89,7 @@ public final class GraphExecutable
     outputOptions.setOutputFormatValue(graphOutputFormat.getFormat());
 
     // Create dot file
-    final Path dotFile = Files.createTempFile("schemacrawler.", ".dot")
-      .normalize().toAbsolutePath();
+    final Path dotFile = createTempFilePath("schemacrawler.", "dot");
     final OutputOptions dotFileOutputOptions;
     if (graphOutputFormat == GraphOutputFormat.scdot)
     {
@@ -111,6 +99,7 @@ public final class GraphExecutable
     {
       dotFileOutputOptions = new OutputOptions(GraphOutputFormat.dot, dotFile);
     }
+
     final SchemaTraversalHandler formatter = getSchemaTraversalHandler(dotFileOutputOptions);
 
     final SchemaTraverser traverser = new SchemaTraverser();
@@ -123,10 +112,10 @@ public final class GraphExecutable
 
     traverser.traverse();
 
-    // Create graph image
-    final GraphOptions graphOptions = getGraphOptions();
-    try
+    if (graphOutputFormat != GraphOutputFormat.scdot)
     {
+      // Create graph image
+      final GraphOptions graphOptions = getGraphOptions();
       final GraphProcessExecutor graphProcessExecutor = new GraphProcessExecutor(dotFile,
                                                                                  outputOptions
                                                                                    .getOutputFile(),
@@ -134,25 +123,11 @@ public final class GraphExecutable
                                                                                  graphOutputFormat);
       graphProcessExecutor.call();
     }
-    catch (final Exception e)
-    {
-      System.err.println(readResourceFully("/dot.error.txt"));
-      throw e;
-    }
   }
 
   public final GraphOptions getGraphOptions()
   {
-    final GraphOptions graphOptions;
-    if (this.graphOptions == null)
-    {
-      graphOptions = new GraphOptionsBuilder()
-        .fromConfig(additionalConfiguration).toOptions();
-    }
-    else
-    {
-      graphOptions = this.graphOptions;
-    }
+    loadGraphOptions();
     return graphOptions;
   }
 
@@ -180,18 +155,22 @@ public final class GraphExecutable
   {
     final SchemaTraversalHandler formatter;
     final GraphOptions graphOptions = getGraphOptions();
-
-    SchemaTextDetailType schemaTextDetailType = getSchemaTextDetailType();
-    if (schemaTextDetailType == null)
-    {
-      schemaTextDetailType = graphOptions.getSchemaTextDetailType();
-    }
+    final SchemaTextDetailType schemaTextDetailType = getSchemaTextDetailType();
 
     formatter = new SchemaDotFormatter(schemaTextDetailType,
                                        graphOptions,
                                        outputOptions);
 
     return formatter;
+  }
+
+  private void loadGraphOptions()
+  {
+    if (graphOptions == null)
+    {
+      graphOptions = new GraphOptionsBuilder()
+        .fromConfig(additionalConfiguration).toOptions();
+    }
   }
 
 }

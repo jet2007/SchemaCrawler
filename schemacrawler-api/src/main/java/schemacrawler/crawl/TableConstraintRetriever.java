@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -36,13 +36,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.SchemaReference;
 import schemacrawler.schema.TableConstraintType;
 import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -55,7 +55,7 @@ final class TableConstraintRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(TableConstraintRetriever.class.getName());
 
   private final Map<String, MutableTableConstraint> tableConstraintsMap;
@@ -99,14 +99,14 @@ final class TableConstraintRetriever
     {
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("CONSTRAINT_CATALOG"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("CONSTRAINT_SCHEMA"));
-        final String constraintName = quotedName(results
+        final String constraintName = nameQuotedName(results
           .getString("CONSTRAINT_NAME"));
         LOGGER.log(Level.FINER,
-                   new StringFormat("Retrieving constraint definition, %s",
+                   new StringFormat("Retrieving definition for constraint <%s>",
                                     constraintName));
         final String definition = results.getString("CHECK_CLAUSE");
 
@@ -118,7 +118,7 @@ final class TableConstraintRetriever
         if (tableConstraint == null)
         {
           LOGGER.log(Level.FINEST,
-                     new StringFormat("Could not add constraint definition to table, %s",
+                     new StringFormat("Could not add table constraint <%s>",
                                       constraintName));
           continue;
         }
@@ -183,17 +183,17 @@ final class TableConstraintRetriever
 
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("CONSTRAINT_CATALOG"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("CONSTRAINT_SCHEMA"));
-        final String constraintName = quotedName(results
+        final String constraintName = nameQuotedName(results
           .getString("CONSTRAINT_NAME"));
         LOGGER
           .log(Level.FINER,
-               new StringFormat("Retrieving constraint, %s", constraintName));
+               new StringFormat("Retrieving constraint <%s>", constraintName));
         // "TABLE_CATALOG", "TABLE_SCHEMA"
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
+        final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
 
         final Optional<MutableTable> tableOptional = lookupTable(catalogName,
                                                                  schemaName,
@@ -201,7 +201,7 @@ final class TableConstraintRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName));
@@ -262,14 +262,14 @@ final class TableConstraintRetriever
     {
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("CONSTRAINT_CATALOG"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("CONSTRAINT_SCHEMA"));
-        final String constraintName = quotedName(results
+        final String constraintName = nameQuotedName(results
           .getString("CONSTRAINT_NAME"));
         LOGGER.log(Level.FINER,
-                   new StringFormat("Retrieving constraint definition, %s",
+                   new StringFormat("Retrieving definition for constraint <%s>",
                                     constraintName));
 
         final String constraintKey = new SchemaReference(catalogName,
@@ -280,13 +280,13 @@ final class TableConstraintRetriever
         if (tableConstraint == null)
         {
           LOGGER.log(Level.FINEST,
-                     new StringFormat("Could not add column for constraint to table, %s",
+                     new StringFormat("Could not add column constraint <%s>",
                                       constraintName));
           continue;
         }
 
         // "TABLE_CATALOG", "TABLE_SCHEMA"
-        final String tableName = quotedName(results.getString("TABLE_NAME"));
+        final String tableName = nameQuotedName(results.getString("TABLE_NAME"));
 
         final Optional<MutableTable> tableOptional = lookupTable(catalogName,
                                                                  schemaName,
@@ -294,7 +294,7 @@ final class TableConstraintRetriever
         if (!tableOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find table, %s.%s.%s",
+                     new StringFormat("Cannot find table <%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName));
@@ -302,13 +302,13 @@ final class TableConstraintRetriever
         }
 
         final MutableTable table = tableOptional.get();
-        final String columnName = quotedName(results.getString("COLUMN_NAME"));
+        final String columnName = nameQuotedName(results.getString("COLUMN_NAME"));
         final Optional<MutableColumn> columnOptional = table
           .lookupColumn(columnName);
         if (!columnOptional.isPresent())
         {
           LOGGER.log(Level.FINE,
-                     new StringFormat("Cannot find column, %s.%s.%s.%s",
+                     new StringFormat("Cannot find column <%s.%s.%s.%s>",
                                       catalogName,
                                       schemaName,
                                       tableName,

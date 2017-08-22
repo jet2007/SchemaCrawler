@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -32,9 +32,8 @@ package schemacrawler.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static schemacrawler.test.utility.TestUtility.compareOutput;
-import static schemacrawler.test.utility.TestUtility.createTempFile;
 import static schemacrawler.test.utility.TestUtility.validateDiagram;
-import static sf.util.Utility.readFully;
+import static sf.util.IOUtility.readFully;
 
 import java.io.FileReader;
 import java.nio.file.Files;
@@ -49,6 +48,7 @@ import schemacrawler.tools.executable.Executable;
 import schemacrawler.tools.integration.scripting.ScriptExecutable;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.TextOutputFormat;
+import sf.util.IOUtility;
 
 public class SchemaCrawlerExecutableChainTest
   extends BaseDatabaseTest
@@ -59,7 +59,8 @@ public class SchemaCrawlerExecutableChainTest
     throws Exception
   {
     final Executable executable = new ScriptExecutable();
-    final Path testOutputFile = createTempFile(executable.getCommand(), "data");
+    final Path testOutputFile = IOUtility
+      .createTempFilePath(executable.getCommand(), "data");
 
     final OutputOptions outputOptions = new OutputOptions("/chain.js",
                                                           testOutputFile);

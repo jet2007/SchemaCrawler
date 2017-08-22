@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,16 +29,14 @@ http://www.gnu.org/licenses/
 package schemacrawler.crawl;
 
 
+import static java.util.Objects.requireNonNull;
+import static sf.util.Utility.isBlank;
+
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
-
-import static sf.util.Utility.isBlank;
 
 import schemacrawler.filter.InclusionRuleFilter;
 import schemacrawler.schema.Function;
@@ -50,9 +48,11 @@ import schemacrawler.schema.ProcedureColumn;
 import schemacrawler.schema.ProcedureColumnType;
 import schemacrawler.schema.ProcedureReturnType;
 import schemacrawler.schema.Schema;
+import schemacrawler.schema.SchemaReference;
 import schemacrawler.schemacrawler.InclusionRule;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerSQLException;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -65,7 +65,7 @@ final class RoutineRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(RoutineRetriever.class.getName());
 
   RoutineRetriever(final RetrieverConnection retrieverConnection,
@@ -99,14 +99,14 @@ final class RoutineRetriever
     {
       while (results.next())
       {
-        final String columnCatalogName = quotedName(results
+        final String columnCatalogName = nameQuotedName(results
           .getString("FUNCTION_CAT"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("FUNCTION_SCHEM"));
-        final String functionName = quotedName(results
+        final String functionName = nameQuotedName(results
           .getString("FUNCTION_NAME"));
-        final String columnName = quotedName(results.getString("COLUMN_NAME"));
-        final String specificName = quotedName(results
+        final String columnName = nameQuotedName(results.getString("COLUMN_NAME"));
+        final String specificName = nameQuotedName(results
           .getString("SPECIFIC_NAME"));
 
         final MutableFunctionColumn column = new MutableFunctionColumn(function,
@@ -137,11 +137,8 @@ final class RoutineRetriever
           final String remarks = results.getString("REMARKS");
           column.setOrdinalPosition(ordinalNumber++);
           column.setFunctionColumnType(columnType);
-          column.setColumnDataType(lookupOrCreateColumnDataType(
-                                                                function
-                                                                  .getSchema(),
-                                                                dataType,
-                                                                typeName));
+          column.setColumnDataType(lookupOrCreateColumnDataType(function
+            .getSchema(), dataType, typeName));
           column.setSize(length);
           column.setPrecision(precision);
           column.setNullable(isNullable);
@@ -155,22 +152,15 @@ final class RoutineRetriever
     }
     catch (final AbstractMethodError | SQLFeatureNotSupportedException e)
     {
-      logSQLFeatureNotSupported("JDBC driver does not support retrieving function columns",
+      logSQLFeatureNotSupported(new StringFormat("Could not retrieve columns for function %s",
+                                                 function),
                                 e);
     }
     catch (final SQLException e)
     {
-      // HYC00 = Optional feature not implemented
-      if ("HYC00".equalsIgnoreCase(e.getSQLState()))
-      {
-        logSQLFeatureNotSupported("JDBC driver does not support retrieving function columns",
-                                  e);
-      }
-      else
-      {
-        throw new SchemaCrawlerSQLException("Could not retrieve columns for function "
-                                            + function, e);
-      }
+      logPossiblyUnsupportedSQLFeature(new StringFormat("Could not retrieve columns for function %s",
+                                                        function),
+                                       e);
     }
 
   }
@@ -190,7 +180,7 @@ final class RoutineRetriever
       return;
     }
 
-    final Optional<Schema> schemaOptional = catalog
+    final Optional<SchemaReference> schemaOptional = catalog
       .lookupSchema(schema.getFullName());
     if (!schemaOptional.isPresent())
     {
@@ -212,7 +202,7 @@ final class RoutineRetriever
       while (results.next())
       {
         // "FUNCTION_CAT", "FUNCTION_SCHEM"
-        final String functionName = quotedName(results
+        final String functionName = nameQuotedName(results
           .getString("FUNCTION_NAME"));
         LOGGER.log(Level.FINE,
                    new StringFormat("Retrieving function: %s.%s",
@@ -242,21 +232,13 @@ final class RoutineRetriever
     }
     catch (final AbstractMethodError | SQLFeatureNotSupportedException e)
     {
-      logSQLFeatureNotSupported("JDBC driver does not support retrieving functions",
+      logSQLFeatureNotSupported(new StringFormat("Could not retrieve functions"),
                                 e);
     }
     catch (final SQLException e)
     {
-      // HYC00 = Optional feature not implemented
-      if ("HYC00".equalsIgnoreCase(e.getSQLState()))
-      {
-        logSQLFeatureNotSupported("JDBC driver does not support retrieving functions",
-                                  e);
-      }
-      else
-      {
-        throw new SchemaCrawlerSQLException("Could not retrieve functions", e);
-      }
+      logPossiblyUnsupportedSQLFeature(new StringFormat("Could not retrieve functions"),
+                                       e);
     }
 
   }
@@ -284,14 +266,14 @@ final class RoutineRetriever
     {
       while (results.next())
       {
-        final String columnCatalogName = quotedName(results
+        final String columnCatalogName = nameQuotedName(results
           .getString("PROCEDURE_CAT"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("PROCEDURE_SCHEM"));
-        final String procedureName = quotedName(results
+        final String procedureName = nameQuotedName(results
           .getString("PROCEDURE_NAME"));
-        final String columnName = quotedName(results.getString("COLUMN_NAME"));
-        final String specificName = quotedName(results
+        final String columnName = nameQuotedName(results.getString("COLUMN_NAME"));
+        final String specificName = nameQuotedName(results
           .getString("SPECIFIC_NAME"));
 
         final MutableProcedureColumn column = new MutableProcedureColumn(procedure,
@@ -323,11 +305,8 @@ final class RoutineRetriever
           final String remarks = results.getString("REMARKS");
           column.setOrdinalPosition(ordinalNumber++);
           column.setProcedureColumnType(columnType);
-          column.setColumnDataType(lookupOrCreateColumnDataType(
-                                                                procedure
-                                                                  .getSchema(),
-                                                                dataType,
-                                                                typeName));
+          column.setColumnDataType(lookupOrCreateColumnDataType(procedure
+            .getSchema(), dataType, typeName));
           column.setSize(length);
           column.setPrecision(precision);
           column.setNullable(isNullable);
@@ -362,7 +341,7 @@ final class RoutineRetriever
       return;
     }
 
-    final Optional<Schema> schemaOptional = catalog
+    final Optional<SchemaReference> schemaOptional = catalog
       .lookupSchema(schema.getFullName());
     if (!schemaOptional.isPresent())
     {
@@ -388,7 +367,7 @@ final class RoutineRetriever
       while (results.next())
       {
         // "PROCEDURE_CAT", "PROCEDURE_SCHEM"
-        final String procedureName = quotedName(results
+        final String procedureName = nameQuotedName(results
           .getString("PROCEDURE_NAME"));
         LOGGER.log(Level.FINE,
                    new StringFormat("Retrieving procedure: %s.%s",

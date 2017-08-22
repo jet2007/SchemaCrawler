@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -41,11 +41,13 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import sf.util.SchemaCrawlerLogger;
+
 public class OfflineDriver
   implements Driver
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(OfflineDriver.class.getName());
 
   private static final String JDBC_URL_PREFIX = "jdbc:offline:";
@@ -106,7 +108,7 @@ public class OfflineDriver
   @Override
   public DriverPropertyInfo[] getPropertyInfo(final String url,
                                               final Properties info)
-                                                throws SQLException
+    throws SQLException
   {
     return new DriverPropertyInfo[0];
   }

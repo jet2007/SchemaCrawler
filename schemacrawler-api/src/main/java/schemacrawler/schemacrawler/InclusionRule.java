@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -31,7 +31,6 @@ package schemacrawler.schemacrawler;
 
 import java.io.Serializable;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 /**
  * Specifies inclusion and exclusion patterns that can be applied to the
@@ -47,18 +46,5 @@ import java.util.regex.Pattern;
 public interface InclusionRule
   extends Serializable, Predicate<String>
 {
-
-  /**
-   * Returns the regular expression for the inclusion rule. Not all
-   * inclusion rules are based on regular expressions, so this method
-   * indicates that all strings should be considered for inclusion by
-   * default.
-   *
-   * @return Regular expression for the inclusion rule
-   */
-  default Pattern getInclusionPattern()
-  {
-    return Pattern.compile(".*");
-  }
 
 }

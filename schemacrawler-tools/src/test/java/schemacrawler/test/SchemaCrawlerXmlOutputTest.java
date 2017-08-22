@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -31,7 +31,6 @@ package schemacrawler.test;
 
 import static org.junit.Assert.fail;
 import static schemacrawler.test.utility.TestUtility.compareOutput;
-import static schemacrawler.test.utility.TestUtility.createTempFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -52,6 +51,7 @@ import schemacrawler.tools.text.operation.Operation;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
 import schemacrawler.tools.text.schema.SchemaTextOptions;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
+import sf.util.IOUtility;
 
 public class SchemaCrawlerXmlOutputTest
   extends BaseDatabaseTest
@@ -97,13 +97,11 @@ public class SchemaCrawlerXmlOutputTest
 
   private void checkValidXmlOutput(final String command,
                                    final List<String> failures)
-                                     throws IOException, Exception,
-                                     SchemaCrawlerException
+    throws IOException, Exception, SchemaCrawlerException
   {
     final String referenceFile = command + ".html";
-    final Path testOutputFile = createTempFile(referenceFile,
-                                               TextOutputFormat.html
-                                                 .getFormat());
+    final Path testOutputFile = IOUtility
+      .createTempFilePath(referenceFile, TextOutputFormat.html.getFormat());
 
     final OutputOptions outputOptions = new OutputOptions(TextOutputFormat.html,
                                                           testOutputFile);

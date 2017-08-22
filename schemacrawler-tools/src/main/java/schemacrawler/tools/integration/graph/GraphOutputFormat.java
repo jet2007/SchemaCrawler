@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,13 +29,13 @@ package schemacrawler.tools.integration.graph;
 
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.tools.options.OutputFormat;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public enum GraphOutputFormat
-    implements OutputFormat
+  implements OutputFormat
 {
 
  htmlx("htmlx", "SchemaCrawler graph embedded in HTML5"),
@@ -93,7 +93,7 @@ public enum GraphOutputFormat
  xlib("xlib", "Xlib canvas"),
  x11("x11", "Xlib canvas"),;
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(GraphOutputFormat.class.getName());
 
   /**
@@ -108,7 +108,7 @@ public enum GraphOutputFormat
     final GraphOutputFormat graphFormat = fromFormatOrNull(format);
     if (graphFormat == null)
     {
-      LOGGER.log(Level.CONFIG, new StringFormat("Unknown format, %s", format));
+      LOGGER.log(Level.CONFIG, new StringFormat("Unknown format <%s>", format));
       return png;
     }
     else

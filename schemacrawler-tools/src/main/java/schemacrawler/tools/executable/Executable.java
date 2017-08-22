@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ public interface Executable
    */
   void execute(Connection connection,
                DatabaseSpecificOverrideOptions databaseSpecificOverrideOptions)
-                 throws Exception;
+    throws Exception;
 
   Config getAdditionalConfiguration();
 

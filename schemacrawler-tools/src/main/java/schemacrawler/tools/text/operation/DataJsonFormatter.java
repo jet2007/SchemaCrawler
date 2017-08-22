@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ final class DataJsonFormatter
   DataJsonFormatter(final Operation operation,
                     final OperationOptions options,
                     final OutputOptions outputOptions)
-                      throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     super(options, /* printVerboseDatabaseInfo */false, outputOptions);
     this.operation = operation;
@@ -91,9 +91,6 @@ final class DataJsonFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.DataTraversalHandler#handleData(schemacrawler.utility.Query,
-   *      java.sql.ResultSet)
    */
   @Override
   public void handleData(final Query query, final ResultSet rows)
@@ -114,9 +111,6 @@ final class DataJsonFormatter
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.traversal.DataTraversalHandler#handleData(schemacrawler.schema.Table,
-   *      java.sql.ResultSet)
    */
   @Override
   public void handleData(final Table table, final ResultSet rows)
@@ -152,7 +146,7 @@ final class DataJsonFormatter
    */
   private long handleAggregateOperationForTable(final String title,
                                                 final ResultSet results)
-                                                  throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     try
     {

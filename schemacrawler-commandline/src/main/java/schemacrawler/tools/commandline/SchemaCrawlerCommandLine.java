@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,11 +28,8 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.commandline;
 
 
-import static java.util.Objects.requireNonNull;
-
 import java.sql.Connection;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.ConnectionOptions;
@@ -41,9 +38,11 @@ import schemacrawler.schemacrawler.DatabaseSpecificOverrideOptionsBuilder;
 import schemacrawler.schemacrawler.SchemaCrawlerCommandLineException;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
+import schemacrawler.schemacrawler.UserCredentials;
 import schemacrawler.tools.databaseconnector.DatabaseConnector;
 import schemacrawler.tools.executable.Executable;
 import schemacrawler.tools.options.OutputOptions;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -55,7 +54,7 @@ public final class SchemaCrawlerCommandLine
   implements CommandLine
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SchemaCrawlerCommandLine.class.getName());
 
   private final String command;
@@ -69,10 +68,9 @@ public final class SchemaCrawlerCommandLine
   public SchemaCrawlerCommandLine(final Config argsMap)
     throws SchemaCrawlerException
   {
-    requireNonNull(argsMap, "No command-line arguments provided");
-    if (argsMap.isEmpty())
+    if (argsMap == null || argsMap.isEmpty())
     {
-      throw new SchemaCrawlerCommandLineException("No command-line arguments provided");
+      throw new SchemaCrawlerCommandLineException("Please provide command-line arguments");
     }
 
     // Match the database connector in the best possible way, using the
@@ -80,11 +78,10 @@ public final class SchemaCrawlerCommandLine
     final DatabaseServerTypeParser dbServerTypeParser = new DatabaseServerTypeParser(argsMap);
     dbConnector = dbServerTypeParser.getOptions();
     LOGGER.log(Level.INFO,
-               new StringFormat("Using database plugin, %s",
+               new StringFormat("Using database plugin <%s>",
                                 dbConnector.getDatabaseServerType()));
 
-    config = new Config();
-    loadConfig(argsMap);
+    config = loadConfig(argsMap);
 
     final CommandParser commandParser = new CommandParser(config);
     command = commandParser.getOptions().toString();
@@ -98,10 +95,11 @@ public final class SchemaCrawlerCommandLine
     final AdditionalConfigOptionsParser additionalConfigOptionsParser = new AdditionalConfigOptionsParser(config);
     additionalConfigOptionsParser.loadConfig();
 
-    parseConnectionOptions();
+    final UserCredentials userCredentials = parseConnectionOptions();
     // Connect using connection options provided from the command-line,
     // provided configuration, and bundled configuration
-    connectionOptions = dbConnector.newDatabaseConnectionOptions(config);
+    connectionOptions = dbConnector
+      .newDatabaseConnectionOptions(userCredentials, config);
 
     // Get partially built database specific options, built from the
     // classpath resources, and then override from config loaded in from
@@ -162,20 +160,27 @@ public final class SchemaCrawlerCommandLine
   /**
    * Loads configuration from a number of sources, in order of priority.
    */
-  private void loadConfig(final Config argsMap)
+  private Config loadConfig(final Config argsMap)
     throws SchemaCrawlerException
   {
+    final Config config = new Config();
+
     // 1. Get bundled database config
     config.putAll(dbConnector.getConfig());
 
-    // 2. Load config from files, in place
+    // 2. Load config from CLASSPATH, in place
+    config.putAll(Config.loadResource("/schemacrawler.config.properties"));
+
+    // 3. Load config from files, in place
     config.putAll(argsMap);
     new ConfigParser(config).loadConfig();
 
-    // 3. Override/ overwrite from the command-line options
+    // 4. Override/ overwrite from the command-line options
     config.putAll(argsMap);
 
     new ConfigParser(config).consumeOptions();
+
+    return config;
   }
 
   /**
@@ -184,7 +189,7 @@ public final class SchemaCrawlerCommandLine
    * @param dbServerType
    *        Database server type
    */
-  private void parseConnectionOptions()
+  private UserCredentials parseConnectionOptions()
     throws SchemaCrawlerException
   {
     final BaseDatabaseConnectionOptionsParser dbConnectionOptionsParser;
@@ -198,6 +203,9 @@ public final class SchemaCrawlerCommandLine
     }
     dbConnectionOptionsParser.loadConfig();
     config.putAll(dbConnectionOptionsParser.getOptions());
+    final UserCredentials userCredentials = dbConnectionOptionsParser
+      .getUserCredentials();
+    return userCredentials;
   }
 
 }

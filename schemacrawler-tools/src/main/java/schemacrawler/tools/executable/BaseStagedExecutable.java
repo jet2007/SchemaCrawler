@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -33,12 +33,12 @@ import static java.util.Objects.requireNonNull;
 
 import java.sql.Connection;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.crawl.SchemaCrawler;
 import schemacrawler.schema.Catalog;
 import schemacrawler.schemacrawler.DatabaseSpecificOverrideOptions;
 import sf.util.ObjectToString;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -51,7 +51,7 @@ public abstract class BaseStagedExecutable
   implements StagedExecutable
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(BaseStagedExecutable.class.getName());
 
   protected BaseStagedExecutable(final String command)
@@ -61,24 +61,23 @@ public abstract class BaseStagedExecutable
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.tools.executable.Executable#execute(Connection,
-   *      DatabaseSpecificOverrideOptions))
    */
   @Override
   public final void execute(final Connection connection,
                             final DatabaseSpecificOverrideOptions databaseSpecificOverrideOptions)
-                              throws Exception
+    throws Exception
   {
     requireNonNull(connection, "No connection provided");
     requireNonNull(databaseSpecificOverrideOptions,
                    "No database specific overrides provided");
 
     LOGGER.log(Level.INFO,
-               new StringFormat("Executing SchemaCrawler command, \"%s\"",
+               new StringFormat("Executing SchemaCrawler command <%s>",
                                 getCommand()));
     if (LOGGER.isLoggable(Level.CONFIG))
     {
+      LOGGER.log(Level.CONFIG,
+                 String.format("Executable: %s", this.getClass().getName()));
       LOGGER.log(Level.CONFIG, ObjectToString.toString(schemaCrawlerOptions));
       LOGGER.log(Level.CONFIG, ObjectToString.toString(outputOptions));
     }
@@ -87,9 +86,9 @@ public abstract class BaseStagedExecutable
       LOGGER.log(Level.FINE, ObjectToString.toString(additionalConfiguration));
     }
 
-    final SchemaCrawler crawler = new SchemaCrawler(connection,
-                                                    databaseSpecificOverrideOptions);
-    final Catalog catalog = crawler.crawl(schemaCrawlerOptions);
+    final SchemaCrawler schemaCrawler = new SchemaCrawler(connection,
+                                                          databaseSpecificOverrideOptions);
+    final Catalog catalog = schemaCrawler.crawl(schemaCrawlerOptions);
 
     executeOn(catalog, connection);
   }

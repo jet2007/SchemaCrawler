@@ -35,8 +35,9 @@ PUBLIC.BOOKS.BOOKAUTHORS                                         [table]
 ------------------------------------------------------------------------
 
                                                             [lint, high]
-	redundant index	SYS_IDX_10116
+	redundant index	SYS_IDX_FK_Y_BOOK_10116
 	no primary key	
+	primary key may not be a surrogate	
                                                           [lint, medium]
 	spaces in name, or reserved word	"UPDATE"
                                                              [lint, low]
@@ -48,8 +49,8 @@ PUBLIC.BOOKS.BOOKS                                               [table]
 ------------------------------------------------------------------------
 
                                                             [lint, high]
+	redundant index	SYS_IDX_FK_PREVIOUSEDITION_10109
 	redundant index	UIDX_PREVIOUSEDITION
-	redundant index	SYS_IDX_10109
                                                           [lint, medium]
 	unique index with nullable columns	UIDX_PREVIOUSEDITION
                                                              [lint, low]
@@ -62,8 +63,9 @@ PUBLIC.BOOKS."Global Counts"                                     [table]
 
                                                             [lint, high]
 	no primary key	
+	primary key may not be a surrogate	
                                                           [lint, medium]
-	all data columns are nullable	
+	no non-nullable data columns	
 	no indexes	
 	spaces in name, or reserved word	
 	spaces in name, or reserved word	"Global Count"
@@ -79,7 +81,7 @@ PUBLIC.BOOKS.PUBLISHERS                                          [table]
 ------------------------------------------------------------------------
 
                                                           [lint, medium]
-	all data columns are nullable	
+	no non-nullable data columns	
 
 
 
@@ -98,8 +100,9 @@ PUBLIC.FOR_LINT."Global Counts"                                  [table]
 
                                                             [lint, high]
 	no primary key	
+	primary key may not be a surrogate	
                                                           [lint, medium]
-	all data columns are nullable	
+	no non-nullable data columns	
 	no indexes	
 	spaces in name, or reserved word	
 	spaces in name, or reserved word	"Global Count"
@@ -127,6 +130,8 @@ PUBLIC.FOR_LINT.PUBLICATIONS                                     [table]
 PUBLIC.FOR_LINT.PUBLICATIONWRITERS                               [table]
 ------------------------------------------------------------------------
 
+                                                            [lint, high]
+	primary key may not be a surrogate	
                                                              [lint, low]
 	empty table	
 	should have remarks	
@@ -140,7 +145,7 @@ PUBLIC.FOR_LINT.SELFREFERENCE                                    [table]
                                                         [lint, critical]
 	foreign key self-references primary key	FK_SELFREFERENCE
                                                             [lint, high]
-	redundant index	SYS_IDX_10212
+	redundant index	SYS_IDX_FK_SELFREFERENCE_10212
 	redundant index	SYS_IDX_PK_SELFREFERENCE_10209
                                                              [lint, low]
 	empty table	
@@ -181,7 +186,7 @@ PUBLIC.FOR_LINT.ΠΊΝΑΚΑΒΆΣΗΣΔΕΔΟΜΈΝΩΝ                        
                                                             [lint, high]
 	foreign key data type different from primary key	FK_ΠΊΝΑΚΑΒΆΣΗΣΔΕΔΟΜΈΝΩΝ_PUBLICATIONS
                                                           [lint, medium]
-	all data columns are nullable	
+	no non-nullable data columns	
                                                              [lint, low]
 	empty table	
 	should have remarks	
@@ -192,6 +197,8 @@ PUBLIC.FOR_LINT.ΠΊΝΑΚΑΒΆΣΗΣΔΕΔΟΜΈΝΩΝ                        
 PUBLIC."PUBLISHER SALES".REGIONS                                 [table]
 ------------------------------------------------------------------------
 
+                                                            [lint, high]
+	primary key may not be a surrogate	
                                                              [lint, low]
 	should have remarks	
 	should have remarks	CITY, STATE, POSTALCODE, COUNTRY
@@ -204,6 +211,7 @@ PUBLIC."PUBLISHER SALES".SALES                                   [table]
 
                                                             [lint, high]
 	no primary key	
+	primary key may not be a surrogate	
                                                              [lint, low]
 	should have remarks	
 	should have remarks	POSTALCODE, COUNTRY, BOOKID, PERIODENDDATE, TOTALAMOUNT, SALESDATAID
@@ -215,9 +223,10 @@ PUBLIC."PUBLISHER SALES".SALESDATA                               [table]
 
                                                             [lint, high]
 	no primary key	
+	primary key may not be a surrogate	
                                                           [lint, medium]
 	unique index with nullable columns	SYS_IDX_UQ_CUSTOMERS_10150
-	all data columns are nullable	
+	no non-nullable data columns	
                                                              [lint, low]
 	empty table	
 	should have remarks	

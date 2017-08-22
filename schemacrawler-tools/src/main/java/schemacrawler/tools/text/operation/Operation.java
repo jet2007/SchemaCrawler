@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -40,17 +40,17 @@ public enum Operation
  /**
   * Count operation
   */
-  count("Row Count", "SELECT COUNT(*) FROM ${table}"),
+ count("Row Count", "SELECT COUNT(*) FROM ${table}"),
  /**
   * Dump operation
   */
-  dump("Dump", "SELECT ${columns} FROM ${table} ORDER BY ${orderbycolumns}"),
+ dump("Dump", "SELECT ${columns} FROM ${table} ORDER BY ${orderbycolumns}"),
  /**
   * Quick dump operation, where columns do not need to be retrieved
   * (minimum infolevel), but the order of rows may not be preserved from
   * run to run.
   */
-  quickdump("Dump", "SELECT * FROM ${table}"),;
+ quickdump("Dump", "SELECT * FROM ${table}"),;
 
   private final String description;
   private final String queryString;

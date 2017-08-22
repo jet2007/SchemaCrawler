@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -32,7 +32,6 @@ package schemacrawler.tools.commandline;
 import static sf.util.Utility.isBlank;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.InclusionRule;
@@ -42,6 +41,7 @@ import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
 import schemacrawler.schemacrawler.SchemaInfoLevel;
 import schemacrawler.tools.options.InfoLevel;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -53,7 +53,7 @@ public final class SchemaCrawlerOptionsParser
   extends BaseOptionsParser<SchemaCrawlerOptions>
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SchemaCrawlerOptionsParser.class.getName());
 
   private static final String DEFAULT_TABLE_TYPES = "TABLE,VIEW";
@@ -65,7 +65,7 @@ public final class SchemaCrawlerOptionsParser
   {
     super(config);
     normalizeOptionName("title");
-    normalizeOptionName("infolevel");
+    normalizeOptionName("infolevel", "i");
     normalizeOptionName("schemas");
     normalizeOptionName("tabletypes");
     normalizeOptionName("tables");
@@ -107,7 +107,7 @@ public final class SchemaCrawlerOptionsParser
     }
     else
     {
-      throw new SchemaCrawlerCommandLineException("No infolevel specified");
+      throw new SchemaCrawlerCommandLineException("Please specify an infolevel");
     }
 
     if (config.hasValue("schemas"))

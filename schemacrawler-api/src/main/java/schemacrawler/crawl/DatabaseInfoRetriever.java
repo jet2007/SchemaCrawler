@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -49,25 +49,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.ColumnDataType;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.SchemaReference;
 import schemacrawler.schema.SearchableType;
 import schemacrawler.schemacrawler.InformationSchemaViews;
-import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
-import schemacrawler.schemacrawler.SchemaCrawlerSQLException;
 import schemacrawler.utility.Query;
 import sf.util.DatabaseUtility;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 final class DatabaseInfoRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(DatabaseInfoRetriever.class.getName());
 
   private static final List<String> ignoreMethods = Arrays
@@ -178,7 +176,6 @@ final class DatabaseInfoRetriever
    *         On a SQL exception
    */
   void retrieveAdditionalDatabaseInfo()
-    throws SQLException
   {
     final DatabaseMetaData dbMetaData = getMetaData();
     final MutableDatabaseInfo dbInfo = catalog.getDatabaseInfo();
@@ -199,7 +196,7 @@ final class DatabaseInfoRetriever
           if (LOGGER.isLoggable(Level.FINE))
           {
             LOGGER.log(Level.FINER,
-                       new StringFormat("Retrieving database property using method, %s",
+                       new StringFormat("Retrieving database property using method <%s>",
                                         method));
           }
           final String value = (String) method.invoke(dbMetaData);
@@ -212,7 +209,7 @@ final class DatabaseInfoRetriever
           if (LOGGER.isLoggable(Level.FINE))
           {
             LOGGER.log(Level.FINER,
-                       new StringFormat("Retrieving database property using method, %s",
+                       new StringFormat("Retrieving database property using method <%s>",
                                         method));
           }
           final Object value = method.invoke(dbMetaData);
@@ -224,7 +221,7 @@ final class DatabaseInfoRetriever
           if (LOGGER.isLoggable(Level.FINE))
           {
             LOGGER.log(Level.FINER,
-                       new StringFormat("Retrieving database property using method, %s",
+                       new StringFormat("Retrieving database property using method <%s>",
                                         method));
           }
           final ResultSet results = (ResultSet) method.invoke(dbMetaData);
@@ -240,7 +237,7 @@ final class DatabaseInfoRetriever
           if (LOGGER.isLoggable(Level.FINE))
           {
             LOGGER.log(Level.FINER,
-                       new StringFormat("Retrieving database property using method, %s",
+                       new StringFormat("Retrieving database property using method <%s>",
                                         method));
           }
           dbProperties.add(retrieveResultSetTypeProperty(dbMetaData,
@@ -260,25 +257,20 @@ final class DatabaseInfoRetriever
       catch (final IllegalAccessException | InvocationTargetException e)
       {
         LOGGER.log(Level.FINE,
-                   e.getCause(),
-                   new StringFormat("Could not execute method, %s", method));
+                   new StringFormat("Could not execute method <%s>", method),
+                   e.getCause());
       }
       catch (final AbstractMethodError | SQLFeatureNotSupportedException e)
       {
-        logSQLFeatureNotSupported("JDBC driver does not support " + method, e);
+        logSQLFeatureNotSupported(new StringFormat("Could not execute method %s",
+                                                   method),
+                                  e);
       }
       catch (final SQLException e)
       {
-        // HYC00 = Optional feature not implemented
-        if ("HYC00".equalsIgnoreCase(e.getSQLState()))
-        {
-          logSQLFeatureNotSupported("JDBC driver does not support " + method,
-                                    e);
-        }
-        else
-        {
-          throw new SchemaCrawlerSQLException("Could not execute " + method, e);
-        }
+        logPossiblyUnsupportedSQLFeature(new StringFormat("Could not execute method %s",
+                                                          method),
+                                         e);
       }
 
     }
@@ -294,31 +286,30 @@ final class DatabaseInfoRetriever
    *         On a SQL exception
    */
   void retrieveAdditionalJdbcDriverInfo()
-    throws SQLException
   {
-    final DatabaseMetaData dbMetaData = getMetaData();
-    final String url = dbMetaData.getURL();
-
     final MutableJdbcDriverInfo driverInfo = catalog.getJdbcDriverInfo();
-    if (driverInfo != null)
+    if (driverInfo == null)
     {
-      try
+      return;
+    }
+
+    try
+    {
+      final DatabaseMetaData dbMetaData = getMetaData();
+      final String url = dbMetaData.getURL();
+
+      final Driver jdbcDriver = DriverManager.getDriver(url);
+      final DriverPropertyInfo[] propertyInfo = jdbcDriver
+        .getPropertyInfo(url, new Properties());
+      for (final DriverPropertyInfo driverPropertyInfo: propertyInfo)
       {
-        final Driver jdbcDriver = DriverManager.getDriver(url);
-        final DriverPropertyInfo[] propertyInfo = jdbcDriver
-          .getPropertyInfo(url, new Properties());
-        for (final DriverPropertyInfo driverPropertyInfo: propertyInfo)
-        {
-          driverInfo
-            .addJdbcDriverProperty(new ImmutableJdbcDriverProperty(driverPropertyInfo));
-        }
+        driverInfo
+          .addJdbcDriverProperty(new ImmutableJdbcDriverProperty(driverPropertyInfo));
       }
-      catch (final SQLException e)
-      {
-        LOGGER.log(Level.WARNING,
-                   "Could not obtain JDBC driver information",
-                   e);
-      }
+    }
+    catch (final SQLException e)
+    {
+      LOGGER.log(Level.WARNING, "Could not obtain JDBC driver information", e);
     }
 
   }
@@ -335,15 +326,26 @@ final class DatabaseInfoRetriever
    *         On a SQL exception
    */
   void retrieveDatabaseInfo()
-    throws SQLException
   {
-    final DatabaseMetaData dbMetaData = getMetaData();
 
     final MutableDatabaseInfo dbInfo = catalog.getDatabaseInfo();
+    if (dbInfo == null)
+    {
+      return;
+    }
 
-    dbInfo.setUserName(dbMetaData.getUserName());
-    dbInfo.setProductName(dbMetaData.getDatabaseProductName());
-    dbInfo.setProductVersion(dbMetaData.getDatabaseProductVersion());
+    try
+    {
+      final DatabaseMetaData dbMetaData = getMetaData();
+
+      dbInfo.setUserName(dbMetaData.getUserName());
+      dbInfo.setProductName(dbMetaData.getDatabaseProductName());
+      dbInfo.setProductVersion(dbMetaData.getDatabaseProductVersion());
+    }
+    catch (final SQLException e)
+    {
+      LOGGER.log(Level.WARNING, "Could not obtain database information", e);
+    }
   }
 
   /**
@@ -353,20 +355,28 @@ final class DatabaseInfoRetriever
    *         On a SQL exception
    */
   void retrieveJdbcDriverInfo()
-    throws SQLException
   {
-    final DatabaseMetaData dbMetaData = getMetaData();
-    final String url = dbMetaData.getURL();
-
     final MutableJdbcDriverInfo driverInfo = catalog.getJdbcDriverInfo();
-    if (driverInfo != null)
+    if (driverInfo == null)
     {
+      return;
+    }
+
+    try
+    {
+      final DatabaseMetaData dbMetaData = getMetaData();
+      final String url = dbMetaData.getURL();
+
       driverInfo.setDriverName(dbMetaData.getDriverName());
       driverInfo.setDriverVersion(dbMetaData.getDriverVersion());
       driverInfo.setConnectionUrl(url);
       final Driver jdbcDriver = DriverManager.getDriver(url);
       driverInfo.setJdbcDriverClassName(jdbcDriver.getClass().getName());
       driverInfo.setJdbcCompliant(jdbcDriver.jdbcCompliant());
+    }
+    catch (final SQLException e)
+    {
+      LOGGER.log(Level.WARNING, "Could not obtain JDBC driver information", e);
     }
 
   }
@@ -376,10 +386,9 @@ final class DatabaseInfoRetriever
    *
    * @throws SQLException
    *         On a SQL exception
-   * @throws SchemaCrawlerException
    */
   void retrieveSystemColumnDataTypes()
-    throws SQLException, SchemaCrawlerException
+    throws SQLException
   {
     final Schema systemSchema = new SchemaReference();
 
@@ -410,7 +419,7 @@ final class DatabaseInfoRetriever
         final String typeName = results.getString("TYPE_NAME");
         final int dataType = results.getInt("DATA_TYPE", 0);
         LOGGER.log(Level.FINER,
-                   new StringFormat("Retrieving data type: %s (with type id %d)",
+                   new StringFormat("Retrieving data type <%s> with type id %d",
                                     typeName,
                                     dataType));
         final long precision = results.getLong("PRECISION", 0L);
@@ -475,7 +484,7 @@ final class DatabaseInfoRetriever
   {
     requireNonNull(schema, "No schema provided");
 
-    final Optional<Schema> schemaOptional = catalog
+    final Optional<SchemaReference> schemaOptional = catalog
       .lookupSchema(schema.getFullName());
     if (!schemaOptional.isPresent())
     {
@@ -487,7 +496,7 @@ final class DatabaseInfoRetriever
 
     LOGGER
       .log(Level.INFO,
-           new StringFormat("Retrieving data types for schema: %s", schema));
+           new StringFormat("Retrieving data types for schema <%s>", schema));
 
     final String catalogName = schema.getCatalogName();
     final String schemaName = schema.getName();
@@ -503,7 +512,7 @@ final class DatabaseInfoRetriever
         // "TYPE_CAT", "TYPE_SCHEM"
         final String typeName = results.getString("TYPE_NAME");
         LOGGER.log(Level.FINE,
-                   new StringFormat("Retrieving data type, %s.%s",
+                   new StringFormat("Retrieving data type <%s.%s>",
                                     schema,
                                     typeName));
         final int dataType = results.getInt("DATA_TYPE", 0);

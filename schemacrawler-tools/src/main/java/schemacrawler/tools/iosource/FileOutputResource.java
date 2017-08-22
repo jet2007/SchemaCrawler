@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -41,15 +41,15 @@ import java.nio.charset.Charset;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public class FileOutputResource
   implements OutputResource
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(FileOutputResource.class.getName());
 
   private final Path outputFile;
@@ -68,7 +68,7 @@ public class FileOutputResource
   @Override
   public Writer openNewOutputWriter(final Charset charset,
                                     final boolean appendOutput)
-                                      throws IOException
+    throws IOException
   {
     requireNonNull(charset, "No output charset provided");
     final OpenOption[] openOptions;
@@ -83,7 +83,7 @@ public class FileOutputResource
     final Writer writer = newBufferedWriter(outputFile, charset, openOptions);
     LOGGER
       .log(Level.INFO,
-           new StringFormat("Opened output writer to file, %s", outputFile));
+           new StringFormat("Opened output writer to file <%s>", outputFile));
     return new OutputWriter(getDescription(), writer, true);
   }
 

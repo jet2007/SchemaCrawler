@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -45,10 +45,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import schemacrawler.schemacrawler.SchemaCrawlerException;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -61,7 +61,7 @@ public final class DatabaseConnectorRegistry
   implements Iterable<String>
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(DatabaseConnectorRegistry.class.getName());
 
   private static Map<String, DatabaseConnector> loadDatabaseConnectorRegistry()
@@ -93,10 +93,10 @@ public final class DatabaseConnectorRegistry
         catch (final Exception e)
         {
           LOGGER.log(Level.CONFIG,
-                     e,
                      new StringFormat("Could not load database connector, %s=%s",
                                       databaseSystemIdentifier,
-                                      databaseConnector.getClass().getName()));
+                                      databaseConnector.getClass().getName()),
+                     e);
         }
       }
     }
@@ -190,17 +190,16 @@ public final class DatabaseConnectorRegistry
 
     try
     {
-      final List<String> drivers = new ArrayList<>();
+      final StringBuilder buffer = new StringBuilder(1024);
+      buffer.append("Registered JDBC drivers:");
       for (final Driver driver: Collections.list(DriverManager.getDrivers()))
       {
-        drivers.add(String.format("%s %d.%d",
-                                  driver.getClass().getName(),
-                                  driver.getMajorVersion(),
-                                  driver.getMinorVersion()));
+        buffer.append(String.format("%n%s %d.%d",
+                                    driver.getClass().getName(),
+                                    driver.getMajorVersion(),
+                                    driver.getMinorVersion()));
       }
-      Collections.sort(drivers);
-      LOGGER.log(Level.CONFIG,
-                 new StringFormat("Registered JDBC drivers, %s", drivers));
+      LOGGER.log(Level.CONFIG, buffer.toString());
     }
     catch (final Exception e)
     {

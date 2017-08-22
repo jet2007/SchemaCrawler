@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,10 +28,9 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.iosource;
 
 
-import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isReadable;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Objects.requireNonNull;
+import static sf.util.IOUtility.isFileReadable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,17 +39,17 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public class CompressedFileInputResource
   implements InputResource
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(CompressedFileInputResource.class.getName());
 
   private final Path inputFile;
@@ -58,13 +57,15 @@ public class CompressedFileInputResource
 
   public CompressedFileInputResource(final Path filePath,
                                      final String internalPath)
-                                       throws IOException
+    throws IOException
   {
     inputFile = requireNonNull(filePath, "No file path provided").normalize()
       .toAbsolutePath();
-    if (!exists(filePath) || !isReadable(filePath))
+    if (!isFileReadable(inputFile))
     {
-      throw new IOException("Cannot read file, " + filePath);
+      final IOException e = new IOException("Cannot read file, " + inputFile);
+      LOGGER.log(Level.CONFIG, e.getMessage(), e);
+      throw e;
     }
 
     this.internalPath = requireNonNull(internalPath,
@@ -91,7 +92,7 @@ public class CompressedFileInputResource
 
     final Reader reader = new InputStreamReader(zipInputStream, charset);
     LOGGER.log(Level.INFO,
-               new StringFormat("Opened input reader to compressed file, %s",
+               new StringFormat("Opened input reader to compressed file <%s>",
                                 inputFile));
 
     return new InputReader(getDescription(), reader, true);

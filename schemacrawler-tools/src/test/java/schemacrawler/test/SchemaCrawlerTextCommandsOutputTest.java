@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -155,10 +155,10 @@ public class SchemaCrawlerTextCommandsOutputTest
 
       final CommonTextOptionsBuilder commonTextOptions = new CommonTextOptionsBuilder();
       commonTextOptions.fromConfig(config);
-      commonTextOptions.hideInfo();
-      commonTextOptions.hideHeader();
-      commonTextOptions.hideFooter();
-      commonTextOptions.sortTables();
+      commonTextOptions.noInfo(true);
+      commonTextOptions.noHeader(true);
+      commonTextOptions.noFooter(true);
+      commonTextOptions.sortTables(true);
       config.putAll(commonTextOptions.toConfig());
 
       final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(command);

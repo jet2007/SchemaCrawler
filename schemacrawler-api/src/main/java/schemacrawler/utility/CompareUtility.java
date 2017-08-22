@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -31,6 +31,9 @@ package schemacrawler.utility;
 import java.util.Iterator;
 import java.util.List;
 
+import sf.util.UtilityMarker;
+
+@UtilityMarker
 public class CompareUtility
 {
 

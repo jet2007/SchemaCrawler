@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -31,11 +31,13 @@ package schemacrawler.tools.commandline;
 
 import java.io.Console;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.Version;
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
+import schemacrawler.schemacrawler.SingleUseUserCredentials;
+import schemacrawler.schemacrawler.UserCredentials;
+import sf.util.SchemaCrawlerLogger;
 
 /**
  * Options for the command-line.
@@ -46,11 +48,13 @@ abstract class BaseDatabaseConnectionOptionsParser
   extends BaseConfigOptionsParser
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(BaseDatabaseConnectionOptionsParser.class.getName());
 
   private static final String USER = "user";
   private static final String PASSWORD = "password";
+
+  private UserCredentials userCredentials;
 
   BaseDatabaseConnectionOptionsParser(final Config config)
   {
@@ -59,12 +63,40 @@ abstract class BaseDatabaseConnectionOptionsParser
     normalizeOptionName(PASSWORD);
   }
 
+  public final UserCredentials getUserCredentials()
+  {
+    return userCredentials;
+  }
+
   @Override
   public void loadConfig()
     throws SchemaCrawlerException
   {
-    setUser();
-    setPassword();
+    // Get the database username and password, and remove them from the
+    // config
+    userCredentials = new SingleUseUserCredentials(getUser(), getPassword());
+  }
+
+  private String getPassword()
+  {
+    final String password;
+    if (config.hasValue(PASSWORD))
+    {
+      password = config.getStringValue(PASSWORD, null);
+    }
+    else
+    {
+      password = promptForPassword();
+    }
+    config.remove(PASSWORD);
+    return password;
+  }
+
+  private String getUser()
+  {
+    final String user = config.getStringValue(USER, null);
+    config.remove(USER);
+    return user;
   }
 
   private String promptForPassword()
@@ -87,25 +119,6 @@ abstract class BaseDatabaseConnectionOptionsParser
       LOGGER.log(Level.WARNING, "System console is not available", e);
       return null;
     }
-  }
-
-  private void setPassword()
-  {
-    final String password;
-    if (config.hasValue(PASSWORD))
-    {
-      password = config.getStringValue(PASSWORD, null);
-    }
-    else
-    {
-      password = promptForPassword();
-    }
-    config.put(PASSWORD, password);
-  }
-
-  private void setUser()
-  {
-    config.put(USER, config.getStringValue(USER, null));
   }
 
 }

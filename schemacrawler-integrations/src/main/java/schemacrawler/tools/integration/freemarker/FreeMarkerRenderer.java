@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -46,6 +45,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import schemacrawler.schema.Catalog;
 import schemacrawler.tools.executable.BaseStagedExecutable;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -57,7 +57,7 @@ public final class FreeMarkerRenderer
   extends BaseStagedExecutable
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(FreeMarkerRenderer.class.getName());
   static final String COMMAND = "freemarker";
 
@@ -72,7 +72,7 @@ public final class FreeMarkerRenderer
   @Override
   public final void executeOn(final Catalog catalog,
                               final Connection connection)
-                                throws Exception
+    throws Exception
   {
     String templateLocation = outputOptions.getOutputFormatValue();
     String templatePath = ".";
@@ -109,7 +109,7 @@ public final class FreeMarkerRenderer
 
     LOGGER
       .log(Level.CONFIG,
-           new StringFormat("FreeMarker configuration properties, %s", cfg));
+           new StringFormat("FreeMarker configuration properties <%s>", cfg));
 
     // Create the root hash
     final Map<String, Object> objectMap = new HashMap<>();

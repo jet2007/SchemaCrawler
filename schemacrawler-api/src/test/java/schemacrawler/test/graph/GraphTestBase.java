@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -57,7 +57,7 @@ abstract class GraphTestBase
 
   protected <T extends Comparable<? super T>> boolean containsCycleTarjan(final DirectedGraph<T> graph)
   {
-    final Collection<List<T>> sccs = new TarjanStronglyConnectedComponentFinder<T>(graph)
+    final Collection<List<T>> sccs = new TarjanStronglyConnectedComponentFinder<>(graph)
       .detectCycles();
 
     if (DEBUG)

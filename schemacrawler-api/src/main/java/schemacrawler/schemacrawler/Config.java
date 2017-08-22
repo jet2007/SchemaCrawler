@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,19 +29,12 @@ http://www.gnu.org/licenses/
 package schemacrawler.schemacrawler;
 
 
-import static java.nio.file.Files.isReadable;
-import static java.nio.file.Files.isRegularFile;
-import static java.nio.file.Files.newBufferedReader;
 import static java.util.Objects.requireNonNull;
+import static sf.util.PropertiesUtility.loadProperties;
 import static sf.util.Utility.enumValue;
 import static sf.util.Utility.isBlank;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -50,9 +43,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import sf.util.ObjectToString;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -66,32 +59,29 @@ public final class Config
 
   private static final long serialVersionUID = 8720699738076915453L;
 
-  private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
+    .getLogger(Config.class.getName());
 
   /**
-   * Loads the SchemaCrawler configuration, and override configuration,
-   * from properties files.
+   * Loads the SchemaCrawler configuration from properties file.
    *
-   * @param configFilenames
+   * @param configFilename
    *        Configuration file name.
    * @return Configuration properties.
    * @throws IOException
    */
-  public static Config load(final String... configFilenames)
-    throws IOException
+  public static Config loadFile(final String configFilename)
   {
-    Properties configProperties = new Properties();
-    if (configFilenames != null)
+    final Properties configProperties;
+    if (!isBlank(configFilename))
     {
-      for (final String configFilename: configFilenames)
-      {
-        if (!isBlank(configFilename))
-        {
-          final Path configPath = Paths.get(configFilename).normalize()
-            .toAbsolutePath();
-          configProperties = loadProperties(configProperties, configPath);
-        }
-      }
+      final Path configPath = Paths.get(configFilename).normalize()
+        .toAbsolutePath();
+      configProperties = loadProperties(configPath);
+    }
+    else
+    {
+      configProperties = new Properties();
     }
     return new Config(configProperties);
   }
@@ -106,85 +96,8 @@ public final class Config
    */
   public static Config loadResource(final String resource)
   {
-    Properties configProperties = new Properties();
-
-    final InputStream stream;
-    if (!isBlank(resource))
-    {
-      stream = Config.class.getResourceAsStream(resource);
-    }
-    else
-    {
-      stream = null;
-    }
-
-    if (stream != null)
-    {
-      configProperties = loadProperties(configProperties,
-                                        new InputStreamReader(stream));
-    }
-
+    final Properties configProperties = loadProperties(resource);
     return new Config(configProperties);
-  }
-
-  /**
-   * Loads a properties file.
-   *
-   * @param properties
-   *        Properties object.
-   * @param propertiesFile
-   *        Properties file.
-   * @return Properties
-   * @throws IOException
-   */
-  private static Properties loadProperties(final Properties properties,
-                                           final Path propertiesFile)
-    throws IOException
-  {
-    if (propertiesFile == null || !isRegularFile(propertiesFile)
-        || !isReadable(propertiesFile))
-    {
-      LOGGER.log(Level.CONFIG,
-                 new StringFormat("Cannot load properties from file, %s",
-                                  propertiesFile));
-      return properties;
-    }
-
-    LOGGER.log(Level.INFO,
-               new StringFormat("Loading properties from file, %s",
-                                propertiesFile));
-    loadProperties(properties,
-                   newBufferedReader(propertiesFile, StandardCharsets.UTF_8));
-    return properties;
-  }
-
-  /**
-   * Loads a properties file.
-   *
-   * @param properties
-   *        Properties object.
-   * @param reader
-   *        Properties data stream.
-   * @return Properties
-   */
-  private static Properties loadProperties(final Properties properties,
-                                           final Reader reader)
-  {
-    if (properties == null || reader == null)
-    {
-      LOGGER.log(Level.WARNING, "No properties provided");
-      return new Properties();
-    }
-
-    try (final BufferedReader bufferedReader = new BufferedReader(reader);)
-    {
-      properties.load(bufferedReader);
-    }
-    catch (final IOException e)
-    {
-      LOGGER.log(Level.WARNING, "Error loading properties", e);
-    }
-    return properties;
   }
 
   /**
@@ -294,6 +207,31 @@ public final class Config
   }
 
   /**
+   * Gets the value of a property as an double.
+   *
+   * @param propertyName
+   *        Property name
+   * @return Double value
+   */
+  public double getDoubleValue(final String propertyName,
+                               final double defaultValue)
+  {
+    try
+    {
+      return Double.parseDouble(getStringValue(propertyName,
+                                               String.valueOf(defaultValue)));
+    }
+    catch (final NumberFormatException e)
+    {
+      LOGGER.log(Level.FINEST,
+                 new StringFormat("Could not parse double value for property <%s>",
+                                  propertyName),
+                 e);
+      return defaultValue;
+    }
+  }
+
+  /**
    * Gets the value of a property as an enum.
    *
    * @param propertyName
@@ -385,8 +323,43 @@ public final class Config
    */
   public int getIntegerValue(final String propertyName, final int defaultValue)
   {
-    return Integer
-      .parseInt(getStringValue(propertyName, String.valueOf(defaultValue)));
+    try
+    {
+      return Integer
+        .parseInt(getStringValue(propertyName, String.valueOf(defaultValue)));
+    }
+    catch (final NumberFormatException e)
+    {
+      LOGGER.log(Level.FINEST,
+                 new StringFormat("Could not parse integer value for property <%s>",
+                                  propertyName),
+                 e);
+      return defaultValue;
+    }
+  }
+
+  /**
+   * Gets the value of a property as an long.
+   *
+   * @param propertyName
+   *        Property name
+   * @return Long value
+   */
+  public long getLongValue(final String propertyName, final long defaultValue)
+  {
+    try
+    {
+      return Long
+        .parseLong(getStringValue(propertyName, String.valueOf(defaultValue)));
+    }
+    catch (final NumberFormatException e)
+    {
+      LOGGER.log(Level.FINEST,
+                 new StringFormat("Could not parse long value for property <%s>",
+                                  propertyName),
+                 e);
+      return defaultValue;
+    }
   }
 
   /**

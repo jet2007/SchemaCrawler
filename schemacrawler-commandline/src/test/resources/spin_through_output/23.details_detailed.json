@@ -1,12 +1,11 @@
 [
 {
   "schemaCrawlerInfo": {
-    "productVersion": "14.09.03",
+    "productVersion": "14.16.03",
     "productName": "SchemaCrawler"
   },
   "tables": [
     {
-      "weakAssociations": [],
       "foreignKeys": [{
         "name": "FK_Z_AUTHOR",
         "definition": "",
@@ -276,7 +275,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [],
       "indexes": [],
       "columns": [
@@ -324,7 +322,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [
         {
           "name": "FK_Z_AUTHOR",
@@ -355,7 +352,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10118",
+          "name": "SYS_IDX_FK_Z_AUTHOR_10118",
           "definition": ""
         },
         {
@@ -365,7 +362,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10116",
+          "name": "SYS_IDX_FK_Y_BOOK_10116",
           "definition": ""
         },
         {
@@ -488,11 +485,10 @@
           "type": "check"
         }
       ],
-      "remarks": "Relationship between books and their authors, along with the latest updated information",
+      "remarks": "Relationship between books and their authors, \nalong with the latest updated information",
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [
         {
           "name": "FK_Y_BOOK",
@@ -543,7 +539,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10109",
+          "name": "SYS_IDX_FK_PREVIOUSEDITION_10109",
           "definition": ""
         }
       ],
@@ -578,7 +574,7 @@
           "name": "DESCRIPTION",
           "width": "(255)",
           "decimalDigits": 0,
-          "remarks": "Book description",
+          "remarks": "Book description\n(Usually the blurb from the book jacket or promotional materials)",
           "autoIncremented": false
         },
         {
@@ -721,7 +717,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [],
       "indexes": [],
       "columns": [{
@@ -745,7 +740,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [],
       "indexes": [{
         "columns": {
@@ -814,7 +808,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [
         {
           "name": "FK_PUBLICATION_JOIN",
@@ -845,7 +838,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10198",
+          "name": "SYS_IDX_FK_WRITER_JOIN_10198",
           "definition": ""
         },
         {
@@ -865,7 +858,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10200",
+          "name": "SYS_IDX_FK_PUBLICATION_JOIN_10200",
           "definition": ""
         }
       ],
@@ -1014,7 +1007,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [],
       "indexes": [],
       "columns": [{
@@ -1038,7 +1030,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [
         {
           "name": "FK_PUBLICATION_JOIN",
@@ -1089,7 +1080,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10179",
+          "name": "SYS_IDX_FK_PUBLICATIONS_WRITER_10179",
           "definition": ""
         },
         {
@@ -1288,7 +1279,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [
         {
           "name": "FK_PUBLICATION",
@@ -1319,7 +1309,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10186",
+          "name": "SYS_IDX_FK_WRITER_10186",
           "definition": ""
         },
         {
@@ -1329,7 +1319,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10188",
+          "name": "SYS_IDX_FK_PUBLICATION_10188",
           "definition": ""
         }
       ],
@@ -1428,7 +1418,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [{
         "name": "FK_SELFREFERENCE",
         "definition": "",
@@ -1457,7 +1446,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10212",
+          "name": "SYS_IDX_FK_SELFREFERENCE_10212",
           "definition": ""
         }
       ],
@@ -1565,7 +1554,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [
         {
           "name": "FK_WRITERS_PUBLICATION",
@@ -1636,7 +1624,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10215",
+          "name": "SYS_IDX_FK_WRITERS_PUBLICATION_10215",
           "definition": ""
         },
         {
@@ -2058,7 +2046,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [{
         "name": "FK_ΠΊΝΑΚΑΒΆΣΗΣΔΕΔΟΜΈΝΩΝ_PUBLICATIONS",
         "definition": "",
@@ -2087,7 +2074,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10205",
+          "name": "SYS_IDX_FK_ΠΊΝΑΚΑΒΆΣΗΣΔΕΔΟΜΈΝΩΝ_PUBLICATIONS_10205",
           "definition": ""
         }
       ],
@@ -2191,7 +2178,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [{
         "name": "FK_SALES_REGIONS",
         "definition": "",
@@ -2385,7 +2371,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [
         {
           "name": "FK_SALES_SALESDATA",
@@ -2422,7 +2407,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10158",
+          "name": "SYS_IDX_FK_SALES_SALESDATA_10158",
           "definition": ""
         },
         {
@@ -2439,7 +2424,7 @@
             }
           ],
           "unique": false,
-          "name": "SYS_IDX_10156",
+          "name": "SYS_IDX_FK_SALES_REGIONS_10156",
           "definition": ""
         }
       ],
@@ -2594,7 +2579,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "foreignKeys": [{
         "name": "FK_SALES_SALESDATA",
         "definition": "",
@@ -2896,12 +2880,12 @@
     }
   ],
   "databaseInfo": {
-    "databaseProductVersion": "2.3.4",
+    "databaseProductVersion": "2.4.0",
     "databaseProductName": "HSQL Database Engine",
     "databaseUserName": "SA"
   },
   "schemaCrawlerHeaderInfo": {
-    "crawlTimestamp": "2016-05-23 23:28:15",
+    "crawlTimestamp": "2017-05-31 00:47:16",
     "title": ""
   },
   "routines": [
@@ -3257,7 +3241,7 @@
     }
   ],
   "jdbcDriverInfo": {
-    "driverVersion": "2.3.4",
+    "driverVersion": "2.4.0",
     "isJDBCCompliant": "true",
     "driverClassName": "org.hsqldb.jdbc.JDBCDriver",
     "driverName": "HSQL Database Engine Driver",

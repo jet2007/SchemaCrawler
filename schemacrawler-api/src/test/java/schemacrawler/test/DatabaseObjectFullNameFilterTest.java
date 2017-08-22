@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ package schemacrawler.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.HashSet;
 
 import org.junit.Test;
 
@@ -87,6 +87,8 @@ public class DatabaseObjectFullNameFilterTest
   {
     final Builder<Table> databaseObjectFullNameFilterBuilder = DatabaseObjectFullNameFilter
       .databaseObjectFullNameFilter();
+    databaseObjectFullNameFilterBuilder.withIdentifierQuoteString("")
+      .withConnection(getConnection());
 
     final Collection<Table> filteredTables = tableFilter(databaseObjectFullNameFilterBuilder,
                                                          "Global Counts");
@@ -103,8 +105,16 @@ public class DatabaseObjectFullNameFilterTest
 
     tableFilterBuilder.withInclusionRule(new TableNameFilter(tableName));
 
-    final Collection<Table> filteredTables = catalog.getTables().stream()
-      .filter(tableFilterBuilder.build()).collect(Collectors.toSet());
+    final DatabaseObjectFullNameFilter<Table> filter = tableFilterBuilder
+      .build();
+    final Collection<Table> filteredTables = new HashSet<>();
+    for (final Table table: catalog.getTables())
+    {
+      if (filter.test(table))
+      {
+        filteredTables.add(table);
+      }
+    }
     return filteredTables;
   }
 

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,17 +29,15 @@ http://www.gnu.org/licenses/
 package schemacrawler.crawl;
 
 
+import static java.util.Objects.requireNonNull;
+import static sf.util.Utility.isBlank;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
-
-import static sf.util.Utility.isBlank;
 
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ForeignKey;
@@ -53,6 +51,7 @@ import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerSQLException;
 import schemacrawler.utility.MetaDataUtility;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -65,7 +64,7 @@ final class ForeignKeyRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(ForeignKeyRetriever.class.getName());
 
   ForeignKeyRetriever(final RetrieverConnection retrieverConnection,
@@ -112,9 +111,9 @@ final class ForeignKeyRetriever
       while (results.next())
       {
         // FOREIGN_KEY_CATALOG, FOREIGN_KEY_SCHEMA, FOREIGN_KEY_TABLE
-        final String fkName = quotedName(results.getString("FOREIGN_KEY_NAME"));
+        final String fkName = nameQuotedName(results.getString("FOREIGN_KEY_NAME"));
         LOGGER.log(Level.FINER,
-                   new StringFormat("Retrieving foreign key definition, %s",
+                   new StringFormat("Retrieving foreign key definition <%s>",
                                     fkName));
         final String definition = results.getString("FOREIGN_KEY_DEFINITION");
 
@@ -129,7 +128,7 @@ final class ForeignKeyRetriever
         {
           LOGGER
             .log(Level.FINER,
-                 new StringFormat("Could not find foreign key, %s", fkName));
+                 new StringFormat("Could not find foreign key <%s>", fkName));
         }
       }
     }
@@ -141,133 +140,135 @@ final class ForeignKeyRetriever
   }
 
   void retrieveForeignKeys(final NamedObjectList<MutableTable> allTables)
-    throws SchemaCrawlerSQLException
+    throws SQLException
   {
     requireNonNull(allTables);
 
-    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
-      .getInformationSchemaViews();
+    final MetadataRetrievalStrategy fkRetrievalStrategy = getRetrieverConnection()
+      .getForeignKeyRetrievalStrategy();
+    switch (fkRetrievalStrategy)
+    {
+      case data_dictionary_all:
+        LOGGER
+          .log(Level.INFO,
+               "Retrieving foreign keys, using fast data dictionary retrieval");
+        retrieveForeignKeysFromDataDictionary();
+        break;
 
-    if (!informationSchemaViews.hasForeignKeysSql())
-    {
-      LOGGER.log(Level.INFO,
-                 "Retrieving foreign keys, using database metadata");
-      retrieveForeignKeysUsingDatabaseMetadata(allTables);
+      case metadata_all:
+        LOGGER.log(Level.INFO,
+                   "Retrieving foreign keys, using fast meta-data retrieval");
+        retrieveForeignKeysFromMetadataForAllTables();
+        break;
+
+      case metadata:
+        LOGGER.log(Level.INFO, "Retrieving foreign keys");
+        retrieveForeignKeysFromMetadata(allTables);
+        break;
+
+      default:
+        break;
     }
-    else
-    {
-      LOGGER.log(Level.INFO, "Retrieving foreign keys, using SQL");
-      retrieveForeignKeysUsingSql(informationSchemaViews);
-    }
+
   }
 
   private void createForeignKeys(final MetadataResultSet results,
                                  final NamedObjectList<MutableForeignKey> foreignKeys)
     throws SQLException
   {
-    try
+    while (results.next())
     {
-      while (results.next())
+      String foreignKeyName = nameQuotedName(results.getString("FK_NAME"));
+      LOGGER
+        .log(Level.FINE,
+             new StringFormat("Retrieving foreign key: %s", foreignKeyName));
+
+      final String pkTableCatalogName = nameQuotedName(results
+        .getString("PKTABLE_CAT"));
+      final String pkTableSchemaName = nameQuotedName(results
+        .getString("PKTABLE_SCHEM"));
+      final String pkTableName = nameQuotedName(results.getString("PKTABLE_NAME"));
+      final String pkColumnName = nameQuotedName(results
+        .getString("PKCOLUMN_NAME"));
+
+      final String fkTableCatalogName = nameQuotedName(results
+        .getString("FKTABLE_CAT"));
+      final String fkTableSchemaName = nameQuotedName(results
+        .getString("FKTABLE_SCHEM"));
+      final String fkTableName = nameQuotedName(results.getString("FKTABLE_NAME"));
+      final String fkColumnName = nameQuotedName(results
+        .getString("FKCOLUMN_NAME"));
+
+      final int keySequence = results.getInt("KEY_SEQ", 0);
+      final ForeignKeyUpdateRule updateRule = results
+        .getEnumFromId("UPDATE_RULE", ForeignKeyUpdateRule.unknown);
+      final ForeignKeyUpdateRule deleteRule = results
+        .getEnumFromId("DELETE_RULE", ForeignKeyUpdateRule.unknown);
+      final ForeignKeyDeferrability deferrability = results
+        .getEnumFromId("DEFERRABILITY", ForeignKeyDeferrability.unknown);
+
+      final Column pkColumn = lookupOrCreateColumn(pkTableCatalogName,
+                                                   pkTableSchemaName,
+                                                   pkTableName,
+                                                   pkColumnName);
+      final Column fkColumn = lookupOrCreateColumn(fkTableCatalogName,
+                                                   fkTableSchemaName,
+                                                   fkTableName,
+                                                   fkColumnName);
+      final boolean isPkColumnPartial = pkColumn instanceof ColumnPartial;
+      final boolean isFkColumnPartial = fkColumn instanceof ColumnPartial;
+
+      if (pkColumn == null || fkColumn == null
+          || isFkColumnPartial && isPkColumnPartial)
       {
-        String foreignKeyName = quotedName(results.getString("FK_NAME"));
-        LOGGER
-          .log(Level.FINE,
-               new StringFormat("Retrieving foreign key: %s", foreignKeyName));
+        continue;
+      }
 
-        final String pkTableCatalogName = quotedName(results
-          .getString("PKTABLE_CAT"));
-        final String pkTableSchemaName = quotedName(results
-          .getString("PKTABLE_SCHEM"));
-        final String pkTableName = quotedName(results
-          .getString("PKTABLE_NAME"));
-        final String pkColumnName = quotedName(results
-          .getString("PKCOLUMN_NAME"));
+      if (isBlank(foreignKeyName))
+      {
+        foreignKeyName = MetaDataUtility.constructForeignKeyName(pkColumn,
+                                                                 fkColumn);
+      }
 
-        final String fkTableCatalogName = quotedName(results
-          .getString("FKTABLE_CAT"));
-        final String fkTableSchemaName = quotedName(results
-          .getString("FKTABLE_SCHEM"));
-        final String fkTableName = quotedName(results
-          .getString("FKTABLE_NAME"));
-        final String fkColumnName = quotedName(results
-          .getString("FKCOLUMN_NAME"));
+      final Optional<MutableForeignKey> foreignKeyOptional = foreignKeys
+        .lookup(foreignKeyName);
+      final MutableForeignKey foreignKey;
+      if (foreignKeyOptional.isPresent())
+      {
+        foreignKey = foreignKeyOptional.get();
+      }
+      else
+      {
+        foreignKey = new MutableForeignKey(foreignKeyName);
+        foreignKeys.add(foreignKey);
+      }
 
-        final int keySequence = results.getInt("KEY_SEQ", 0);
-        final ForeignKeyUpdateRule updateRule = results
-          .getEnumFromId("UPDATE_RULE", ForeignKeyUpdateRule.unknown);
-        final ForeignKeyUpdateRule deleteRule = results
-          .getEnumFromId("DELETE_RULE", ForeignKeyUpdateRule.unknown);
-        final ForeignKeyDeferrability deferrability = results
-          .getEnumFromId("DEFERRABILITY", ForeignKeyDeferrability.unknown);
+      foreignKey.addColumnReference(keySequence, pkColumn, fkColumn);
+      foreignKey.setUpdateRule(updateRule);
+      foreignKey.setDeleteRule(deleteRule);
+      foreignKey.setDeferrability(deferrability);
+      foreignKey.addAttributes(results.getAttributes());
 
-        final Column pkColumn = lookupOrCreateColumn(pkTableCatalogName,
-                                                     pkTableSchemaName,
-                                                     pkTableName,
-                                                     pkColumnName);
-        final Column fkColumn = lookupOrCreateColumn(fkTableCatalogName,
-                                                     fkTableSchemaName,
-                                                     fkTableName,
-                                                     fkColumnName);
-        final boolean isPkColumnPartial = pkColumn instanceof ColumnPartial;
-        final boolean isFkColumnPartial = fkColumn instanceof ColumnPartial;
+      if (fkColumn instanceof MutableColumn)
+      {
+        ((MutableColumn) fkColumn).setReferencedColumn(pkColumn);
+        ((MutableTable) fkColumn.getParent()).addForeignKey(foreignKey);
+      }
+      else if (isFkColumnPartial)
+      {
+        ((ColumnPartial) fkColumn).setReferencedColumn(pkColumn);
+        ((TablePartial) fkColumn.getParent()).addForeignKey(foreignKey);
+      }
 
-        if (pkColumn == null || fkColumn == null
-            || isFkColumnPartial && isPkColumnPartial)
-        {
-          continue;
-        }
-
-        if (isBlank(foreignKeyName))
-        {
-          foreignKeyName = MetaDataUtility.constructForeignKeyName(pkColumn,
-                                                                   fkColumn);
-        }
-
-        final Optional<MutableForeignKey> foreignKeyOptional = foreignKeys
-          .lookup(foreignKeyName);
-        final MutableForeignKey foreignKey;
-        if (foreignKeyOptional.isPresent())
-        {
-          foreignKey = foreignKeyOptional.get();
-        }
-        else
-        {
-          foreignKey = new MutableForeignKey(foreignKeyName);
-          foreignKeys.add(foreignKey);
-        }
-
-        foreignKey.addColumnReference(keySequence, pkColumn, fkColumn);
-        foreignKey.setUpdateRule(updateRule);
-        foreignKey.setDeleteRule(deleteRule);
-        foreignKey.setDeferrability(deferrability);
-        foreignKey.addAttributes(results.getAttributes());
-
-        if (fkColumn instanceof MutableColumn)
-        {
-          ((MutableColumn) fkColumn).setReferencedColumn(pkColumn);
-          ((MutableTable) fkColumn.getParent()).addForeignKey(foreignKey);
-        }
-        else if (isFkColumnPartial)
-        {
-          ((ColumnPartial) fkColumn).setReferencedColumn(pkColumn);
-          ((TablePartial) fkColumn.getParent()).addForeignKey(foreignKey);
-        }
-
-        if (pkColumn instanceof MutableColumn)
-        {
-          ((MutableTable) pkColumn.getParent()).addForeignKey(foreignKey);
-        }
-        else if (isPkColumnPartial)
-        {
-          ((TablePartial) pkColumn.getParent()).addForeignKey(foreignKey);
-        }
+      if (pkColumn instanceof MutableColumn)
+      {
+        ((MutableTable) pkColumn.getParent()).addForeignKey(foreignKey);
+      }
+      else if (isPkColumnPartial)
+      {
+        ((TablePartial) pkColumn.getParent()).addForeignKey(foreignKey);
       }
     }
-    finally
-    {
-      results.close();
-    }
-
   }
 
   /**
@@ -304,60 +305,25 @@ final class ForeignKeyRetriever
       ((TablePartial) table).addColumn(column);
 
       LOGGER.log(Level.FINER,
-                 new StringFormat("Creating column reference for a column that is referenced by a foreign key, %s",
+                 new StringFormat("Creating column reference for a column that is referenced by a foreign key <%s>",
                                   column.getFullName()));
     }
     return column;
   }
 
-  private void retrieveForeignKeysUsingDatabaseMetadata(final NamedObjectList<MutableTable> allTables)
+  private void retrieveForeignKeysFromDataDictionary()
     throws SchemaCrawlerSQLException
   {
-    final NamedObjectList<MutableForeignKey> foreignKeys = new NamedObjectList<>();
-    for (final MutableTable table: allTables)
+    final InformationSchemaViews informationSchemaViews = getRetrieverConnection()
+      .getInformationSchemaViews();
+
+    if (!informationSchemaViews.hasForeignKeysSql())
     {
-      if (table instanceof View)
-      {
-        continue;
-      }
-
-      final DatabaseMetaData metaData = getMetaData();
-      try (final MetadataResultSet results = new MetadataResultSet(metaData
-        .getImportedKeys(unquotedName(table.getSchema().getCatalogName()),
-                         unquotedName(table.getSchema().getName()),
-                         unquotedName(table.getName())));)
-      {
-        createForeignKeys(results, foreignKeys);
-      }
-      catch (final SQLException e)
-      {
-        throw new SchemaCrawlerSQLException("Could not retrieve foreign keys for table "
-                                            + table, e);
-      }
-
-      // We need to get exported keys as well, since if only a single
-      // table is
-      // selected, we have not retrieved it's keys that are imported by
-      // other
-      // tables.
-      try (final MetadataResultSet results = new MetadataResultSet(metaData
-        .getExportedKeys(unquotedName(table.getSchema().getCatalogName()),
-                         unquotedName(table.getSchema().getName()),
-                         unquotedName(table.getName())));)
-      {
-        createForeignKeys(results, foreignKeys);
-      }
-      catch (final SQLException e)
-      {
-        throw new SchemaCrawlerSQLException("Could not retrieve foreign keys for table "
-                                            + table, e);
-      }
+      LOGGER.log(Level.FINE,
+                 "Extended foreign keys SQL statement was not provided");
+      return;
     }
-  }
 
-  private void retrieveForeignKeysUsingSql(final InformationSchemaViews informationSchemaViews)
-    throws SchemaCrawlerSQLException
-  {
     final NamedObjectList<MutableForeignKey> foreignKeys = new NamedObjectList<>();
     final Query fkSql = informationSchemaViews.getForeignKeysSql();
     final Connection connection = getDatabaseConnection();
@@ -373,6 +339,78 @@ final class ForeignKeyRetriever
     {
       throw new SchemaCrawlerSQLException("Could not retrieve foreign keys from SQL:\n"
                                           + fkSql, e);
+    }
+  }
+
+  private void retrieveForeignKeysFromMetadata(final NamedObjectList<MutableTable> allTables)
+    throws SchemaCrawlerSQLException
+  {
+    final NamedObjectList<MutableForeignKey> foreignKeys = new NamedObjectList<>();
+    for (final MutableTable table: allTables)
+    {
+      if (table instanceof View)
+      {
+        continue;
+      }
+
+      final DatabaseMetaData metaData = getMetaData();
+
+      // Get imported foreign keys
+      try (final MetadataResultSet results = new MetadataResultSet(metaData
+        .getImportedKeys(unquotedName(table.getSchema().getCatalogName()),
+                         unquotedName(table.getSchema().getName()),
+                         unquotedName(table.getName())));)
+      {
+        createForeignKeys(results, foreignKeys);
+      }
+      catch (final SQLException e)
+      {
+        throw new SchemaCrawlerSQLException("Could not retrieve foreign keys for table "
+                                            + table, e);
+      }
+
+      // We need to get exported keys as well, since if only a single
+      // table is selected, we have not retrieved it's keys that are
+      // imported by other tables.
+      try (final MetadataResultSet results = new MetadataResultSet(metaData
+        .getExportedKeys(unquotedName(table.getSchema().getCatalogName()),
+                         unquotedName(table.getSchema().getName()),
+                         unquotedName(table.getName())));)
+      {
+        createForeignKeys(results, foreignKeys);
+      }
+      catch (final SQLException e)
+      {
+        throw new SchemaCrawlerSQLException("Could not retrieve foreign keys for table "
+                                            + table, e);
+      }
+    }
+  }
+
+  private void retrieveForeignKeysFromMetadataForAllTables()
+    throws SQLException
+  {
+    final NamedObjectList<MutableForeignKey> foreignKeys = new NamedObjectList<>();
+    final DatabaseMetaData metaData = getMetaData();
+
+    // Get imported foreign keys
+    try (final MetadataResultSet results = new MetadataResultSet(metaData
+      .getImportedKeys(null,
+                       null,
+                       "%"));)
+    {
+      createForeignKeys(results, foreignKeys);
+    }
+
+    // We need to get exported keys as well, since if only a single
+    // table is selected, we have not retrieved it's keys that are
+    // imported by other tables.
+    try (final MetadataResultSet results = new MetadataResultSet(metaData
+      .getExportedKeys(null,
+                       null,
+                       "%"));)
+    {
+      createForeignKeys(results, foreignKeys);
     }
   }
 

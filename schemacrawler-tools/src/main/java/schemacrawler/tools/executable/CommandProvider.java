@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -37,14 +37,11 @@ public interface CommandProvider
 
   Executable configureNewExecutable(SchemaCrawlerOptions schemaCrawlerOptions,
                                     OutputOptions outputOptions)
-                                      throws SchemaCrawlerException;
+    throws SchemaCrawlerException;
 
   String getCommand();
 
-  default String getHelpAdditionalText()
-  {
-    return "";
-  }
+  String getHelpAdditionalText();
 
   String getHelpResource();
 

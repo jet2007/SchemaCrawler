@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,6 +28,7 @@ http://www.gnu.org/licenses/
 package schemacrawler.crawl;
 
 
+import schemacrawler.filter.IncludeAllFilter;
 import schemacrawler.filter.InclusionRuleFilter;
 import schemacrawler.schema.Schema;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
@@ -38,9 +39,9 @@ public final class SchemasReducer
 
   public SchemasReducer(final SchemaCrawlerOptions options)
   {
-    super(options == null? schema -> true: new InclusionRuleFilter<>(
-                                                                     options
-                                                                       .getSchemaInclusionRule(),
-                                                                     true));
+    super(options == null? new IncludeAllFilter<Schema>()
+                         : new InclusionRuleFilter<Schema>(options
+                           .getSchemaInclusionRule(), true));
   }
+
 }

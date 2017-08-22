@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -60,8 +60,6 @@ abstract class AbstractDependantObject<D extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public boolean equals(final Object obj)
@@ -95,8 +93,6 @@ abstract class AbstractDependantObject<D extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.crawl.AbstractDatabaseObject#getFullName()
    */
   @Override
   public String getFullName()
@@ -120,8 +116,6 @@ abstract class AbstractDependantObject<D extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.DependantObject#getParent()
    */
   @Override
   public final D getParent()
@@ -151,8 +145,6 @@ abstract class AbstractDependantObject<D extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#hashCode()
    */
   @Override
   public int hashCode()

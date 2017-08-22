@@ -325,7 +325,7 @@ schemacrawler.format.hide_constraint_names=false
           in the
           <code>schemacrawler.config.properties </code>
           file. This setting will show unqualified names of database objects
-          such as tables and prcodures.
+          such as tables and procedures.
           That is, the catalog and schema names will not be displayed. Use with care,
           especially if you have foreign keys
           that reference tables in other
@@ -424,7 +424,7 @@ schemacrawler.format.hide_constraint_names=false
     </faq>
     <faq id="graphviz_opts">
       <question>
-        How to provide additional GraphViz command-line options
+        How to provide additional Graphviz command-line options
       </question>
       <answer>
         <p>
@@ -434,7 +434,7 @@ schemacrawler.format.hide_constraint_names=false
           details.
         </p>
         <p>
-          You can provide additional GraphViz command-line options using
+          You can provide additional Graphviz command-line options using
           the SC_GRAPHVIZ_OPTS environmental variable, or pass in
           the additional arguments using the SC_GRAPHVIZ_OPTS Java
           system property.
@@ -499,10 +499,10 @@ for (final Schema schema: catalog.getSchemas())
     </faq>
     <faq id="maven-project">
       <question>
-        How to use SchemaCrawler in a Maven Project
+        How to use SchemaCrawler in an Apache Maven Project
       </question>
       <answer>
-        <p>In order to use SchemaCrawler in your Maven projects, add a
+        <p>In order to use SchemaCrawler in your Apache Maven projects, add a
           dependency to SchemaCrawler
           in your pom.xml.
         </p>
@@ -512,7 +512,7 @@ for (final Schema schema: catalog.getSchemas())
   <dependency>
     <groupId>us.fatehi</groupId>
     <artifactId>schemacrawler</artifactId>
-    <version>14.09.03</version>
+    <version>14.16.03</version>
   </dependency>
 </dependencies>
         ]]></source>
@@ -528,16 +528,16 @@ for (final Schema schema: catalog.getSchemas())
     </faq>
     <faq id="maven-report">
       <question>
-        How to use SchemaCrawler To Produce a Maven Report
+        How to use SchemaCrawler To Produce an Apache Maven Report
       </question>
       <answer>
         <p>
           <a
-            href="http://mvn-schemacrwlr.sourceforge.net/schemacrawler-maven-plugin/1.0/"
-          >SchemaCrawler Maven Plugin</a>
-          is a SourceForge project that provides a Maven plugin that can
+            href="https://github.com/sualeh/SchemaCrawler-Report-Maven-Plugin"
+          >SchemaCrawler Report Maven Plugin</a>
+          is a SourceForge project that provides an Apache Maven plugin that can
           generate database
-          documentation for a
+          documentation for an Apache 
           Maven-generated website.
         </p>
       </answer>
@@ -553,7 +553,7 @@ for (final Schema schema: catalog.getSchemas())
         <p>
           <i>
             See the documentation in
-            <a href="INFORMATION_SCHEMA.html">INFORMATION_SCHEMA Views</a>
+            <a href="data-dictionary-extensions.html">Extensions Using the Data Dictionary</a>
             .
           </i>
         </p>
@@ -567,7 +567,7 @@ for (final Schema schema: catalog.getSchemas())
         <p>
           <i>
             See the documentation in
-            <a href="INFORMATION_SCHEMA.html">INFORMATION_SCHEMA Views</a>
+            <a href="data-dictionary-extensions.html">Extensions Using the Data Dictionary</a>
             .
           </i>
         </p>

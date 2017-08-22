@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -43,7 +43,7 @@ public final class SqlServerDatabaseConnector
           "/help/Connections.sqlserver.txt",
           "/schemacrawler-sqlserver.config.properties",
           "/sqlserver.information_schema",
-          "jdbc:jtds:sqlserver:.*");
+          "jdbc:sqlserver:.*");
   }
 
 }

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -37,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.filter.InclusionRuleFilter;
 import schemacrawler.schema.Schema;
@@ -47,13 +46,14 @@ import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.utility.Query;
 import sf.util.DatabaseUtility;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 final class SchemaRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SchemaRetriever.class.getName());
 
   private final boolean supportsCatalogs;
@@ -106,7 +106,7 @@ final class SchemaRetriever
       if (!schemaFilter.test(schemaRef))
       {
         LOGGER.log(Level.FINER,
-                   new StringFormat("Dropping schema, since schema is excluded, %s",
+                   new StringFormat("Excluding schema <%s>",
                                     schemaRef.getFullName()));
         iterator.remove();
         // continue
@@ -115,7 +115,10 @@ final class SchemaRetriever
 
     // Create schemas for the catalogs, as well as create the schema
     // reference cache
-    schemaRefs.stream().forEach(schemaRef -> catalog.addSchema(schemaRef));
+    for (final SchemaReference schemaRef: schemaRefs)
+    {
+      catalog.addSchema(schemaRef);
+    }
 
     // Add an empty schema reference for databases that do not support
     // neither catalogs nor schemas
@@ -124,6 +127,9 @@ final class SchemaRetriever
       catalog.addSchema(new SchemaReference(null, null));
     }
 
+    LOGGER.log(Level.INFO,
+               new StringFormat("Retrieved %d schemas",
+                                catalog.getSchemas().size()));
   }
 
   /**
@@ -145,7 +151,7 @@ final class SchemaRetriever
           .readResultsVector(getMetaData().getCatalogs());
         for (final String catalogName: metaDataCatalogNames)
         {
-          catalogNames.add(quotedName(catalogName));
+          catalogNames.add(nameQuotedName(catalogName));
         }
       }
       catch (final SQLException e)
@@ -153,7 +159,7 @@ final class SchemaRetriever
         LOGGER.log(Level.WARNING, e.getMessage(), e);
       }
       LOGGER.log(Level.FINER,
-                 new StringFormat("Retrieved catalogs, %s", catalogNames));
+                 new StringFormat("Retrieved catalogs <%s>", catalogNames));
     }
 
     return catalogNames;
@@ -177,13 +183,13 @@ final class SchemaRetriever
           final String catalogName;
           if (supportsCatalogs)
           {
-            catalogName = quotedName(results.getString("TABLE_CATALOG"));
+            catalogName = nameQuotedName(results.getString("TABLE_CATALOG"));
           }
           else
           {
             catalogName = null;
           }
-          final String schemaName = quotedName(results
+          final String schemaName = nameQuotedName(results
             .getString("TABLE_SCHEM"));
           LOGGER.log(Level.FINER,
                      new StringFormat("Retrieving schema: %s --> %s",
@@ -249,9 +255,9 @@ final class SchemaRetriever
       results.setDescription("retrieveAllSchemasFromInformationSchemaViews");
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("CATALOG_NAME"));
-        final String schemaName = quotedName(results.getString("SCHEMA_NAME"));
+        final String schemaName = nameQuotedName(results.getString("SCHEMA_NAME"));
         LOGGER.log(Level.FINER,
                    new StringFormat("Retrieving schema: %s --> %s",
                                     catalogName,

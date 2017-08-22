@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -39,6 +39,7 @@ import org.junit.Test;
 
 import de.danielbechler.diff.node.DiffNode;
 import de.danielbechler.diff.node.DiffNode.State;
+import de.danielbechler.diff.node.Visit;
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.DatabaseObject;
@@ -48,6 +49,7 @@ import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.ConnectionOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaInfoLevelBuilder;
+import schemacrawler.schemacrawler.SingleUseUserCredentials;
 import schemacrawler.test.utility.BaseDatabaseTest;
 import schemacrawler.test.utility.TestName;
 import schemacrawler.test.utility.TestWriter;
@@ -63,6 +65,50 @@ public class DiffTest
 
   @Rule
   public TestName testName = new TestName();
+
+  @Test
+  public void diffCatalog()
+    throws Exception
+  {
+    final Catalog catalog1 = getCatalog("/test1.db");
+    final Catalog catalog2 = getCatalog("/test2.db");
+
+    final String currentMethodFullName = testName.currentMethodFullName();
+
+    final SchemaCrawlerDifferBuilder objectDifferBuilder = new SchemaCrawlerDifferBuilder();
+
+    try (final TestWriter out = new TestWriter("text");)
+    {
+      final DiffNode diff = objectDifferBuilder.build().compare(catalog1,
+                                                                catalog2);
+      diff.visit(new DiffNode.Visitor()
+      {
+        public void node(DiffNode node, Visit visit)
+        {
+          final State nodeState = node.getState();
+          final boolean print = DatabaseObject.class
+            .isAssignableFrom(node.getValueType());
+
+          if (print)
+          {
+            out.println(node.getPath() + " (" + nodeState + ")");
+          }
+
+          if (Table.class.isAssignableFrom(node.getValueType())
+              && nodeState != State.CHANGED)
+          {
+            visit.dontGoDeeper();
+          }
+          if (Column.class.isAssignableFrom(node.getValueType()))
+          {
+            visit.dontGoDeeper();
+          }
+        }
+      });
+
+      out.assertEquals(currentMethodFullName);
+    }
+  }
 
   @Test
   public void printColumns1()
@@ -90,7 +136,7 @@ public class DiffTest
     schemaCrawlerOptions.setSchemaInfoLevel(SchemaInfoLevelBuilder.maximum());
 
     final ConnectionOptions connectionOptions = new SQLiteDatabaseConnector()
-      .newDatabaseConnectionOptions(config);
+      .newDatabaseConnectionOptions(new SingleUseUserCredentials(), config);
 
     final Catalog catalog = SchemaCrawlerUtility
       .getCatalog(connectionOptions.getConnection(), schemaCrawlerOptions);
@@ -100,7 +146,7 @@ public class DiffTest
 
   private void printColumns(final String currentMethodFullName,
                             final String database)
-                              throws Exception
+    throws Exception
   {
 
     try (final TestWriter out = new TestWriter("text");)
@@ -123,46 +169,6 @@ public class DiffTest
           }
         }
       }
-
-      out.assertEquals(currentMethodFullName);
-    }
-  }
-
-  @Test
-  public void diffCatalog()
-    throws Exception
-  {
-    final Catalog catalog1 = getCatalog("/test1.db");
-    final Catalog catalog2 = getCatalog("/test2.db");
-
-    final String currentMethodFullName = testName.currentMethodFullName();
-
-    final SchemaCrawlerDifferBuilder objectDifferBuilder = new SchemaCrawlerDifferBuilder();
-
-    try (final TestWriter out = new TestWriter("text");)
-    {
-      final DiffNode diff = objectDifferBuilder.build().compare(catalog1,
-                                                                catalog2);
-      diff.visit((node, visit) -> {
-        final State nodeState = node.getState();
-        final boolean print = DatabaseObject.class
-          .isAssignableFrom(node.getValueType());
-
-        if (print)
-        {
-          out.println(node.getPath() + " (" + nodeState + ")");
-        }
-
-        if (Table.class.isAssignableFrom(node.getValueType())
-            && nodeState != State.CHANGED)
-        {
-          visit.dontGoDeeper();
-        }
-        if (Column.class.isAssignableFrom(node.getValueType()))
-        {
-          visit.dontGoDeeper();
-        }
-      });
 
       out.assertEquals(currentMethodFullName);
     }

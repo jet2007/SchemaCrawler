@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -32,12 +32,12 @@ package schemacrawler.crawl;
 import static sf.util.Utility.isBlank;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.ColumnDataType;
 import schemacrawler.schema.JavaSqlType;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.SearchableType;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -53,7 +53,7 @@ final class MutableColumnDataType
 
   private static final long serialVersionUID = 3688503281676530744L;
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SchemaCrawler.class.getName());
 
   private JavaSqlType javaSqlType;
@@ -89,8 +89,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getBaseType()
    */
   @Override
   public ColumnDataType getBaseType()
@@ -100,8 +98,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getCreateParameters()
    */
   @Override
   public String getCreateParameters()
@@ -111,8 +107,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getDatabaseSpecificTypeName()
    */
   @Override
   public String getDatabaseSpecificTypeName()
@@ -128,8 +122,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getLiteralPrefix()
    */
   @Override
   public String getLiteralPrefix()
@@ -139,8 +131,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getLiteralSuffix()
    */
   @Override
   public String getLiteralSuffix()
@@ -150,8 +140,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getLocalTypeName()
    */
   @Override
   public String getLocalTypeName()
@@ -161,8 +149,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getMaximumScale()
    */
   @Override
   public int getMaximumScale()
@@ -172,8 +158,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getMinimumScale()
    */
   @Override
   public int getMinimumScale()
@@ -183,8 +167,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getNumPrecisionRadix()
    */
   @Override
   public int getNumPrecisionRadix()
@@ -194,8 +176,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getPrecision()
    */
   @Override
   public long getPrecision()
@@ -205,8 +185,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getSearchable()
    */
   @Override
   public SearchableType getSearchable()
@@ -216,8 +194,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#getTypeMappedClass()
    */
   @Override
   public Class<?> getTypeMappedClass()
@@ -227,8 +203,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#isAutoIncrementable()
    */
   @Override
   public boolean isAutoIncrementable()
@@ -238,8 +212,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#isCaseSensitive()
    */
   @Override
   public boolean isCaseSensitive()
@@ -249,8 +221,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#isFixedPrecisionScale()
    */
   @Override
   public boolean isFixedPrecisionScale()
@@ -260,8 +230,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#isNullable()
    */
   @Override
   public boolean isNullable()
@@ -271,8 +239,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#isUnsigned()
    */
   @Override
   public boolean isUnsigned()
@@ -282,8 +248,6 @@ final class MutableColumnDataType
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.ColumnDataType#isUserDefined()
    */
   @Override
   public boolean isUserDefined()
@@ -396,9 +360,9 @@ final class MutableColumnDataType
       catch (final ClassNotFoundException e)
       {
         LOGGER.log(Level.FINE,
-                   e,
-                   new StringFormat("Could not load mapped class, %s",
-                                    mappedClassName));
+                   new StringFormat("Could not load mapped class <%s>",
+                                    mappedClassName),
+                   e);
         javaSqlTypeMappedClass = Object.class;
       }
     }

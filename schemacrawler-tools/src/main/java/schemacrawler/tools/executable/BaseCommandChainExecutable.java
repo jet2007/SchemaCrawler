@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -32,10 +32,10 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.Catalog;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
+import sf.util.SchemaCrawlerLogger;
 
 /**
  * Allows chaining multiple executables with the same configuration. The
@@ -46,7 +46,7 @@ abstract class BaseCommandChainExecutable
   extends BaseStagedExecutable
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(BaseCommandChainExecutable.class.getName());
 
   private final List<Executable> executables;
@@ -72,7 +72,7 @@ abstract class BaseCommandChainExecutable
 
   protected final void executeChain(final Catalog catalog,
                                     final Connection connection)
-                                      throws Exception
+    throws Exception
   {
     if (executables.isEmpty())
     {

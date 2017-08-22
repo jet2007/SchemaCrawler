@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,6 +29,7 @@ package schemacrawler.crawl;
 
 
 import schemacrawler.filter.DatabaseObjectFilter;
+import schemacrawler.filter.IncludeAllFilter;
 import schemacrawler.schema.Sequence;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 
@@ -38,7 +39,7 @@ public final class SequencesReducer
 
   public SequencesReducer(final SchemaCrawlerOptions options)
   {
-    super(options == null? sequence -> true
+    super(options == null? new IncludeAllFilter<Sequence>()
                          : new DatabaseObjectFilter<Sequence>(options,
                                                               options
                                                                 .getSequenceInclusionRule()));

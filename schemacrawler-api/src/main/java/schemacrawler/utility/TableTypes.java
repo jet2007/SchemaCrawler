@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ package schemacrawler.utility;
 
 import static java.util.Objects.requireNonNull;
 import static sf.util.DatabaseUtility.readResultsVector;
-import static sf.util.Utility.filterOutBlank;
+import static sf.util.Utility.isBlank;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -41,9 +41,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.TableType;
+import sf.util.SchemaCrawlerLogger;
 
 /**
  * Represents a collection of tables types for a database system, as
@@ -54,7 +54,7 @@ import schemacrawler.schema.TableType;
 public final class TableTypes
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(TableTypes.class.getName());
 
   private final Collection<TableType> tableTypes;
@@ -71,9 +71,14 @@ public final class TableTypes
     try (final ResultSet tableTypesResults = connection.getMetaData()
       .getTableTypes();)
     {
-      readResultsVector(tableTypesResults).stream().filter(filterOutBlank)
-        .forEach(tableTypeString -> tableTypes
-          .add(new TableType(tableTypeString)));
+      final List<String> tableTypeStrings = readResultsVector(tableTypesResults);
+      for (final String tableTypeString: tableTypeStrings)
+      {
+        if (!isBlank(tableTypeString))
+        {
+          tableTypes.add(new TableType(tableTypeString));
+        }
+      }
     }
     catch (final Exception e)
     {
@@ -128,14 +133,18 @@ public final class TableTypes
    */
   public Optional<TableType> lookupTableType(final String tableTypeString)
   {
-    return tableTypes.stream()
-      .filter(tableType -> tableType.isEqualTo(tableTypeString)).findAny();
+    for (final TableType tableType: tableTypes)
+    {
+      if (tableType.isEqualTo(tableTypeString))
+      {
+        return Optional.of(tableType);
+      }
+    }
+    return Optional.empty();
   }
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#toString()
    */
   @Override
   public String toString()

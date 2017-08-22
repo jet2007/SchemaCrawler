@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -61,7 +61,7 @@ import schemacrawler.utility.NamedObjectSort;
 import sf.util.Color;
 
 /**
- * GraphViz DOT formatting of schema.
+ * Graphviz DOT formatting of schema.
  *
  * @author Sualeh Fatehi
  */
@@ -70,7 +70,6 @@ public final class SchemaDotFormatter
   implements SchemaTraversalHandler
 {
 
-  private final boolean isVerbose;
   private final boolean isBrief;
 
   /**
@@ -93,7 +92,6 @@ public final class SchemaDotFormatter
     super(options,
           schemaTextDetailType == SchemaTextDetailType.details,
           outputOptions);
-    isVerbose = schemaTextDetailType == SchemaTextDetailType.details;
     isBrief = schemaTextDetailType == SchemaTextDetailType.brief;
   }
 
@@ -190,11 +188,7 @@ public final class SchemaDotFormatter
     formattingHelper.println();
 
     printForeignKeys(table);
-
-    if (isVerbose && !options.isHideWeakAssociations())
-    {
-      printWeakAssociations(table);
-    }
+    printWeakAssociations(table);
 
     formattingHelper.println();
     formattingHelper.println();
@@ -569,6 +563,11 @@ public final class SchemaDotFormatter
 
   private void printWeakAssociations(final Table table)
   {
+    if (!options.isShowWeakAssociations())
+    {
+      return;
+    }
+
     final Collection<WeakAssociationForeignKey> weakFks = WeakAssociationsUtility
       .getWeakAssociations(table);
     printForeignKeys(table, weakFks);

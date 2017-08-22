@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -45,7 +45,10 @@ public final class Query
 
   private static final long serialVersionUID = 2820769346069413473L;
 
+  private final boolean hasName;
+
   private final String name;
+
   private final String query;
   private final boolean throwSQLException;
 
@@ -84,10 +87,12 @@ public final class Query
     {
       this.name = name;
       this.query = query;
+      hasName = true;
     }
     else if (isNameProvided && !isQueryProvided)
     {
       this.name = this.query = name;
+      hasName = false;
     }
     else
     {
@@ -117,6 +122,16 @@ public final class Query
   }
 
   /**
+   * Whether a query name was provided.
+   *
+   * @return Whether a query name was provided
+   */
+  public boolean hasName()
+  {
+    return hasName;
+  }
+
+  /**
    * Determines if this query has substitutable parameters, and whether
    * it should be run once for each table.
    *
@@ -141,8 +156,6 @@ public final class Query
 
   /**
    * {@inheritDoc}
-   *
-   * @see java.lang.Object#toString()
    */
   @Override
   public String toString()

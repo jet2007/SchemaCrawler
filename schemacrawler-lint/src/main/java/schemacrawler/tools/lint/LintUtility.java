@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,25 +28,25 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.lint;
 
 
-import static java.nio.file.Files.isReadable;
-import static java.nio.file.Files.isRegularFile;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newBufferedReader;
+import static sf.util.IOUtility.isFileReadable;
 import static sf.util.Utility.isBlank;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.tools.lint.executable.LintOptions;
+import sf.util.SchemaCrawlerLogger;
 
 public final class LintUtility
 {
 
-  public static final Logger LOGGER = Logger
+  public static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(LintUtility.class.getName());
 
   public static final <E> boolean listStartsWith(final List<E> main,
@@ -71,12 +71,14 @@ public final class LintUtility
 
   /**
    * Obtain linter configuration from a system property
-   * @param config TODO
    *
+   * @param config
+   *        SchemaCrawler configuration
    * @return LinterConfigs
    * @throws SchemaCrawlerException
    */
-  public static LinterConfigs readLinterConfigs(final LintOptions lintOptions, final Config config)
+  public static LinterConfigs readLinterConfigs(final LintOptions lintOptions,
+                                                final Config config)
   {
     final LinterConfigs linterConfigs = new LinterConfigs(config);
     String linterConfigsFile = null;
@@ -87,16 +89,15 @@ public final class LintUtility
       {
         final Path linterConfigsFilePath = Paths.get(linterConfigsFile)
           .toAbsolutePath();
-        if (isRegularFile(linterConfigsFilePath)
-            && isReadable(linterConfigsFilePath))
+        if (isFileReadable(linterConfigsFilePath))
         {
-          linterConfigs.parse(newBufferedReader(linterConfigsFilePath));
+          linterConfigs.parse(newBufferedReader(linterConfigsFilePath, UTF_8));
         }
         else
         {
           LOGGER
             .log(Level.WARNING,
-                 "Could not find linter configs file, " + linterConfigsFile);
+                 "Could not read linter configs file, " + linterConfigsFile);
         }
       }
       else

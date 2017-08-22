@@ -18,6 +18,7 @@
 /schemacrawler/lgpl-3.0.txt
 /schemacrawler/src/assembly/schemacrawler.pom.asc
 target/
+bin/
 workspace/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -26,3 +27,4 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
+/schemacrawler-examplecode/derby.log

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -70,9 +70,9 @@ public final class OperationOptionsBuilder
   /**
    * Whether to show LOBs.
    */
-  public OperationOptionsBuilder showLobs()
+  public OperationOptionsBuilder showLobs(final boolean value)
   {
-    options.setShowLobs(true);
+    options.setShowLobs(value);
     return this;
   }
 

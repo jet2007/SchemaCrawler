@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,12 +34,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schema.RoutineBodyType;
 import schemacrawler.schemacrawler.InformationSchemaViews;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -52,7 +52,7 @@ final class RoutineExtRetriever
   extends AbstractRetriever
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(RoutineExtRetriever.class.getName());
 
   RoutineExtRetriever(final RetrieverConnection retrieverConnection,
@@ -95,13 +95,13 @@ final class RoutineExtRetriever
     {
       while (results.next())
       {
-        final String catalogName = quotedName(results
+        final String catalogName = nameQuotedName(results
           .getString("ROUTINE_CATALOG"));
-        final String schemaName = quotedName(results
+        final String schemaName = nameQuotedName(results
           .getString("ROUTINE_SCHEMA"));
-        final String routineName = quotedName(results
+        final String routineName = nameQuotedName(results
           .getString("ROUTINE_NAME"));
-        final String specificName = quotedName(results
+        final String specificName = nameQuotedName(results
           .getString("SPECIFIC_NAME"));
 
         final Optional<MutableRoutine> routineOptional = lookupRoutine(catalogName,
@@ -112,7 +112,7 @@ final class RoutineExtRetriever
         {
           final MutableRoutine routine = routineOptional.get();
           LOGGER.log(Level.FINER,
-                     new StringFormat("Retrieving routine information, %s",
+                     new StringFormat("Retrieving routine information for <%s>",
                                       routineName));
           final RoutineBodyType routineBodyType = results
             .getEnum("ROUTINE_BODY", RoutineBodyType.unknown);

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -43,6 +43,7 @@ import java.util.Set;
  *
  * @author Sualeh Fatehi
  */
+@UtilityMarker
 public final class TemplatingUtility
 {
 

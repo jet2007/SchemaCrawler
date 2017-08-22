@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -34,6 +34,7 @@ import static sf.util.Utility.isBlank;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import schemacrawler.schema.AttributedObject;
 import schemacrawler.schema.DescribedObject;
@@ -61,9 +62,15 @@ abstract class AbstractNamedObjectWithAttributes
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.AttributedObject#getAttribute(java.lang.String,
-   *      java.lang.Object)
+   */
+  @Override
+  public final <T> T getAttribute(final String name)
+  {
+    return getAttribute(name, (T) null);
+  }
+
+  /**
+   * {@inheritDoc}
    */
   @Override
   public final <T> T getAttribute(final String name, final T defaultValue)
@@ -88,8 +95,6 @@ abstract class AbstractNamedObjectWithAttributes
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.NamedObjectWithAttributes#getAttributes()
    */
   @Override
   public final Map<String, Object> getAttributes()
@@ -99,8 +104,6 @@ abstract class AbstractNamedObjectWithAttributes
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.DatabaseObject#getRemarks()
    */
   @Override
   public final String getRemarks()
@@ -110,8 +113,6 @@ abstract class AbstractNamedObjectWithAttributes
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.AttributedObject#hasAttribute(java.lang.String)
    */
   @Override
   public boolean hasAttribute(final String name)
@@ -121,13 +122,20 @@ abstract class AbstractNamedObjectWithAttributes
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.NamedObjectWithAttributes#hasRemarks()
    */
   @Override
   public final boolean hasRemarks()
   {
     return remarks != null && !remarks.isEmpty();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public final <T> Optional<T> lookupAttribute(final String name)
+  {
+    return Optional.of(getAttribute(name));
   }
 
   /**
@@ -144,8 +152,6 @@ abstract class AbstractNamedObjectWithAttributes
 
   /**
    * {@inheritDoc}
-   *
-   * @see NamedObjectWithAttributes#setAttribute(String, Object)
    */
   @Override
   public final void setAttribute(final String name, final Object value)

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,14 +28,12 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.iosource;
 
 
-import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isDirectory;
-import static java.nio.file.Files.isWritable;
 import static java.nio.file.Files.newOutputStream;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.requireNonNull;
+import static sf.util.IOUtility.isFileWritable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -45,34 +43,32 @@ import java.nio.charset.Charset;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public class CompressedFileOutputResource
   implements OutputResource
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(CompressedFileOutputResource.class.getName());
 
   private final Path outputFile;
   private final String internalPath;
 
-  public CompressedFileOutputResource(final Path filePath,
+  public CompressedFileOutputResource(final Path outputFile,
                                       final String internalPath)
-                                        throws IOException
+    throws IOException
   {
-    outputFile = requireNonNull(filePath, "No file path provided").normalize()
-      .toAbsolutePath();
-    final Path parentPath = requireNonNull(filePath.getParent(),
-                                           "Invalid output directory");
-    if (!exists(parentPath) || !isWritable(parentPath)
-        || !isDirectory(parentPath))
+    requireNonNull(outputFile, "No output file provided");
+
+    this.outputFile = outputFile.normalize().toAbsolutePath();
+    if (!isFileWritable(this.outputFile))
     {
-      throw new IOException("Cannot write file, " + filePath);
+      throw new IOException("Cannot write output file, " + this.outputFile);
     }
 
     this.internalPath = requireNonNull(internalPath,
@@ -87,7 +83,7 @@ public class CompressedFileOutputResource
   @Override
   public Writer openNewOutputWriter(final Charset charset,
                                     final boolean appendOutput)
-                                      throws IOException
+    throws IOException
   {
     if (appendOutput)
     {
@@ -104,7 +100,7 @@ public class CompressedFileOutputResource
 
     final Writer writer = new OutputStreamWriter(zipOutputStream, charset);
     LOGGER.log(Level.INFO,
-               new StringFormat("Opened output writer to compressed file, %s",
+               new StringFormat("Opened output writer to compressed file <%s>",
                                 outputFile));
     return new OutputWriter(getDescription(), writer, true);
   }

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -87,8 +87,6 @@ abstract class AbstractColumn<P extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.BaseColumn#getColumnDataType()
    */
   @Override
   public final ColumnDataType getColumnDataType()
@@ -98,8 +96,6 @@ abstract class AbstractColumn<P extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.BaseColumn#getDecimalDigits()
    */
   @Override
   public final int getDecimalDigits()
@@ -109,8 +105,6 @@ abstract class AbstractColumn<P extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.BaseColumn#getOrdinalPosition()
    */
   @Override
   public final int getOrdinalPosition()
@@ -120,8 +114,6 @@ abstract class AbstractColumn<P extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.BaseColumn#getSize()
    */
   @Override
   public final int getSize()
@@ -131,8 +123,15 @@ abstract class AbstractColumn<P extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.BaseColumn#getWidth()
+   */
+  @Override
+  public final ColumnDataType getType()
+  {
+    return getColumnDataType();
+  }
+
+  /**
+   * {@inheritDoc}
    */
   @Override
   public final String getWidth()
@@ -172,8 +171,6 @@ abstract class AbstractColumn<P extends DatabaseObject>
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.BaseColumn#isNullable()
    */
   @Override
   public final boolean isNullable()

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ public class DirectedGraph<T extends Comparable<? super T>>
   {
     if (!from.equals(to))
     {
-      edges.add(new DirectedEdge<T>(addVertex(from), addVertex(to)));
+      edges.add(new DirectedEdge<>(addVertex(from), addVertex(to)));
     }
   }
 
@@ -82,7 +82,7 @@ public class DirectedGraph<T extends Comparable<? super T>>
     }
     else
     {
-      vertex = new Vertex<T>(value);
+      vertex = new Vertex<>(value);
       verticesMap.put(value, vertex);
     }
     return vertex;

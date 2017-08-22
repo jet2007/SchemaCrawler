@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,6 +29,7 @@ http://www.gnu.org/licenses/
 package schemacrawler.tools.offline;
 
 
+import static java.util.Objects.requireNonNull;
 import static schemacrawler.filter.FilterFactory.routineFilter;
 import static schemacrawler.filter.FilterFactory.tableFilter;
 
@@ -37,9 +38,6 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.util.function.Predicate;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 import schemacrawler.crawl.RoutinesReducer;
 import schemacrawler.crawl.SchemasReducer;
@@ -61,6 +59,7 @@ import schemacrawler.tools.executable.StagedExecutable;
 import schemacrawler.tools.integration.serialization.XmlSerializedCatalog;
 import schemacrawler.tools.offline.jdbc.OfflineConnection;
 import schemacrawler.tools.options.OutputOptions;
+import sf.util.SchemaCrawlerLogger;
 
 /**
  * A SchemaCrawler tools executable unit.
@@ -72,12 +71,12 @@ public class OfflineSnapshotExecutable
   implements StagedExecutable
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(OfflineSnapshotExecutable.class.getName());
 
   private OutputOptions inputOptions;
 
-  protected OfflineSnapshotExecutable(final String command)
+  public OfflineSnapshotExecutable(final String command)
   {
     super(command);
   }
@@ -85,7 +84,7 @@ public class OfflineSnapshotExecutable
   @Override
   public void execute(final Connection connection,
                       final DatabaseSpecificOverrideOptions databaseSpecificOverrideOptions)
-                        throws Exception
+    throws Exception
   {
     checkConnection(connection);
 

@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.thoughtworks.xstream.XStream;
@@ -225,6 +226,24 @@ public final class XmlSerializedCatalog
   }
 
   /**
+   * {@inheritDoc}
+   */
+  @Override
+  public final <T> T getAttribute(final String name)
+  {
+    return getAttribute(name, (T) null);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public final <T> Optional<T> lookupAttribute(final String name)
+  {
+    return Optional.of(getAttribute(name));
+  }
+
+  /**
    * Serializes the database to the writer, as XML.
    *
    * @param writer
@@ -247,5 +266,4 @@ public final class XmlSerializedCatalog
       throw new SchemaCrawlerException("Could not write XML", e);
     }
   }
-
 }

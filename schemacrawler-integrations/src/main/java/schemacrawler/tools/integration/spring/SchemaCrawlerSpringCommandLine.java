@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -36,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -50,13 +49,14 @@ import schemacrawler.schemacrawler.DatabaseSpecificOverrideOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.tools.commandline.CommandLine;
 import schemacrawler.tools.executable.Executable;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 public class SchemaCrawlerSpringCommandLine
   implements CommandLine
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(SchemaCrawlerSpringCommandLine.class.getName());
 
   private final SpringOptions springOptions;
@@ -80,14 +80,14 @@ public class SchemaCrawlerSpringCommandLine
     {
       final String contextFilePath = contextFile.toUri().toString();
       LOGGER.log(Level.INFO,
-                 new StringFormat("Loading context from file, %s",
+                 new StringFormat("Loading context from file <%s>",
                                   contextFilePath));
       appContext = new FileSystemXmlApplicationContext(contextFilePath);
     }
     else
     {
       LOGGER.log(Level.INFO,
-                 new StringFormat("Loading context from classpath, %s",
+                 new StringFormat("Loading context from classpath <%s>",
                                   springOptions.getContextFileName()));
       appContext = new ClassPathXmlApplicationContext(springOptions
         .getContextFileName());

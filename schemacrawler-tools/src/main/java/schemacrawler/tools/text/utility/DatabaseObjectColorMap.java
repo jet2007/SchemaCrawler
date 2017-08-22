@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -29,26 +29,48 @@ package schemacrawler.tools.text.utility;
 
 
 import static java.util.Objects.requireNonNull;
+import static sf.util.PropertiesUtility.loadProperties;
 import static sf.util.Utility.isBlank;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.Properties;
 
 import schemacrawler.schema.DatabaseObject;
 import sf.util.Color;
+import sf.util.RegularExpressionColorMap;
 
 public class DatabaseObjectColorMap
 {
 
+  private static final String SCHEMACRAWLER_COLORMAP_PROPERTIES = "schemacrawler.colormap.properties";
+
   public static Color default_object_color = Color.fromHSV(0, 0, 0.95f);
 
-  private final Map<String, Color> colorMap;
+  public static DatabaseObjectColorMap initialize(final boolean noColors)
+  {
+    final Properties properties = new Properties();
+    if (noColors)
+    {
+      return new DatabaseObjectColorMap(properties, noColors);
+    }
+
+    // Load from classpath and also current directory, in that order
+    properties.putAll(loadProperties("/" + SCHEMACRAWLER_COLORMAP_PROPERTIES));
+    properties.putAll(loadProperties(Paths
+      .get("./" + SCHEMACRAWLER_COLORMAP_PROPERTIES)));
+
+    return new DatabaseObjectColorMap(properties, noColors);
+  }
+
+  private final RegularExpressionColorMap colorMap;
   private final boolean noColors;
 
-  public DatabaseObjectColorMap(final boolean noColors)
+  private DatabaseObjectColorMap(final Properties properties,
+                                 final boolean noColors)
   {
     this.noColors = noColors;
-    colorMap = new HashMap<>();
+    colorMap = new RegularExpressionColorMap(properties);
   }
 
   public Color getColor(final DatabaseObject dbObject)
@@ -61,14 +83,15 @@ public class DatabaseObjectColorMap
 
     final Color tableColor;
     final String schemaName = dbObject.getSchema().getFullName();
-    if (!colorMap.containsKey(schemaName))
+    final Optional<Color> colorMatch = colorMap.match(schemaName);
+    if (!colorMatch.isPresent())
     {
       tableColor = generatePastelColor(schemaName);
-      colorMap.put(schemaName, tableColor);
+      colorMap.putLiteral(schemaName, tableColor);
     }
     else
     {
-      tableColor = colorMap.get(schemaName);
+      tableColor = colorMatch.get();
     }
     return tableColor;
   }
@@ -92,4 +115,5 @@ public class DatabaseObjectColorMap
     final Color color = Color.fromHSV(hue, saturation, brightness);
     return color;
   }
+
 }

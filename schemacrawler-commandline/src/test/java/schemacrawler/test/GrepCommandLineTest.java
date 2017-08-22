@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -28,6 +28,7 @@ http://www.gnu.org/licenses/
 package schemacrawler.test;
 
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newBufferedWriter;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -35,10 +36,8 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static org.junit.Assert.fail;
 import static schemacrawler.test.utility.TestUtility.clean;
 import static schemacrawler.test.utility.TestUtility.compareOutput;
-import static schemacrawler.test.utility.TestUtility.createTempFile;
 
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +52,7 @@ import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
+import sf.util.IOUtility;
 
 public class GrepCommandLineTest
   extends BaseDatabaseTest
@@ -94,10 +94,10 @@ public class GrepCommandLineTest
 
       final SchemaTextDetailType schemaTextDetailType = SchemaTextDetailType.details;
       final InfoLevel infoLevel = InfoLevel.detailed;
-      final Path additionalProperties = createTempFile("hsqldb.INFORMATION_SCHEMA.config",
-                                                       "properties");
+      final Path additionalProperties = IOUtility
+        .createTempFilePath("hsqldb.INFORMATION_SCHEMA.config", "properties");
       final Writer writer = newBufferedWriter(additionalProperties,
-                                              StandardCharsets.UTF_8,
+                                              UTF_8,
                                               WRITE,
                                               CREATE,
                                               TRUNCATE_EXISTING);
@@ -108,7 +108,8 @@ public class GrepCommandLineTest
 
       final String referenceFile = String.format("grep%02d.txt", i + 1);
 
-      final Path testOutputFile = createTempFile(referenceFile, "data");
+      final Path testOutputFile = IOUtility.createTempFilePath(referenceFile,
+                                                               "data");
 
       final OutputFormat outputFormat = TextOutputFormat.text;
 

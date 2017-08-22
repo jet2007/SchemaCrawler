@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 import sf.util.TemplatingUtility;
 
@@ -57,12 +58,10 @@ abstract class BaseDatabaseConnectionOptions
 
   private static final long serialVersionUID = -8141436553988174836L;
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(BaseDatabaseConnectionOptions.class.getName());
 
   private static final String URL = "url";
-  private static final String USER = "user";
-  private static final String PASSWORD = "password";
 
   protected static final Map<String, String> toMap(final String connectionUrl)
   {
@@ -77,19 +76,22 @@ abstract class BaseDatabaseConnectionOptions
   }
 
   protected final Map<String, String> connectionProperties;
-  private String user;
-  private String password;
+  private final UserCredentials userCredentials;
 
-  protected BaseDatabaseConnectionOptions(final Map<String, String> properties)
+  protected BaseDatabaseConnectionOptions(final UserCredentials userCredentials,
+                                          final Map<String, String> properties)
     throws SchemaCrawlerException
   {
+    if (userCredentials == null)
+    {
+      throw new IllegalArgumentException("No user credentials provided");
+    }
+    this.userCredentials = userCredentials;
+
     if (properties == null || properties.isEmpty())
     {
       throw new IllegalArgumentException("No connection properties provided");
     }
-
-    setUser(properties.get(USER));
-    setPassword(properties.get(PASSWORD));
 
     connectionProperties = new HashMap<>(properties);
     TemplatingUtility.substituteVariables(connectionProperties);
@@ -99,6 +101,8 @@ abstract class BaseDatabaseConnectionOptions
   public final Connection getConnection()
     throws SQLException
   {
+    final String user = userCredentials.getUser();
+    final String password = userCredentials.getPassword();
     return getConnection(user, password);
   }
 
@@ -127,11 +131,21 @@ abstract class BaseDatabaseConnectionOptions
     }
     catch (final Exception e)
     {
+      final String username;
+      if (user != null)
+      {
+        username = String.format("user \'%s\'", user);
+      }
+      else
+      {
+        username = "unspecified user";
+      }
       throw new SQLException(String
-        .format("Could not connect to database, for user \'%s\'", user), e);
+        .format("Could not connect to database, for %s", username), e);
     }
 
-    final Properties jdbcConnectionProperties = createConnectionProperties(user,
+    final Properties jdbcConnectionProperties = createConnectionProperties(connectionUrl,
+                                                                           user,
                                                                            password);
     try
     {
@@ -141,22 +155,41 @@ abstract class BaseDatabaseConnectionOptions
                               connectionUrl,
                               user,
                               safeProperties(jdbcConnectionProperties)));
-      final Connection connection = DriverManager
-        .getConnection(connectionUrl, jdbcConnectionProperties);
+      // (Using java.sql.DriverManager.getConnection(String, Properties)
+      // to make a connection is not the best idea,
+      // since for some strange reason, it does not check if a Driver
+      // will accept the connection URL, and some non-compliant drivers
+      // (MySQL Connector/J) may raise an exception other than a
+      // SQLException in this case.)
+      final Driver driver = getJdbcDriver(connectionUrl);
+      final Connection connection = driver.connect(connectionUrl,
+                                                   jdbcConnectionProperties);
 
       LOGGER
         .log(Level.INFO,
-             new StringFormat("Opened database connection, %s", connection));
+             new StringFormat("Opened database connection <%s>", connection));
       logConnection(connection);
+
+      // Clear password
+      jdbcConnectionProperties.remove("password");
 
       return connection;
     }
     catch (final SQLException e)
     {
+      final String username;
+      if (user != null)
+      {
+        username = String.format("user \'%s\'", user);
+      }
+      else
+      {
+        username = "unspecified user";
+      }
       throw new SchemaCrawlerSQLException(String
-        .format("Could not connect to %s, for user \'%s\', with properties %s",
+        .format("Could not connect to %s, for %s, with properties %s",
                 connectionUrl,
-                user,
+                username,
                 safeProperties(jdbcConnectionProperties)), e);
     }
   }
@@ -183,15 +216,7 @@ abstract class BaseDatabaseConnectionOptions
   public final Driver getJdbcDriver()
     throws SQLException
   {
-    try
-    {
-      return DriverManager.getDriver(getConnectionUrl());
-    }
-    catch (final SQLException e)
-    {
-      throw new SchemaCrawlerSQLException("Could not find a suitable JDBC driver for database connection URL, "
-                                          + getConnectionUrl(), e);
-    }
+    return getJdbcDriver(getConnectionUrl());
   }
 
   @Override
@@ -216,9 +241,9 @@ abstract class BaseDatabaseConnectionOptions
   }
 
   @Override
-  public final String getUser()
+  public UserCredentials getUserCredentials()
   {
-    return user;
+    return userCredentials;
   }
 
   @Override
@@ -246,18 +271,6 @@ abstract class BaseDatabaseConnectionOptions
   }
 
   @Override
-  public final void setPassword(final String password)
-  {
-    this.password = password;
-  }
-
-  @Override
-  public final void setUser(final String user)
-  {
-    this.user = user;
-  }
-
-  @Override
   public final String toString()
   {
     String jdbcDriverClass = "<unknown>";
@@ -276,7 +289,7 @@ abstract class BaseDatabaseConnectionOptions
       .append(System.lineSeparator());
     builder.append("url=").append(getConnectionUrl())
       .append(System.lineSeparator());
-    builder.append("user=").append(getUser()).append(System.lineSeparator());
+    builder.append(userCredentials).append(System.lineSeparator());
     return builder.toString();
   }
 
@@ -287,7 +300,8 @@ abstract class BaseDatabaseConnectionOptions
     throw new SQLFeatureNotSupportedException("Not supported", "HYC00");
   }
 
-  private Properties createConnectionProperties(final String user,
+  private Properties createConnectionProperties(final String connectionUrl,
+                                                final String user,
                                                 final String password)
     throws SQLException
   {
@@ -300,7 +314,7 @@ abstract class BaseDatabaseConnectionOptions
               "user",
               "password",
               "url");
-    final Driver jdbcDriver = getJdbcDriver();
+    final Driver jdbcDriver = getJdbcDriver(connectionUrl);
     final DriverPropertyInfo[] propertyInfo = jdbcDriver
       .getPropertyInfo(getConnectionUrl(), new Properties());
     final Map<String, Boolean> jdbcDriverProperties = new HashMap<>();
@@ -341,6 +355,20 @@ abstract class BaseDatabaseConnectionOptions
     }
 
     return jdbcConnectionProperties;
+  }
+
+  private final Driver getJdbcDriver(final String connectionUrl)
+    throws SQLException
+  {
+    try
+    {
+      return DriverManager.getDriver(connectionUrl);
+    }
+    catch (final SQLException e)
+    {
+      throw new SchemaCrawlerSQLException("Could not find a suitable JDBC driver for database connection URL, "
+                                          + getConnectionUrl(), e);
+    }
   }
 
   private void logConnection(final Connection connection)

@@ -1,12 +1,11 @@
 [
 {
   "schemaCrawlerInfo": {
-    "productVersion": "14.09.03",
+    "productVersion": "14.16.03",
     "productName": "SchemaCrawler"
   },
   "tables": [
     {
-      "weakAssociations": [],
       "privileges": [
         {
           "grants": {
@@ -244,7 +243,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "privileges": [
         {
           "grants": {
@@ -343,7 +341,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "privileges": [
         {
           "grants": {
@@ -464,7 +461,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10118",
+          "name": "SYS_IDX_FK_Z_AUTHOR_10118",
           "definition": ""
         },
         {
@@ -474,7 +471,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10116",
+          "name": "SYS_IDX_FK_Y_BOOK_10116",
           "definition": ""
         },
         {
@@ -497,20 +494,10 @@
       ],
       "name": "BOOKAUTHORS",
       "definition": "",
-      "remarks": "Relationship between books and their authors, along with the latest updated information",
+      "remarks": "Relationship between books and their authors, \nalong with the latest updated information",
       "primaryKey": {}
     },
     {
-      "weakAssociations": [
-        {"columnReferences": [{
-          "pkColumn": "PUBLIC.BOOKS.BOOKS.ID",
-          "fkColumn": "PUBLIC.\"PUBLISHER SALES\".SALES.BOOKID"
-        }]},
-        {"columnReferences": [{
-          "pkColumn": "PUBLIC.BOOKS.PUBLISHERS.ID",
-          "fkColumn": "PUBLIC.BOOKS.BOOKS.PUBLISHERID"
-        }]}
-      ],
       "privileges": [
         {
           "grants": {
@@ -615,7 +602,7 @@
           "name": "DESCRIPTION",
           "width": "(255)",
           "decimalDigits": 0,
-          "remarks": "Book description",
+          "remarks": "Book description\n(Usually the blurb from the book jacket or promotional materials)",
           "autoIncremented": false
         },
         {
@@ -695,7 +682,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10109",
+          "name": "SYS_IDX_FK_PREVIOUSEDITION_10109",
           "definition": ""
         }
       ],
@@ -714,7 +701,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "privileges": [
         {
           "grants": {
@@ -789,10 +775,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [{"columnReferences": [{
-        "pkColumn": "PUBLIC.BOOKS.PUBLISHERS.ID",
-        "fkColumn": "PUBLIC.BOOKS.BOOKS.PUBLISHERID"
-      }]}],
       "privileges": [
         {
           "grants": {
@@ -898,7 +880,6 @@
       }
     },
     {
-      "weakAssociations": [],
       "privileges": [
         {
           "grants": {
@@ -1055,10 +1036,6 @@
       }
     },
     {
-      "weakAssociations": [{"columnReferences": [{
-        "pkColumn": "PUBLIC.BOOKS.BOOKS.ID",
-        "fkColumn": "PUBLIC.\"PUBLISHER SALES\".SALES.BOOKID"
-      }]}],
       "privileges": [
         {
           "grants": {
@@ -1218,7 +1195,7 @@
             "definition": ""
           },
           "unique": false,
-          "name": "SYS_IDX_10158",
+          "name": "SYS_IDX_FK_SALES_SALESDATA_10158",
           "definition": ""
         },
         {
@@ -1235,7 +1212,7 @@
             }
           ],
           "unique": false,
-          "name": "SYS_IDX_10156",
+          "name": "SYS_IDX_FK_SALES_REGIONS_10156",
           "definition": ""
         }
       ],
@@ -1245,7 +1222,6 @@
       "primaryKey": {}
     },
     {
-      "weakAssociations": [],
       "privileges": [
         {
           "grants": {
@@ -1575,7 +1551,7 @@
     }
   ],
   "databaseInfo": {
-    "databaseProductVersion": "2.3.4",
+    "databaseProductVersion": "2.4.0",
     "databaseProductName": "HSQL Database Engine",
     "databaseProperties": [
       {
@@ -1665,11 +1641,13 @@
           "sql.pad_space",
           "sql.ref_integrity",
           "sql.regular_names",
+          "sql.restrict_exec",
           "sql.syntax_db2",
           "sql.syntax_mss",
           "sql.syntax_mys",
           "sql.syntax_ora",
           "sql.syntax_pgs",
+          "sql.sys_index_names",
           "sql.unique_nulls",
           "textdb.all_quoted",
           "textdb.cache_rows",
@@ -1703,7 +1681,7 @@
       {
         "name": "getDatabaseMinorVersion",
         "description": "database minor version",
-        "value": 3
+        "value": 4
       },
       {
         "name": "getDefaultTransactionIsolation",
@@ -1738,7 +1716,7 @@
       {
         "name": "getDriverMinorVersion",
         "description": "driver minor version",
-        "value": 3
+        "value": 4
       },
       {
         "name": "getExtraNameCharacters",
@@ -1788,7 +1766,7 @@
       {
         "name": "getJDBCMinorVersion",
         "description": "JDBC minor version",
-        "value": 0
+        "value": 2
       },
       {
         "name": "locatorsUpdateCopy",
@@ -1858,7 +1836,7 @@
       {
         "name": "getMaxLogicalLobSize",
         "description": "max logical lob size",
-        "value": 0
+        "value": 1099511627776
       },
       {
         "name": "getMaxProcedureNameLength",
@@ -2555,7 +2533,7 @@
     "databaseUserName": "SA"
   },
   "schemaCrawlerHeaderInfo": {
-    "crawlTimestamp": "2016-05-22 20:40:36",
+    "crawlTimestamp": "2017-05-31 00:42:58",
     "title": ""
   },
   "routines": [
@@ -2643,7 +2621,7 @@
     }
   ],
   "jdbcDriverInfo": {
-    "driverVersion": "2.3.4",
+    "driverVersion": "2.4.0",
     "isJDBCCompliant": "true",
     "driverClassName": "org.hsqldb.jdbc.JDBCDriver",
     "driverName": "HSQL Database Engine Driver",

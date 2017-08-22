@@ -40,6 +40,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Table;
@@ -49,6 +50,8 @@ import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.traversal.DataTraversalHandler;
 import schemacrawler.utility.NamedObjectSort;
 import schemacrawler.utility.Query;
+import sf.util.SchemaCrawlerLogger;
+import sf.util.StringFormat;
 
 /**
  * Basic SchemaCrawler executor.
@@ -58,6 +61,8 @@ import schemacrawler.utility.Query;
 public final class OperationExecutable
   extends BaseStagedExecutable
 {
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
+    .getLogger(OperationExecutable.class.getName());
 
   private OperationOptions operationOptions;
 
@@ -71,6 +76,15 @@ public final class OperationExecutable
     throws Exception
   {
     loadOperationOptions();
+
+    if (!isOutputFormatSupported())
+    {
+      LOGGER.log(Level.INFO,
+                 new StringFormat("Output format <%s> not supported for command <%s>",
+                                  outputOptions.getOutputFormatValue(),
+                                  getCommand()));
+      return;
+    }
 
     final DataTraversalHandler handler = getDataTraversalHandler();
     final Query query = getQuery();
@@ -116,7 +130,9 @@ public final class OperationExecutable
     }
     catch (final SQLException e)
     {
-      throw new SchemaCrawlerException("Cannot perform operation", e);
+      throw new SchemaCrawlerException(String.format("Unknown command <%s>",
+                                                     getCommand()),
+                                       e);
     }
   }
 
@@ -124,6 +140,14 @@ public final class OperationExecutable
   {
     loadOperationOptions();
     return operationOptions;
+  }
+
+  public boolean isOutputFormatSupported()
+  {
+    final String outputFormatValue = outputOptions.getOutputFormatValue();
+    final boolean isOutputFormatSupported = TextOutputFormat
+      .isTextOutputFormat(outputFormatValue);
+    return isOutputFormatSupported;
   }
 
   public final void setOperationOptions(final OperationOptions operationOptions)

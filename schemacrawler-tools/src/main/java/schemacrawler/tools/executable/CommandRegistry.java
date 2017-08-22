@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -30,7 +30,6 @@ package schemacrawler.tools.executable;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,15 +38,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
-import schemacrawler.tools.integration.graph.GraphCommandProvider;
 import schemacrawler.tools.integration.scripting.ScriptCommandProvider;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.text.operation.Operation;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
+import sf.util.SchemaCrawlerLogger;
 import sf.util.StringFormat;
 
 /**
@@ -59,7 +57,7 @@ public final class CommandRegistry
   implements Iterable<String>
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(CommandRegistry.class.getName());
 
   private static Map<String, CommandProvider> loadCommandRegistry()
@@ -80,8 +78,7 @@ public final class CommandRegistry
       commandProviders.add(new OperationExecutableCommandProvider(operation));
     }
 
-    commandProviders.addAll(Arrays.asList(new ScriptCommandProvider(),
-                                          new GraphCommandProvider()));
+    commandProviders.add(new ScriptCommandProvider());
 
     try
     {

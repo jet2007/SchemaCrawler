@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ public class TestSqlServerCatalog
   public static void main(final String[] args)
     throws Exception
   {
-    final DataSource dataSource = new DatabaseConnectionOptions("jdbc:jtds:sqlserver://scsqlserver.cdf972bn8znp.us-east-1.rds.amazonaws.com:1433/SCHEMACRAWLER");
+    final DataSource dataSource = new DatabaseConnectionOptions("jdbc:sqlserver://scsqlserver.cdf972bn8znp.us-east-1.rds.amazonaws.com:1433;databaseName=SCHEMACRAWLER");
     final Connection connection = dataSource.getConnection("schemacrawler",
                                                            "schemacrawler");
 

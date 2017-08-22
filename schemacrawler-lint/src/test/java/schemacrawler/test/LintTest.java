@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -88,7 +88,7 @@ public class LintTest
                                                            getConnection(),
                                                            linters);
     final LintCollector lintCollector = lintedDatabase.getCollector();
-    assertEquals(54, lintCollector.size());
+    assertEquals(56, lintCollector.size());
 
     try (final TestWriter out = new TestWriter("text");)
     {
@@ -135,7 +135,7 @@ public class LintTest
                                                            getConnection(),
                                                            linters);
     final LintCollector lintCollector = lintedDatabase.getCollector();
-    assertEquals(43, lintCollector.size());
+    assertEquals(45, lintCollector.size());
 
     try (final TestWriter out = new TestWriter("text");)
     {

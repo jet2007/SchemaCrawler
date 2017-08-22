@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ public final class CommandChainExecutable
   public final Executable addNext(final String command,
                                   final OutputFormat outputFormat,
                                   final Path outputFile)
-                                    throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     requireNonNull(command, "No command provided");
     requireNonNull(outputFormat, "No output format provided");
@@ -72,7 +72,7 @@ public final class CommandChainExecutable
   public final Executable addNext(final String command,
                                   final String outputFormat,
                                   final String outputFileName)
-                                    throws SchemaCrawlerException
+    throws SchemaCrawlerException
   {
     try
     {

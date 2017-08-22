@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -69,8 +69,6 @@ final class MutableFunction
 
   /**
    * {@inheritDoc}
-   *
-   * @see Function#getColumns()
    */
   @Override
   public List<FunctionColumn> getColumns()
@@ -80,8 +78,6 @@ final class MutableFunction
 
   /**
    * {@inheritDoc}
-   *
-   * @see Function#getReturnType()
    */
   @Override
   public FunctionReturnType getReturnType()
@@ -91,8 +87,6 @@ final class MutableFunction
 
   /**
    * {@inheritDoc}
-   *
-   * @see Function#getRoutineBodyType()
    */
   @Override
   public RoutineBodyType getRoutineBodyType()
@@ -108,8 +102,6 @@ final class MutableFunction
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.Function#lookupColumn(java.lang.String)
    */
   @Override
   public Optional<MutableFunctionColumn> lookupColumn(final String name)

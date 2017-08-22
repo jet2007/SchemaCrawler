@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -117,8 +117,6 @@ final class ColumnPartial
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.Column#isAutoIncremented()
    */
   @Override
   public boolean isAutoIncremented()
@@ -128,8 +126,6 @@ final class ColumnPartial
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.Column#isGenerated()
    */
   @Override
   public boolean isGenerated()
@@ -139,8 +135,6 @@ final class ColumnPartial
 
   /**
    * {@inheritDoc}
-   *
-   * @see schemacrawler.schema.Column#isHidden()
    */
   @Override
   public boolean isHidden()

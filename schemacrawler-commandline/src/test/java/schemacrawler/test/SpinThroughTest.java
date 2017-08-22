@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -59,6 +59,7 @@ import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.text.schema.SchemaTextDetailType;
+import sf.util.IOUtility;
 
 public class SpinThroughTest
   extends BaseDatabaseTest
@@ -115,7 +116,7 @@ public class SpinThroughTest
           final OutputOptions outputOptions = new OutputOptions(outputFormat,
                                                                 testOutputFile);
 
-          final Config config = Config.load(hsqldbProperties.toString());
+          final Config config = Config.loadFile(hsqldbProperties.toString());
 
           final DatabaseSpecificOverrideOptionsBuilder databaseSpecificOverrideOptionsBuilder = new DatabaseSpecificOverrideOptionsBuilder();
           databaseSpecificOverrideOptionsBuilder.fromConfig(config);
@@ -205,9 +206,9 @@ public class SpinThroughTest
                               final OutputFormat outputFormat)
     throws IOException
   {
-    return TestUtility
-      .createTempFile(String.format("%s.%s", schemaTextDetailType, infoLevel),
-                      outputFormat.getFormat());
+    return IOUtility.createTempFilePath(String
+      .format("%s.%s", schemaTextDetailType, infoLevel),
+                                        outputFormat.getFormat());
   }
 
   private String referenceFile(final SchemaTextDetailType schemaTextDetailType,

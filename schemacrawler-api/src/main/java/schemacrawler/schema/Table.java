@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -139,10 +139,7 @@ public interface Table
    *
    * @return True if the table has a primary key.
    */
-  default boolean hasPrimaryKey()
-  {
-    return getPrimaryKey() != null;
-  }
+  boolean hasPrimaryKey();
 
   /**
    * Gets a column by unqualified name.

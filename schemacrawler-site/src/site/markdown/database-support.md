@@ -14,7 +14,7 @@ The JDBC drivers bundled with SchemaCrawler are:
   is included with the SchemaCrawler download. _Please do not replace this bundled driver, or SchemaCrawler will not function._
 - The [Oracle](http://www.oracle.com/) [JDBC driver](http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html) 
   needs to be downloaded separately.
-- The [Microsoft SQL Server](http://www.microsoft.com/sqlserver/) [jTDS JDBC driver](http://jtds.sourceforge.net/) 
+- The [Microsoft SQL Server](http://www.microsoft.com/sqlserver/) [JDBC driver](https://github.com/Microsoft/mssql-jdbc) 
   is included with the SchemaCrawler download.
 - The [IBM DB2](http://www.ibm.com/software/data/db2/) [JDBC driver](http://www.ibm.com/software/data/db2/linux-unix-windows/download.html) 
   needs to be downloaded separately.
@@ -22,7 +22,6 @@ The JDBC drivers bundled with SchemaCrawler are:
   is included with the SchemaCrawler download.
 - The [PostgreSQL](http://www.postgresql.org/) [JDBC driver](http://jdbc.postgresql.org/) 
   is included with the SchemaCrawler download.
-- The [Sybase IQ](http://www.sybase.com/products/datawarehousing/sybaseiq) [jConnect JDBC driver](http://www.sybase.com/products/allproductsa-z/softwaredeveloperkit/jconnect) needs to be downloaded separately.
 - Offline database support does not need any JDBC driver, 
   and is included with the SchemaCrawler download.
 
@@ -35,7 +34,7 @@ For the databases mentioned above, you can provide connection details by using t
 command-line options:
 
 - `-server` - identifies the database server, and can be one of `sqlite`, `oracle`, `sqlserver`, 
-   `db2`, `mysql`, `postgresql`, `sybaseiq`, `offline`
+   `db2`, `mysql`, `postgresql`, `offline`
 - `-database` - identifies the database, and can have different meaning based on the server type
 - `-host` - specifies the database server host; it is optional, and defaults to localhost
 - `-port` - specifies the database server port; it is optional, and defaults to the default port for the server type
@@ -48,3 +47,71 @@ You should always use the -schemas command-line switch for databases that suppor
 for the `-schemas` switch is a regular expression that determines which schemas SchemaCrawler will 
 work with. The "schema" is database-dependent - for example, on Microsoft SQL Server, typically 
 schemas look like "database_name.user", but for Oracle, typically, schemas look like "USER" (in uppercase).
+
+## Making Connections to a Database
+
+### Microsoft SQL Server
+
+You need to specify the host, port, database name, and the schemas you
+are interested in, for Microsoft SQL Server.
+
+
+Typical command-line arguments will look like:
+```
+-server=sqlserver -host=db.example.com -port=1433 -database=schemacrawler -schemas=schemacrawler.dbo -user=xxxxx -password=xxxxx -infolevel=standard -command=schema
+```
+
+If your Microsoft SQL Server instance is set up with Windows authentication or named pipes, you
+will need to use a database connection URL. See the 
+[documentation for the Microsoft JDBC Driver for SQL Server](https://msdn.microsoft.com/en-us/library/mt720657) 
+for details. 
+
+Typical command-line arguments for connecting to SQL Server with Windows authentication will look like:
+```
+-server=sqlserver -url=<url> -schemas=schemacrawler.dbo -user= -password= -infolevel=standard -command=schema
+```
+
+### Oracle
+
+You need to specify the host, port, database name, and the schemas you
+are interested in, for Oracle.
+
+
+Typical command-line arguments will look like:
+```
+-server=oracle -host=db.example.com -port=1521 -database=ORCL -schemas=SCHEMACRAWLER -user=xxxxx -password=xxxxx -infolevel=standard -command=schema
+```
+
+### MySQL
+
+You need to specify the host, port, database name, and the schemas you
+are interested in, for MySQL.
+
+
+Typical command-line arguments will look like:
+```
+-server=mysql -host=db.example.com -port=3306 -database=schemacrawler -schemas=schemacrawler -user=xxxxx -password=xxxxx -infolevel=standard -command=schema
+```
+
+### PostgreSQL
+
+You need to specify the host, port, database name, and the schemas you
+are interested in, for PostgreSQL.
+
+
+Typical command-line arguments will look like:
+```
+-server=postgresql -host=db.example.com -port=5432 -database=schemacrawler -schemas=public -user=xxxxx -password=xxxxx -infolevel=standard -command=schema
+```
+
+### MariaDB
+
+You need to specify the database connection URL, and the schemas you are
+interested in, for MariaDB. First make sure that the MariaDB driver is
+in the `lib/` folder.
+
+
+Typical command-line arguments will look like:
+```
+-url=jdbc:mariadb://scmariadb.cdf972bn8znp.us-east-1.rds.amazonaws.com:3306/schemacrawler -schemas=schemacrawler -user=schemacrawler -password=schemacrawler -tabletypes=UNKNOWN,VIEW -infolevel=standard -command=schema 
+```

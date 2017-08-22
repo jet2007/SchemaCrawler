@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ public class TarjanStronglyConnectedComponentFinder<T extends Comparable<? super
     this.graph = Objects.requireNonNull(graph);
 
     stronglyConnectedComponents = new HashSet<>();
-    stack = new Stack<Vertex<T>>();
+    stack = new Stack<>();
   }
 
   /**
@@ -92,15 +92,17 @@ public class TarjanStronglyConnectedComponentFinder<T extends Comparable<? super
         // Successor vertex has not yet been visited; recurse on it
         strongConnect(vertexTo, index + 1);
         vertexFrom.putAttribute("lowlink",
-                                Math.min(vertexFrom.getAttribute("lowlink"),
-                                         vertexTo.getAttribute("lowlink")));
+                                Math
+                                  .min((int) vertexFrom.getAttribute("lowlink"),
+                                       (int) vertexTo.getAttribute("lowlink")));
       }
       else if (stack.contains(vertexTo))
       {
         // Successor vertex is on stack, hence in the current SCC
         vertexFrom.putAttribute("lowlink",
-                                Math.min(vertexFrom.getAttribute("lowlink"),
-                                         vertexTo.getAttribute("index")));
+                                Math
+                                  .min((int) vertexFrom.getAttribute("lowlink"),
+                                       (int) vertexTo.getAttribute("index")));
       }
     }
 

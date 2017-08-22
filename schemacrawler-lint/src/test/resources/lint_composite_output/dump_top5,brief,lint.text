@@ -216,8 +216,9 @@ PUBLIC.FOR_LINT."Global Counts"                                  [table]
 
                                                             [lint, high]
 	no primary key	
+	primary key may not be a surrogate	
                                                           [lint, medium]
-	all data columns are nullable	
+	no non-nullable data columns	
 	no indexes	
 	spaces in name, or reserved word	
 	spaces in name, or reserved word	"Global Count"
@@ -245,6 +246,8 @@ PUBLIC.FOR_LINT.PUBLICATIONS                                     [table]
 PUBLIC.FOR_LINT.PUBLICATIONWRITERS                               [table]
 ------------------------------------------------------------------------
 
+                                                            [lint, high]
+	primary key may not be a surrogate	
                                                              [lint, low]
 	empty table	
 	should have remarks	
@@ -258,7 +261,7 @@ PUBLIC.FOR_LINT.SELFREFERENCE                                    [table]
                                                         [lint, critical]
 	foreign key self-references primary key	FK_SELFREFERENCE
                                                             [lint, high]
-	redundant index	SYS_IDX_10212
+	redundant index	SYS_IDX_FK_SELFREFERENCE_10212
 	redundant index	SYS_IDX_PK_SELFREFERENCE_10209
                                                              [lint, low]
 	empty table	
@@ -299,7 +302,7 @@ PUBLIC.FOR_LINT.ΠΊΝΑΚΑΒΆΣΗΣΔΕΔΟΜΈΝΩΝ                        
                                                             [lint, high]
 	foreign key data type different from primary key	FK_ΠΊΝΑΚΑΒΆΣΗΣΔΕΔΟΜΈΝΩΝ_PUBLICATIONS
                                                           [lint, medium]
-	all data columns are nullable	
+	no non-nullable data columns	
                                                              [lint, low]
 	empty table	
 	should have remarks	

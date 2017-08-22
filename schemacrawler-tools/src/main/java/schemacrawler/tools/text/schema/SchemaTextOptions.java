@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ public class SchemaTextOptions
   private boolean isHideRoutineSpecificNames;
   private boolean isHideTableConstraintNames;
   private boolean isHideTriggerNames;
-  private boolean isHideWeakAssociations;
+  private boolean isShowWeakAssociations;
   private boolean isShowOrdinalNumbers;
   private boolean isShowStandardColumnTypeNames;
   private boolean isShowRowCounts;
@@ -96,11 +96,6 @@ public class SchemaTextOptions
     return isHideTriggerNames;
   }
 
-  public boolean isHideWeakAssociations()
-  {
-    return isHideWeakAssociations;
-  }
-
   public boolean isShowOrdinalNumbers()
   {
     return isShowOrdinalNumbers;
@@ -114,6 +109,11 @@ public class SchemaTextOptions
   public boolean isShowStandardColumnTypeNames()
   {
     return isShowStandardColumnTypeNames;
+  }
+
+  public boolean isShowWeakAssociations()
+  {
+    return isShowWeakAssociations;
   }
 
   public void setAlphabeticalSortForForeignKeys(final boolean isAlphabeticalSortForForeignKeys)
@@ -166,11 +166,6 @@ public class SchemaTextOptions
     this.isHideTriggerNames = isHideTriggerNames;
   }
 
-  public void setHideWeakAssociations(final boolean isHideWeakAssociations)
-  {
-    this.isHideWeakAssociations = isHideWeakAssociations;
-  }
-
   public void setShowOrdinalNumbers(final boolean isShowOrdinalNumbers)
   {
     this.isShowOrdinalNumbers = isShowOrdinalNumbers;
@@ -184,6 +179,11 @@ public class SchemaTextOptions
   public void setShowStandardColumnTypeNames(final boolean isShowStandardColumnTypeNames)
   {
     this.isShowStandardColumnTypeNames = isShowStandardColumnTypeNames;
+  }
+
+  public void setShowWeakAssociations(final boolean isShowWeakAssociations)
+  {
+    this.isShowWeakAssociations = isShowWeakAssociations;
   }
 
 }

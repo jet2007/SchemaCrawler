@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -35,13 +35,14 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import sf.util.SchemaCrawlerLogger;
 
 public class WriterOutputResource
   implements OutputResource
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(WriterOutputResource.class.getName());
 
   private final Writer writer;
@@ -54,7 +55,7 @@ public class WriterOutputResource
   @Override
   public Writer openNewOutputWriter(final Charset charset,
                                     final boolean appendOutput)
-                                      throws IOException
+    throws IOException
   {
     LOGGER.log(Level.INFO, "Output to provided writer");
     return new OutputWriter(getDescription(),

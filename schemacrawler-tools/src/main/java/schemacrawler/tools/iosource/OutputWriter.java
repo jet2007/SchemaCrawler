@@ -2,7 +2,7 @@
 ========================================================================
 SchemaCrawler
 http://www.schemacrawler.com
-Copyright (c) 2000-2016, Sualeh Fatehi <sualeh@hotmail.com>.
+Copyright (c) 2000-2017, Sualeh Fatehi <sualeh@hotmail.com>.
 All rights reserved.
 ------------------------------------------------------------------------
 
@@ -33,13 +33,14 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import sf.util.SchemaCrawlerLogger;
 
 public final class OutputWriter
   extends Writer
 {
 
-  private static final Logger LOGGER = Logger
+  private static final SchemaCrawlerLogger LOGGER = SchemaCrawlerLogger
     .getLogger(ConsoleOutputResource.class.getName());
 
   private final String description;
@@ -162,7 +163,7 @@ public final class OutputWriter
     if (!isClosed)
     {
       throw new IllegalStateException(String
-        .format("Output writer \"%s\" was not closed", description));
+        .format("Could not close output writer <%s>", description));
     }
     super.finalize();
   }
@@ -175,7 +176,7 @@ public final class OutputWriter
   {
     if (isClosed)
     {
-      throw new IOException(String.format("Output writer \"%s\" is not open",
+      throw new IOException(String.format("Output writer is not open <%s>",
                                           description));
     }
   }
